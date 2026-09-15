@@ -53,8 +53,26 @@ def login_required_response():
     }), 401
 
 
+POPULAR_SYMBOLS = [
+    {"symbol": "AAPL", "name": "Apple Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "MSFT", "name": "Microsoft Corporation", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "GOOGL", "name": "Alphabet Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "AMZN", "name": "Amazon.com Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "TSLA", "name": "Tesla Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "NVDA", "name": "NVIDIA Corporation", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "META", "name": "Meta Platforms Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "NFLX", "name": "Netflix Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "AMD", "name": "Advanced Micro Devices", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "INTC", "name": "Intel Corporation", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "DIS", "name": "The Walt Disney Company", "type": "Equity", "region": "United States", "currency": "USD"},
+    {"symbol": "RELIANCE.BSE", "name": "Reliance Industries", "type": "Equity", "region": "India", "currency": "INR"},
+    {"symbol": "TCS.BSE", "name": "Tata Consultancy Services", "type": "Equity", "region": "India", "currency": "INR"},
+    {"symbol": "INFY", "name": "Infosys Limited", "type": "Equity", "region": "United States/India", "currency": "USD"},
+]
+
+
 @research_bp.route("/ticker-search", methods=["GET"])
-@rate_limit(max_requests=30, window_seconds=60, key_prefix="ticker_search")
+@rate_limit(max_requests=60, window_seconds=60, key_prefix="ticker_search")
 def search_ticker():
     user = get_current_user()
     if user is None:
@@ -69,24 +87,13 @@ def search_ticker():
 
     try:
         matches = search_symbols(keywords)
-    except MissingApiKeyError as e:
-        current_app.logger.error("Financial service misconfigured: %s", e)
-        return jsonify({
-            "success": False,
-            "message": "Search service is temporarily unavailable."
-        }), 500
-    except FinancialServiceUnavailableError as e:
-        current_app.logger.warning("Financial service unavailable: %s", e)
-        return jsonify({
-            "success": False,
-            "message": "Search service is temporarily rate limited or unavailable."
-        }), 503
-    except FinancialServiceBadResponseError as e:
-        current_app.logger.warning("Financial service bad response: %s", e)
-        return jsonify({
-            "success": False,
-            "message": "Search service error."
-        }), 502
+    except (MissingApiKeyError, FinancialServiceUnavailableError, FinancialServiceBadResponseError) as e:
+        current_app.logger.warning("Ticker search fallback triggered: %s", e)
+        kw_lower = keywords.lower()
+        matches = [
+            s for s in POPULAR_SYMBOLS
+            if kw_lower in s["symbol"].lower() or kw_lower in s["name"].lower()
+        ]
 
     return jsonify({
         "success": True,

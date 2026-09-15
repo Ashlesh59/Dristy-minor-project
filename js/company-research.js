@@ -328,19 +328,62 @@
     });
   }
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var companyName = nameInput.value.trim();
-    var ticker = tickerInput.value.trim().toUpperCase();
+  var KNOWN_TICKERS = {
+    'apple': { name: 'Apple Inc.', ticker: 'AAPL' },
+    'aapl': { name: 'Apple Inc.', ticker: 'AAPL' },
+    'microsoft': { name: 'Microsoft Corporation', ticker: 'MSFT' },
+    'msft': { name: 'Microsoft Corporation', ticker: 'MSFT' },
+    'google': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
+    'alphabet': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
+    'googl': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
+    'goog': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
+    'amazon': { name: 'Amazon.com Inc.', ticker: 'AMZN' },
+    'amzn': { name: 'Amazon.com Inc.', ticker: 'AMZN' },
+    'tesla': { name: 'Tesla Inc.', ticker: 'TSLA' },
+    'tsla': { name: 'Tesla Inc.', ticker: 'TSLA' },
+    'nvidia': { name: 'NVIDIA Corporation', ticker: 'NVDA' },
+    'nvda': { name: 'NVIDIA Corporation', ticker: 'NVDA' },
+    'meta': { name: 'Meta Platforms Inc.', ticker: 'META' },
+    'facebook': { name: 'Meta Platforms Inc.', ticker: 'META' },
+    'netflix': { name: 'Netflix Inc.', ticker: 'NFLX' },
+    'nflx': { name: 'Netflix Inc.', ticker: 'NFLX' }
+  };
+
+  function resolveAndSearch(rawName, rawTicker) {
+    var name = (rawName || '').trim();
+    var ticker = (rawTicker || '').trim().toUpperCase();
 
     formError.hidden = true;
-    if (!companyName || !ticker) {
-      formError.textContent = 'Please enter both a company name and a ticker symbol.';
+
+    if (!name && !ticker) {
+      formError.textContent = 'Please enter a company name or ticker symbol.';
       formError.hidden = false;
       return;
     }
 
-    search(companyName, ticker);
+    if (name && !ticker) {
+      var lower = name.toLowerCase();
+      if (KNOWN_TICKERS[lower]) {
+        name = KNOWN_TICKERS[lower].name;
+        ticker = KNOWN_TICKERS[lower].ticker;
+      } else if (/^[A-Za-z0-9.]{1,6}$/.test(name)) {
+        ticker = name.toUpperCase();
+        name = ticker;
+      } else {
+        ticker = name.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 5);
+      }
+    } else if (!name && ticker) {
+      name = ticker;
+    }
+
+    nameInput.value = name;
+    tickerInput.value = ticker;
+    search(name, ticker);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    resolveAndSearch(nameInput.value, tickerInput.value);
   });
 
   document.querySelectorAll('.search-chip').forEach(function (chip) {
@@ -367,4 +410,11 @@
   }
 
   initAutocomplete();
+
+  // Support query parameters (e.g. ?q=AAPL or ?q=Tesla)
+  var urlParams = new URLSearchParams(window.location.search);
+  var queryParam = urlParams.get('q') || urlParams.get('ticker') || urlParams.get('query') || urlParams.get('search');
+  if (queryParam) {
+    resolveAndSearch(queryParam, '');
+  }
 })();

@@ -542,6 +542,23 @@
   }
 
   /* ------------------------------------------------------------------
+     TOPBAR SEARCH
+     ------------------------------------------------------------------ */
+  function initTopbarSearch() {
+    document.querySelectorAll('.topbar__search input').forEach(function (input) {
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          var q = input.value.trim();
+          if (q) {
+            window.location.href = 'company-research.html?q=' + encodeURIComponent(q);
+          }
+        }
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------
      INIT
      ------------------------------------------------------------------ */
   document.addEventListener('DOMContentLoaded', function () {
@@ -551,6 +568,7 @@
     initStatCounters();
     initTopbarDate();
     initQuickActions();
+    initTopbarSearch();
     clearFakeNotifications();
   });
 })();
