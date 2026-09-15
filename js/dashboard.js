@@ -291,7 +291,7 @@
      cookie is invalidated, then clear localStorage and redirect.
      ------------------------------------------------------------------ */
   function initLogout() {
-    document.querySelectorAll('.sidebar__link--logout').forEach(function (link) {
+    document.querySelectorAll('.sidebar__link--logout, .dropdown-link--danger, [data-action="logout"]').forEach(function (link) {
       link.addEventListener('click', function (e) {
         e.preventDefault();
         fetch(API_BASE_URL + '/api/auth/logout', {
