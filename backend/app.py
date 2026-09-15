@@ -117,9 +117,21 @@ def create_app():
     # process up and responding," not "is every dependency healthy."
     @app.route("/api/health", methods=["GET"])
     def health_check():
+        db_status = "connected"
+        try:
+            db.session.execute(db.text("SELECT 1"))
+        except Exception as e:
+            db_status = f"error: {e}"
+
         return jsonify({
             "success": True,
-            "status": "healthy"
+            "status": "healthy" if db_status == "connected" else "degraded",
+            "database": db_status,
+            "services": {
+                "alpha_vantage": bool(os.environ.get("ALPHA_VANTAGE_API_KEY")),
+                "gemini": bool(os.environ.get("GEMINI_API_KEY")),
+            },
+            "environment": "development" if app.config["DEBUG"] else "production"
         }), 200
 
     app.register_blueprint(auth_bp)

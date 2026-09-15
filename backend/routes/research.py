@@ -173,6 +173,34 @@ def list_research():
     }), 200
 
 
+@research_bp.route("/stats", methods=["GET"])
+def get_research_stats():
+    """
+    Returns aggregated research and search counts from the database for the current user.
+    """
+    user = get_current_user()
+    if user is None:
+        return login_required_response()
+
+    records = Research.query.filter_by(user_id=user.id).all()
+    total_searches = len(records)
+    completed_reports = sum(1 for r in records if r.status == "completed")
+    distinct_companies = len(set(r.ticker_symbol for r in records))
+    
+    scored = [r.ai_score for r in records if r.ai_score is not None]
+    average_score = round(sum(scored) / len(scored)) if scored else None
+
+    return jsonify({
+        "success": True,
+        "stats": {
+            "total_searches": total_searches,
+            "completed_reports": completed_reports,
+            "distinct_companies": distinct_companies,
+            "average_score": average_score
+        }
+    }), 200
+
+
 @research_bp.route("/<int:research_id>", methods=["GET"])
 def get_research(research_id):
     user = get_current_user()
