@@ -31,9 +31,12 @@ from routes.auth import auth_bp
 from routes.research import research_bp
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    if test_config:
+        app.config.update(test_config)
 
     # SECURITY FIX (Phase 11): fail loudly rather than silently
     # deploying with the well-known dev fallback secret (which is

@@ -1,9 +1,11 @@
 /* ==========================================================================
    COMPANY-RESEARCH.JS
    --------------------------------------------------------------------------
-   Behavior for company-research.html. On submit: creates a research
-   record (POST /api/research), then fetches real financials and news
-   for it. Includes ticker-search autocomplete and XSS protection.
+   Behavior for company-research.html.
+   - Company name search with debounced, sequenced autocomplete.
+   - Requires selecting an autocomplete match or providing a valid ticker.
+   - Validates ticker via backend before creating research records.
+   - Distinct, clear error messages for all failure modes.
    ========================================================================== */
 
 (function () {
@@ -12,7 +14,7 @@
   var API_BASE_URL = window.INVESTIQ_API_BASE || 'http://127.0.0.1:5000';
 
   var form = document.getElementById('companySearchForm');
-  if (!form) return; // not on this page
+  if (!form) return;
 
   var nameInput = document.getElementById('companyNameInput');
   var tickerInput = document.getElementById('companyTickerInput');
@@ -44,6 +46,8 @@
 
   var currentResearchId = null;
   var debounceTimer = null;
+  var autocompleteAbortController = null;
+  var autocompleteSeq = 0;
 
   function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -83,41 +87,50 @@
   }
 
   function showLoading(show) {
-    loadingEl.hidden = !show;
+    if (loadingEl) loadingEl.hidden = !show;
   }
 
   function showError(message) {
-    errorEl.textContent = message;
-    errorEl.hidden = false;
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    }
   }
 
   function clearError() {
-    errorEl.hidden = true;
-    errorEl.textContent = '';
+    if (errorEl) {
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+    }
+    if (formError) {
+      formError.hidden = true;
+      formError.textContent = '';
+    }
   }
 
   function renderOverview(record, financialData) {
     var initials = escapeHtml((record.company_name || '?').trim().slice(0, 2).toUpperCase());
-    ovLogo.textContent = initials;
-    ovName.textContent = record.company_name;
-    ovTicker.textContent = record.ticker_symbol;
+    if (ovLogo) ovLogo.textContent = initials;
+    if (ovName) ovName.textContent = record.company_name;
+    if (ovTicker) ovTicker.textContent = record.ticker_symbol;
 
     if (financialData) {
       var curr = financialData.currency || 'USD';
-      ovPrice.textContent = financialData.price ? formatPrice(financialData.price, curr) : 'N/A';
-      ovChange.textContent = financialData.change || 'N/A';
-      ovChangePercent.textContent = financialData.change_percent || 'N/A';
-      ovHigh.textContent = financialData.high ? formatPrice(financialData.high, curr) : 'N/A';
-      ovLow.textContent = financialData.low ? formatPrice(financialData.low, curr) : 'N/A';
-      ovTradingDay.textContent = financialData.latest_trading_day || 'N/A';
+      if (ovPrice) ovPrice.textContent = financialData.price ? formatPrice(financialData.price, curr) : 'N/A';
+      if (ovChange) ovChange.textContent = financialData.change || 'N/A';
+      if (ovChangePercent) ovChangePercent.textContent = financialData.change_percent || 'N/A';
+      if (ovHigh) ovHigh.textContent = financialData.high ? formatPrice(financialData.high, curr) : 'N/A';
+      if (ovLow) ovLow.textContent = financialData.low ? formatPrice(financialData.low, curr) : 'N/A';
+      if (ovTradingDay) ovTradingDay.textContent = financialData.latest_trading_day || 'N/A';
     } else {
       [ovPrice, ovChange, ovChangePercent, ovHigh, ovLow, ovTradingDay].forEach(function (el) {
-        el.textContent = 'N/A';
+        if (el) el.textContent = 'N/A';
       });
     }
   }
 
   function renderFinancialCards(financialData) {
+    if (!financialCards) return;
     financialCards.innerHTML = '';
     if (!financialData) {
       financialCards.innerHTML = '<p class="field-hint">Financial data is temporarily unavailable for this ticker.</p>';
@@ -152,12 +165,13 @@
   }
 
   function renderNews(articles) {
+    if (!newsGrid) return;
     newsGrid.innerHTML = '';
     if (!articles || !articles.length) {
-      newsEmpty.hidden = false;
+      if (newsEmpty) newsEmpty.hidden = false;
       return;
     }
-    newsEmpty.hidden = true;
+    if (newsEmpty) newsEmpty.hidden = true;
     articles.slice(0, 6).forEach(function (article) {
       var card = document.createElement('a');
       card.className = 'news-card';
@@ -188,41 +202,12 @@
     });
   }
 
-  function loadFinancialsAndNews(researchId) {
-    return Promise.all([
-      fetchJson('/api/research/' + encodeURIComponent(researchId) + '/financials', { method: 'GET' }),
-      fetchJson('/api/research/' + encodeURIComponent(researchId) + '/news', { method: 'GET' })
-    ]).then(function (results) {
-      var financialsResult = results[0];
-      var newsResult = results[1];
-
-      var financialData = financialsResult.ok ? financialsResult.data.financial_data : null;
-      renderOverview({ company_name: nameInput.value.trim(), ticker_symbol: tickerInput.value.trim().toUpperCase() }, financialData);
-      renderFinancialCards(financialData);
-
-      if (!financialsResult.ok) {
-        showError(financialsResult.data.message || 'Could not load financial data for this ticker.');
-      }
-
-      var news = newsResult.ok ? newsResult.data.news : [];
-      renderNews(news);
-      if (!newsResult.ok) {
-        var msg = newsResult.data.message || 'Could not load news for this ticker.';
-        if (errorEl.hidden) {
-          showError(msg);
-        } else {
-          errorEl.textContent += ' ' + msg;
-        }
-      }
-    });
-  }
-
   function search(companyName, ticker) {
     clearError();
     if (autocompleteDropdown) autocompleteDropdown.hidden = true;
-    resultsEl.hidden = true;
+    if (resultsEl) resultsEl.hidden = true;
     showLoading(true);
-    submitBtn.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
 
     fetchJson('/api/research', {
       method: 'POST',
@@ -230,30 +215,53 @@
       body: JSON.stringify({ company_name: companyName, ticker_symbol: ticker })
     })
       .then(function (result) {
+        showLoading(false);
+        if (submitBtn) submitBtn.disabled = false;
+
         if (!result.ok) {
-          showLoading(false);
-          submitBtn.disabled = false;
-          showError(result.data.message || 'Could not create a research request.');
+          var errorType = result.data ? result.data.error_type : null;
+          var msg = result.data ? result.data.message : null;
+
+          if (result.status === 503 || errorType === 'provider_unavailable') {
+            showError('Financial data provider rate limit reached. Please try again in a minute.');
+          } else if (result.status === 500 && (errorType === 'missing_api_key' || (msg && msg.indexOf('API key') !== -1))) {
+            showError('Financial API key is not configured.');
+          } else if (result.status === 400 && errorType === 'invalid_ticker') {
+            showError('Invalid ticker symbol. No financial data found for this ticker.');
+          } else {
+            showError(msg || 'Could not retrieve financial data for this ticker.');
+          }
           return null;
         }
-        currentResearchId = result.data.research.id;
-        goToAnalysisBtn.href = 'ai-analysis.html?research_id=' + encodeURIComponent(currentResearchId);
-        resultsEl.hidden = false;
-        return loadFinancialsAndNews(currentResearchId);
-      })
-      .then(function () {
-        showLoading(false);
-        submitBtn.disabled = false;
+
+        var research = result.data.research;
+        var financialData = result.data.financial_data;
+        currentResearchId = research.id;
+
+        if (goToAnalysisBtn) {
+          goToAnalysisBtn.href = 'ai-analysis.html?research_id=' + encodeURIComponent(currentResearchId);
+        }
+
+        renderOverview(research, financialData);
+        renderFinancialCards(financialData);
+        if (resultsEl) resultsEl.hidden = false;
+
+        // Fetch news for this validated ticker
+        return fetchJson('/api/research/' + encodeURIComponent(currentResearchId) + '/news', { method: 'GET' })
+          .then(function (newsResult) {
+            var news = newsResult.ok ? newsResult.data.news : [];
+            renderNews(news);
+          });
       })
       .catch(function () {
         showLoading(false);
-        submitBtn.disabled = false;
-        showError('Unable to connect to the server. Please make sure the backend is running.');
+        if (submitBtn) submitBtn.disabled = false;
+        showError('Unable to connect to the server. Please check your backend connection.');
       });
   }
 
   /* ------------------------------------------------------------------
-     TICKER / COMPANY AUTOCOMPLETE
+     TICKER / COMPANY AUTOCOMPLETE WITH SEQUENCE & ABORTCONTROLLER
      ------------------------------------------------------------------ */
   function initAutocomplete() {
     if (!nameInput || !autocompleteDropdown) return;
@@ -266,15 +274,39 @@
         return;
       }
 
-      fetchJson('/api/research/ticker-search?keywords=' + encodeURIComponent(query), { method: 'GET' })
+      if (autocompleteAbortController) {
+        autocompleteAbortController.abort();
+      }
+      if (window.AbortController) {
+        autocompleteAbortController = new AbortController();
+      }
+
+      autocompleteSeq++;
+      var thisSeq = autocompleteSeq;
+
+      var fetchOptions = {
+        method: 'GET',
+        signal: autocompleteAbortController ? autocompleteAbortController.signal : undefined
+      };
+
+      fetchJson('/api/research/ticker-search?keywords=' + encodeURIComponent(query), fetchOptions)
         .then(function (result) {
+          if (thisSeq !== autocompleteSeq) return;
+
+          autocompleteDropdown.innerHTML = '';
+
           if (!result.ok || !result.data.matches || !result.data.matches.length) {
-            autocompleteDropdown.hidden = true;
-            autocompleteDropdown.innerHTML = '';
+            var emptyItem = document.createElement('div');
+            emptyItem.className = 'ticker-autocomplete-item ticker-autocomplete-item--empty';
+            emptyItem.textContent = 'No matching companies found.';
+            emptyItem.style.padding = '10px 14px';
+            emptyItem.style.color = 'var(--color-text-secondary, #64748b)';
+            emptyItem.style.fontSize = 'var(--fs-sm, 0.875rem)';
+            autocompleteDropdown.appendChild(emptyItem);
+            autocompleteDropdown.hidden = false;
             return;
           }
 
-          autocompleteDropdown.innerHTML = '';
           result.data.matches.slice(0, 6).forEach(function (match) {
             var item = document.createElement('div');
             item.className = 'ticker-autocomplete-item';
@@ -305,20 +337,23 @@
               tickerInput.value = match.symbol;
               autocompleteDropdown.hidden = true;
               autocompleteDropdown.innerHTML = '';
+              clearError();
             });
 
             autocompleteDropdown.appendChild(item);
           });
           autocompleteDropdown.hidden = false;
         })
-        .catch(function () {
+        .catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          if (thisSeq !== autocompleteSeq) return;
           autocompleteDropdown.hidden = true;
         });
     }
 
     nameInput.addEventListener('input', function () {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(doSearch, 300);
+      debounceTimer = setTimeout(doSearch, 250);
     });
 
     document.addEventListener('click', function (e) {
@@ -328,70 +363,51 @@
     });
   }
 
-  var KNOWN_TICKERS = {
-    'apple': { name: 'Apple Inc.', ticker: 'AAPL' },
-    'aapl': { name: 'Apple Inc.', ticker: 'AAPL' },
-    'microsoft': { name: 'Microsoft Corporation', ticker: 'MSFT' },
-    'msft': { name: 'Microsoft Corporation', ticker: 'MSFT' },
-    'google': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
-    'alphabet': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
-    'googl': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
-    'goog': { name: 'Alphabet Inc.', ticker: 'GOOGL' },
-    'amazon': { name: 'Amazon.com Inc.', ticker: 'AMZN' },
-    'amzn': { name: 'Amazon.com Inc.', ticker: 'AMZN' },
-    'tesla': { name: 'Tesla Inc.', ticker: 'TSLA' },
-    'tsla': { name: 'Tesla Inc.', ticker: 'TSLA' },
-    'nvidia': { name: 'NVIDIA Corporation', ticker: 'NVDA' },
-    'nvda': { name: 'NVIDIA Corporation', ticker: 'NVDA' },
-    'meta': { name: 'Meta Platforms Inc.', ticker: 'META' },
-    'facebook': { name: 'Meta Platforms Inc.', ticker: 'META' },
-    'netflix': { name: 'Netflix Inc.', ticker: 'NFLX' },
-    'nflx': { name: 'Netflix Inc.', ticker: 'NFLX' }
-  };
+  function handleFormSubmit(e) {
+    if (e) e.preventDefault();
+    clearError();
 
-  function resolveAndSearch(rawName, rawTicker) {
-    var name = (rawName || '').trim();
-    var ticker = (rawTicker || '').trim().toUpperCase();
+    var nameVal = (nameInput.value || '').trim();
+    var tickerVal = (tickerInput.value || '').trim().toUpperCase();
 
-    formError.hidden = true;
-
-    if (!name && !ticker) {
-      formError.textContent = 'Please enter a company name or ticker symbol.';
-      formError.hidden = false;
+    // 1. If user provided a specific ticker explicitly
+    if (tickerVal) {
+      var companyName = nameVal || tickerVal;
+      search(companyName, tickerVal);
       return;
     }
 
-    if (name && !ticker) {
-      var lower = name.toLowerCase();
-      if (KNOWN_TICKERS[lower]) {
-        name = KNOWN_TICKERS[lower].name;
-        ticker = KNOWN_TICKERS[lower].ticker;
-      } else if (/^[A-Za-z0-9.]{1,6}$/.test(name)) {
-        ticker = name.toUpperCase();
-        name = ticker;
-      } else {
-        ticker = name.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 5);
-      }
-    } else if (!name && ticker) {
-      name = ticker;
+    // 2. If user entered a single clean ticker in the name box (e.g., "AAPL", "MSFT", "TSLA", "RELIANCE.BSE")
+    if (/^[A-Za-z0-9.]{1,6}$/.test(nameVal)) {
+      tickerInput.value = nameVal.toUpperCase();
+      search(nameVal.toUpperCase(), nameVal.toUpperCase());
+      return;
     }
 
-    nameInput.value = name;
-    tickerInput.value = ticker;
-    search(name, ticker);
+    // 3. User typed a general company name without selecting an autocomplete item
+    if (nameVal) {
+      if (formError) {
+        formError.textContent = 'Please select a company from the search suggestions or enter a valid ticker symbol.';
+        formError.hidden = false;
+      }
+      return;
+    }
+
+    // 4. Empty form
+    if (formError) {
+      formError.textContent = 'Please enter a company name or ticker symbol.';
+      formError.hidden = false;
+    }
   }
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    resolveAndSearch(nameInput.value, tickerInput.value);
-  });
+  form.addEventListener('submit', handleFormSubmit);
 
   document.querySelectorAll('.search-chip').forEach(function (chip) {
     chip.addEventListener('click', function () {
       var company = chip.getAttribute('data-company');
       var ticker = chip.getAttribute('data-ticker');
-      nameInput.value = company;
-      tickerInput.value = ticker;
+      if (nameInput) nameInput.value = company;
+      if (tickerInput) tickerInput.value = ticker;
       search(company, ticker);
     });
   });
@@ -411,10 +427,17 @@
 
   initAutocomplete();
 
-  // Support query parameters (e.g. ?q=AAPL or ?q=Tesla)
+  // Support query parameters (e.g. ?q=AAPL)
   var urlParams = new URLSearchParams(window.location.search);
   var queryParam = urlParams.get('q') || urlParams.get('ticker') || urlParams.get('query') || urlParams.get('search');
   if (queryParam) {
-    resolveAndSearch(queryParam, '');
+    var q = queryParam.trim();
+    if (/^[A-Za-z0-9.]{1,6}$/.test(q)) {
+      if (nameInput) nameInput.value = q.toUpperCase();
+      if (tickerInput) tickerInput.value = q.toUpperCase();
+      search(q.toUpperCase(), q.toUpperCase());
+    } else {
+      if (nameInput) nameInput.value = q;
+    }
   }
 })();

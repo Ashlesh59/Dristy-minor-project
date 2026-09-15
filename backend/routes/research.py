@@ -82,13 +82,16 @@ def search_ticker():
     if not keywords:
         return jsonify({
             "success": True,
+            "source": "alpha_vantage",
             "matches": []
         }), 200
 
     try:
         matches = search_symbols(keywords)
+        source = "alpha_vantage"
     except (MissingApiKeyError, FinancialServiceUnavailableError, FinancialServiceBadResponseError) as e:
         current_app.logger.warning("Ticker search fallback triggered: %s", e)
+        source = "local_fallback"
         kw_lower = keywords.lower()
         matches = [
             s for s in POPULAR_SYMBOLS
@@ -97,6 +100,7 @@ def search_ticker():
 
     return jsonify({
         "success": True,
+        "source": source,
         "matches": matches
     }), 200
 
@@ -116,11 +120,6 @@ def create_research():
 
     company_name = (data.get("company_name") or "").strip()
     ticker_symbol = (data.get("ticker_symbol") or "").strip().upper()
-    # research_type is optional -- Research.research_type already
-    # defaults to "general" at the database level, but we still handle
-    # it explicitly here so an empty string in the request body (e.g.
-    # `"research_type": ""`) falls back to "general" too, rather than
-    # being saved as blank.
     research_type = (data.get("research_type") or "general").strip() or "general"
 
     if not company_name:
@@ -135,14 +134,45 @@ def create_research():
             "message": "ticker_symbol is required."
         }), 400
 
-    # user_id always comes from the logged-in session, never from the
-    # request body -- this is what stops a client from creating a
-    # research record "as" another user.
+    # Validate ticker with the financial provider before creating record
+    try:
+        financial_data = get_stock_quote(ticker_symbol)
+    except MissingApiKeyError as e:
+        current_app.logger.error("Financial service misconfigured: %s", e)
+        return jsonify({
+            "success": False,
+            "error_type": "missing_api_key",
+            "message": "Financial API key is not configured."
+        }), 500
+    except FinancialServiceUnavailableError as e:
+        current_app.logger.warning("Financial service unavailable: %s", e)
+        return jsonify({
+            "success": False,
+            "error_type": "provider_unavailable",
+            "message": "Financial data provider rate limit reached. Please try again shortly."
+        }), 503
+    except FinancialServiceBadResponseError as e:
+        current_app.logger.warning("Invalid ticker requested: %s (%s)", ticker_symbol, e)
+        return jsonify({
+            "success": False,
+            "error_type": "invalid_ticker",
+            "message": f"Invalid ticker symbol '{ticker_symbol}'. No financial data found."
+        }), 400
+    except Exception as e:
+        current_app.logger.error("Unexpected error validating ticker: %s", e)
+        return jsonify({
+            "success": False,
+            "error_type": "validation_failed",
+            "message": "Could not validate ticker symbol."
+        }), 400
+
+    # If financial provider returned valid quote, create exactly one record
     new_research = Research(
         user_id=user.id,
         company_name=company_name,
         ticker_symbol=ticker_symbol,
         research_type=research_type,
+        financial_data=json.dumps(financial_data),
         status="pending",
     )
 
@@ -152,7 +182,8 @@ def create_research():
     return jsonify({
         "success": True,
         "message": "Research request created",
-        "research": new_research.to_dict()
+        "research": new_research.to_dict(),
+        "financial_data": financial_data
     }), 201
 
 
