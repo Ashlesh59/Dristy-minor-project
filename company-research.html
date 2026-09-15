@@ -186,13 +186,21 @@
             <form class="research-search__form" id="companySearchForm" autocomplete="off">
               <div class="research-search__field" style="position:relative; flex:1;">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                <input type="text" id="companyNameInput" placeholder="Company name or ticker — e.g. Apple or AAPL" aria-label="Company name" required />
-                <div id="tickerSearchResults" class="ticker-autocomplete-dropdown" hidden></div>
+                <input
+                  type="text"
+                  id="companyNameInput"
+                  placeholder="Search by company name, ticker or ISIN (e.g. Reliance, TCS, INE...)"
+                  aria-label="Search company or ticker"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-controls="companySearchResults"
+                  aria-activedescendant=""
+                  required
+                />
+                <div id="companySearchResults" class="ticker-autocomplete-dropdown" role="listbox" aria-label="Company suggestions" hidden></div>
               </div>
-              <div class="research-search__field">
-                <input type="text" id="companyTickerInput" placeholder="Ticker (optional)" aria-label="Stock ticker symbol" style="max-width:160px;" />
-              </div>
-              <button type="submit" class="btn btn-primary research-search__submit">
+              <button type="submit" class="btn btn-primary research-search__submit" id="companySearchSubmitBtn">
                 <span class="btn-label">Search</span>
               </button>
             </form>
@@ -220,33 +228,41 @@
 
           <div id="researchResults" hidden>
 
-            <!-- COMPANY OVERVIEW — only fields Alpha Vantage's quote
-                 endpoint actually returns. No Industry/CEO/HQ/Market Cap/
-                 52-week range, since financial_service.py doesn't supply
-                 those and we never invent data. -->
-            <section class="panel company-overview" aria-label="Company overview">
+            <!-- COMPANY OVERVIEW & LATEST MARKET DATA -->
+            <section class="panel company-overview" aria-label="Company overview and market data">
               <div class="company-overview__top">
                 <div class="company-overview__identity">
                   <div class="company-overview__logo" id="ovLogo">--</div>
                   <div>
                     <h2 class="company-overview__name" id="ovName"></h2>
                     <span class="company-overview__ticker" id="ovTicker"></span>
+                    <div class="market-badges">
+                      <span class="market-badge market-badge--eod" id="badgeEod">End-of-day data</span>
+                      <span class="market-badge market-badge--unadjusted" id="badgeUnadjusted">Unadjusted prices</span>
+                      <span class="market-badge" id="badgeSource">NSE CM-UDiFF</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              <!-- Big Price Summary -->
+              <div class="price-highlight" id="priceHighlightSection">
+                <span class="price-highlight__value" id="ovPrice">--</span>
+                <span class="price-highlight__change" id="ovChange">--</span>
+              </div>
+
               <div class="company-overview__grid">
                 <div class="company-overview__item">
-                  <span class="company-overview__label">Last Close (EOD)</span>
-                  <span class="company-overview__value" id="ovPrice">--</span>
+                  <span class="company-overview__label">Trading Date</span>
+                  <span class="company-overview__value" id="ovTradingDay">--</span>
                 </div>
                 <div class="company-overview__item">
-                  <span class="company-overview__label">Change</span>
-                  <span class="company-overview__value" id="ovChange">--</span>
+                  <span class="company-overview__label">Previous Close</span>
+                  <span class="company-overview__value" id="ovPrevClose">--</span>
                 </div>
                 <div class="company-overview__item">
-                  <span class="company-overview__label">Change %</span>
-                  <span class="company-overview__value" id="ovChangePercent">--</span>
+                  <span class="company-overview__label">Day Open</span>
+                  <span class="company-overview__value" id="ovOpen">--</span>
                 </div>
                 <div class="company-overview__item">
                   <span class="company-overview__label">Day High</span>
@@ -257,61 +273,117 @@
                   <span class="company-overview__value" id="ovLow">--</span>
                 </div>
                 <div class="company-overview__item">
-                  <span class="company-overview__label">Latest Trading Day</span>
-                  <span class="company-overview__value" id="ovTradingDay">--</span>
+                  <span class="company-overview__label">Volume</span>
+                  <span class="company-overview__value" id="ovVolume">--</span>
+                </div>
+                <div class="company-overview__item">
+                  <span class="company-overview__label">Turnover</span>
+                  <span class="company-overview__value" id="ovTurnover">--</span>
+                </div>
+                <div class="company-overview__item">
+                  <span class="company-overview__label">Exchange / Series</span>
+                  <span class="company-overview__value" id="ovExchangeSeries">--</span>
                 </div>
               </div>
-              <p class="field-hint">Extended company profile data (industry, leadership, market cap) isn't available from the current data provider.</p>
+
+              <div id="marketDataNotice" class="unadjusted-disclaimer" hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="marketDataNoticeText">All prices are official exchange closing prices without corporate action adjustments (splits, bonuses, dividends).</span>
+              </div>
             </section>
 
-            <!-- FINANCIAL SUMMARY — real quote fields only -->
-            <section aria-label="Financial summary">
-              <div class="panel__head panel__head--loose">
-                <h2 class="panel__title">Financial Summary</h2>
+            <!-- HISTORICAL PRICE CHART -->
+            <section class="chart-card" aria-label="Historical price chart">
+              <div class="chart-controls">
+                <div>
+                  <h3 class="panel__title" style="margin:0;">Price History</h3>
+                  <p class="field-hint" style="margin:2px 0 0 0;" id="chartSubtitle">Official daily closing prices</p>
+                </div>
+                
+                <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                  <!-- Price Mode Toggle -->
+                  <div class="price-mode-buttons" role="group" aria-label="Price adjustment mode">
+                    <button type="button" class="mode-btn is-active" data-mode="raw" aria-pressed="true">Raw</button>
+                    <button type="button" class="mode-btn" data-mode="split_adjusted" aria-pressed="false">Split/Bonus Adjusted</button>
+                  </div>
+
+                  <!-- Range Controls -->
+                  <div class="range-buttons" role="group" aria-label="Chart time range selection">
+                    <button type="button" class="range-btn" data-range="1m" aria-pressed="false">1M</button>
+                    <button type="button" class="range-btn" data-range="3m" aria-pressed="false">3M</button>
+                    <button type="button" class="range-btn" data-range="6m" aria-pressed="false">6M</button>
+                    <button type="button" class="range-btn is-active" data-range="1y" aria-pressed="true">1Y</button>
+                    <button type="button" class="range-btn" data-range="3y" aria-pressed="false">3Y</button>
+                    <button type="button" class="range-btn" data-range="5y" aria-pressed="false">5Y</button>
+                    <button type="button" class="range-btn" data-range="max" aria-pressed="false">MAX</button>
+                  </div>
+                </div>
               </div>
-              <div class="stat-cards financial-summary" id="financialCards"></div>
+
+              <!-- Loading & Chart States -->
+              <div id="chartLoading" class="chart-status-message" hidden>
+                <p>Loading historical price data...</p>
+              </div>
+
+              <div id="chartEmpty" class="chart-status-message" hidden>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p id="chartEmptyMessage">No historical price records found for the requested range.</p>
+              </div>
+
+              <!-- Native SVG Chart -->
+              <div class="svg-chart-container" id="chartContainer">
+                <svg id="priceHistorySvg" class="svg-chart" viewBox="0 0 600 260" preserveAspectRatio="none" role="img" aria-label="Stock price history chart">
+                  <defs>
+                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- Gridlines and Axes -->
+                  <g id="svgGridlines"></g>
+                  <g id="svgAxes"></g>
+                  <!-- Price Path and Area -->
+                  <path id="svgAreaPath" class="chart-area" d="" />
+                  <path id="svgLinePath" class="chart-line" d="" />
+                  <!-- Data points -->
+                  <g id="svgPoints"></g>
+                </svg>
+              </div>
+
+              <!-- Accessible Summary & Screen-reader Data Table -->
+              <div id="chartAccessibleSummary" style="margin-top:12px; font-size:var(--fs-xs, 0.75rem); color:var(--color-text-secondary, #64748b);"></div>
+              <details style="margin-top:8px;">
+                <summary style="cursor:pointer; font-size:var(--fs-xs, 0.75rem); color:var(--color-primary, #2563eb);">View Historical Price Table</summary>
+                <div style="max-height: 200px; overflow-y: auto; margin-top: 6px;">
+                  <table class="sr-data-table" id="chartDataTable" aria-label="Historical price data table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Open</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Close</th>
+                        <th>Volume</th>
+                      </tr>
+                    </thead>
+                    <tbody id="chartTableBody"></tbody>
+                  </table>
+                </div>
+              </details>
+
+              <div id="chartAdjustmentDisclaimer" class="unadjusted-disclaimer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span id="chartDisclaimerText"><strong>Unadjusted Historical Data:</strong> Prices reflect unadjusted nominal exchange records and do not account for stock splits, dividends, or bonus issues. Total return calculations should not be derived directly from unadjusted prices.</span>
+              </div>
             </section>
 
-            <!-- AI INSIGHT PANEL — CTA to a separate analysis page, since
-                 AI analysis is generated per research_id on ai-analysis.html,
-                 not on this page. -->
-            <section class="panel ai-insight-panel" aria-label="AI insights">
-              <div class="panel__head">
-                <h2 class="panel__title">AI Insight Panel</h2>
-              </div>
-              <p>Get an AI-generated score, recommendation, and risk/opportunity breakdown for this company.</p>
-              <a href="#" id="goToAnalysisBtn" class="btn btn-primary">
-                <span class="btn-label">Run AI Analysis</span>
-              </a>
-            </section>
-
-            <!-- NEWS -->
-            <section aria-label="Latest news">
-              <div class="panel__head panel__head--loose">
-                <h2 class="panel__title">Latest News</h2>
-              </div>
-              <div class="news-card-grid" id="newsGrid"></div>
-              <p class="field-hint" id="newsEmpty" hidden>No recent news found for this ticker.</p>
-            </section>
 
             <!-- ACTION BUTTONS -->
             <section class="research-actions" aria-label="Research actions">
-              <button type="button" class="btn btn-primary" id="generateReportActionBtn">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-                <span class="btn-label">Generate AI Report</span>
-              </button>
-              <button type="button" class="btn btn-ghost" disabled title="Coming soon">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><rect x="3" y="4" width="8" height="16" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="4" width="8" height="16" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>
-                <span class="btn-label">Compare Company (Coming Soon)</span>
-              </button>
               <a href="saved-reports.html" class="btn btn-ghost">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M6 3h12v18l-6-4-6 4V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
                 <span class="btn-label">View Saved Reports</span>
               </a>
-              <button type="button" class="btn btn-ghost" id="exportPdfBtn">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M7 3h7l5 5v13H7V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                <span class="btn-label">Export PDF</span>
-              </button>
             </section>
 
           </div>
@@ -323,6 +395,8 @@
 
   <script src="js/config.js" defer></script>
   <script src="js/dashboard.js" defer></script>
+  <script src="js/autocomplete-state.js" defer></script>
+  <script src="js/market-data-state.js" defer></script>
   <script src="js/company-research.js" defer></script>
 </body>
 </html>

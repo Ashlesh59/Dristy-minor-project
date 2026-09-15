@@ -462,3 +462,247 @@
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   PHASE 2B: STORED MARKET DATA & SVG CHART
+   ========================================================================== */
+
+.market-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.market-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-bg, #f1f5f9);
+  color: var(--color-text-secondary, #475569);
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.market-badge--eod {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-primary, #2563eb);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.market-badge--unadjusted {
+  background: rgba(234, 179, 8, 0.1);
+  color: #854d0e;
+  border-color: rgba(234, 179, 8, 0.25);
+}
+
+/* Big price highlight */
+.price-highlight {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3, 12px);
+  margin-bottom: var(--space-4, 16px);
+  flex-wrap: wrap;
+}
+
+.price-highlight__value {
+  font-size: var(--fs-3xl, 2rem);
+  font-weight: var(--fw-bold, 700);
+  font-family: var(--font-display, var(--font-body));
+  color: var(--color-text-primary, #0f172a);
+}
+
+.price-highlight__change {
+  font-size: var(--fs-base, 1rem);
+  font-weight: var(--fw-semibold, 600);
+}
+
+.price-highlight__change--pos {
+  color: var(--color-success, #16a34a);
+}
+
+.price-highlight__change--neg {
+  color: var(--color-danger, #dc2626);
+}
+
+.price-highlight__change--neutral {
+  color: var(--color-text-muted, #64748b);
+}
+
+/* Range selector */
+.chart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4, 16px);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4, 16px);
+}
+
+.range-buttons, .price-mode-buttons {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--color-bg, #f8fafc);
+  padding: 3px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.range-btn, .mode-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
+  font-size: var(--fs-xs, 0.75rem);
+  font-weight: var(--fw-semibold, 600);
+  color: var(--color-text-secondary, #475569);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms), color var(--duration-fast, 150ms);
+}
+
+.range-btn:hover, .mode-btn:hover {
+  color: var(--color-text-primary, #0f172a);
+}
+
+.range-btn.is-active, .mode-btn.is-active {
+  background: var(--color-surface, #ffffff);
+  color: var(--color-primary, #2563eb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.range-btn:focus-visible, .mode-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #2563eb);
+  outline-offset: 1px;
+}
+
+/* SVG Chart container */
+.chart-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: var(--space-5, 20px);
+  margin-bottom: var(--space-6, 24px);
+}
+
+.svg-chart-container {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+}
+
+.svg-chart {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--color-primary, #2563eb);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-area {
+  fill: url(#chartGradient);
+  opacity: 0.15;
+}
+
+.chart-gridline {
+  stroke: var(--color-border, #e2e8f0);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.chart-axis-text {
+  font-size: 11px;
+  fill: var(--color-text-muted, #64748b);
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+.chart-dot {
+  fill: var(--color-primary, #2563eb);
+  stroke: var(--color-surface, #ffffff);
+  stroke-width: 2;
+  cursor: pointer;
+  transition: r 150ms ease;
+}
+
+.chart-dot:hover {
+  r: 6;
+}
+
+/* Chart empty & single point message */
+.chart-status-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  text-align: center;
+  color: var(--color-text-secondary, #64748b);
+  padding: var(--space-4, 16px);
+}
+
+.chart-status-message p {
+  margin: 4px 0 0 0;
+  font-size: var(--fs-sm, 0.875rem);
+}
+
+/* Unadjusted disclaimer banner */
+.unadjusted-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  color: #713f12;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: var(--fs-xs, 0.75rem);
+  line-height: 1.5;
+  margin-top: var(--space-4, 16px);
+}
+
+.unadjusted-disclaimer svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #ca8a04;
+}
+
+/* Screen reader accessible data table */
+.sr-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-xs, 0.75rem);
+  margin-top: var(--space-3, 12px);
+}
+
+.sr-data-table th, .sr-data-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  text-align: left;
+}
+
+.sr-data-table th {
+  background: var(--color-bg, #f8fafc);
+  font-weight: 600;
+  color: var(--color-text-secondary, #475569);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

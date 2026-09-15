@@ -29,45 +29,68 @@ from database.migrations import run_migrations
 import models  # noqa: F401
 from routes.auth import auth_bp
 from routes.research import research_bp
+from routes.companies import companies_bp
+from routes.securities import securities_bp
+
 
 
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Apply test configuration before any validation, database initialization, or migrations
     if test_config:
         app.config.update(test_config)
+
+    # ------------------------------------------------------------
+    # PHASE 0: TEST-RUN SENTINEL & DATABASE SAFETY CHECK
+    # ------------------------------------------------------------
+    # If INVESTIQ_TEST_RUN=1 is active, we enforce that testing mode is
+    # strictly engaged and that the configured database is NOT the
+    # development/production investiq.db file.
+    if os.environ.get("INVESTIQ_TEST_RUN") == "1":
+        if not app.config.get("TESTING"):
+            raise RuntimeError(
+                "INVESTIQ_TEST_RUN sentinel is active but TESTING is not True."
+            )
+        
+        db_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+        if not db_uri:
+            raise RuntimeError(
+                "INVESTIQ_TEST_RUN sentinel is active but SQLALCHEMY_DATABASE_URI is empty."
+            )
+
+        dev_db_path = os.path.abspath(os.path.join(Config.BASE_DIR, "database", "investiq.db"))
+        
+        # Check if URI resolves to the development investiq.db file
+        if db_uri.startswith("sqlite:///"):
+            raw_path = db_uri.replace("sqlite:///", "")
+            if raw_path != ":memory:":
+                resolved_path = os.path.abspath(raw_path)
+                if os.path.normcase(resolved_path) == os.path.normcase(dev_db_path) or "investiq.db" in os.path.basename(resolved_path):
+                    raise RuntimeError(
+                        f"INVESTIQ_TEST_RUN violation: Configured test database resolves to "
+                        f"development database ({resolved_path}). Refusing to run tests on live data."
+                    )
+        elif db_uri != "sqlite:///:memory:":
+            raise RuntimeError(
+                f"INVESTIQ_TEST_RUN violation: Test database must be an isolated temporary SQLite database or :memory:, got: {db_uri}"
+            )
+
+    is_testing = app.config.get("TESTING", False)
 
     # SECURITY FIX (Phase 11): fail loudly rather than silently
     # deploying with the well-known dev fallback secret (which is
     # now public in this project's own history) once DEBUG is off.
-    # SECRET_KEY signs session cookies -- deploying with a guessable
-    # one would let an attacker forge a valid session for any user_id.
-    if not app.config["DEBUG"] and app.config["SECRET_KEY"] == "dev-secret-key-change-later":
+    # When TESTING is True, test suites provide their own dedicated test secret.
+    if not is_testing and not app.config["DEBUG"] and app.config["SECRET_KEY"] == "dev-secret-key-change-later":
         raise RuntimeError(
             "SECRET_KEY must be set via the environment before running with "
             "DEBUG=False. Refusing to start with the default development key."
         )
 
-    # supports_credentials=True is required for Phase 4: the frontend
-    # will eventually need to send `credentials: "include"` in its
-    # fetch() calls so the browser attaches/accepts the session cookie
-    # set by POST /api/auth/login. Without this, the browser silently
-    # drops that cookie on cross-origin requests and login would
-    # appear to "not stick." This doesn't change behavior for the
-    # existing /api/test or /api/auth/signup calls, which don't use
-    # cookies at all.
-    #
-    # SECURITY FIX (Phase 11): supports_credentials=True combined with
-    # no explicit `origins` means flask-cors reflects back whatever
-    # Origin header the request sent -- i.e. ANY website can make an
-    # authenticated (cookie-carrying) request to this API and read the
-    # response. That's fine for local development (and preserves the
-    # exact behavior every prior phase has already been tested
-    # against), but is a real cross-origin credential-theft risk in
-    # production. In production, an explicit allow-list is now
-    # required instead of silently staying wide-open.
-    if app.config["DEBUG"]:
+    # CORS configuration
+    if app.config["DEBUG"] or is_testing:
         CORS(app, supports_credentials=True)
     else:
         allowed_origins = [
@@ -82,27 +105,16 @@ def create_app(test_config=None):
             )
         CORS(app, supports_credentials=True, origins=allowed_origins)
 
-    # By default, Flask propagates unhandled exceptions straight to
-    # Werkzeug's interactive debugger whenever DEBUG=True (which is
-    # this project's default), bypassing any @app.errorhandler(...)
-    # entirely. That's normally convenient for local development, but
-    # it also means the safe-JSON-500 guarantee below wouldn't
-    # actually hold except in production. Setting this explicitly
-    # ensures unexpected errors always come back as safe JSON, in
-    # every environment, not only when DEBUG happens to be off.
+    # Exception propagation
     app.config["PROPAGATE_EXCEPTIONS"] = False
 
     db.init_app(app)
 
     with app.app_context():
         db.create_all()
-        # Adds any columns models gained after the original schema
-        # (e.g. Research.financial_data, User.company) to an existing
-        # investiq.db without touching current rows -- see
-        # database/migrations.py. db.create_all() alone would silently
-        # skip these on a database that already has the users/research
-        # tables.
-        run_migrations(db)
+        # Migration execution is controlled by RUN_MIGRATIONS (False in test mode)
+        if app.config.get("RUN_MIGRATIONS", True):
+            run_migrations(db)
 
     @app.route("/api/test", methods=["GET"])
     def test_connection():
@@ -139,6 +151,9 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(research_bp)
+    app.register_blueprint(companies_bp)
+    app.register_blueprint(securities_bp)
+
 
     # ------------------------------------------------------------
     # GLOBAL ERROR HANDLERS (Phase 10)

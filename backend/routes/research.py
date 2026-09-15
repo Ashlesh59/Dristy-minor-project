@@ -53,56 +53,8 @@ def login_required_response():
     }), 401
 
 
-POPULAR_SYMBOLS = [
-    {"symbol": "AAPL", "name": "Apple Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "MSFT", "name": "Microsoft Corporation", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "GOOGL", "name": "Alphabet Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "AMZN", "name": "Amazon.com Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "TSLA", "name": "Tesla Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "NVDA", "name": "NVIDIA Corporation", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "META", "name": "Meta Platforms Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "NFLX", "name": "Netflix Inc.", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "AMD", "name": "Advanced Micro Devices", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "INTC", "name": "Intel Corporation", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "DIS", "name": "The Walt Disney Company", "type": "Equity", "region": "United States", "currency": "USD"},
-    {"symbol": "RELIANCE.BSE", "name": "Reliance Industries", "type": "Equity", "region": "India", "currency": "INR"},
-    {"symbol": "TCS.BSE", "name": "Tata Consultancy Services", "type": "Equity", "region": "India", "currency": "INR"},
-    {"symbol": "INFY", "name": "Infosys Limited", "type": "Equity", "region": "United States/India", "currency": "USD"},
-]
-
-
-@research_bp.route("/ticker-search", methods=["GET"])
-@rate_limit(max_requests=60, window_seconds=60, key_prefix="ticker_search")
-def search_ticker():
-    user = get_current_user()
-    if user is None:
-        return login_required_response()
-
-    keywords = (request.args.get("keywords") or request.args.get("q") or "").strip()
-    if not keywords:
-        return jsonify({
-            "success": True,
-            "source": "alpha_vantage",
-            "matches": []
-        }), 200
-
-    try:
-        matches = search_symbols(keywords)
-        source = "alpha_vantage"
-    except (MissingApiKeyError, FinancialServiceUnavailableError, FinancialServiceBadResponseError) as e:
-        current_app.logger.warning("Ticker search fallback triggered: %s", e)
-        source = "local_fallback"
-        kw_lower = keywords.lower()
-        matches = [
-            s for s in POPULAR_SYMBOLS
-            if kw_lower in s["symbol"].lower() or kw_lower in s["name"].lower()
-        ]
-
-    return jsonify({
-        "success": True,
-        "source": source,
-        "matches": matches
-    }), 200
+from models.company import Company
+from models.security import Security
 
 
 @research_bp.route("", methods=["POST"])
@@ -118,61 +70,31 @@ def create_research():
             "message": "Request body must be valid JSON."
         }), 400
 
-    company_name = (data.get("company_name") or "").strip()
-    ticker_symbol = (data.get("ticker_symbol") or "").strip().upper()
+    raw_security_id = data.get("security_id")
+    if raw_security_id is None or not isinstance(raw_security_id, int):
+        return jsonify({
+            "success": False,
+            "message": "security_id (integer) is required for new research requests."
+        }), 400
+
     research_type = (data.get("research_type") or "general").strip() or "general"
 
-    if not company_name:
+    # Query the authoritative Security and Company from the local database
+    security = Security.query.get(raw_security_id)
+    if not security or not security.is_active or not security.company or not security.company.is_active:
         return jsonify({
             "success": False,
-            "message": "company_name is required."
-        }), 400
+            "message": "Security not found or is no longer active."
+        }), 404
 
-    if not ticker_symbol:
-        return jsonify({
-            "success": False,
-            "message": "ticker_symbol is required."
-        }), 400
-
-    # Validate ticker with the financial provider before creating record
-    try:
-        financial_data = get_stock_quote(ticker_symbol)
-    except MissingApiKeyError as e:
-        current_app.logger.error("Financial service misconfigured: %s", e)
-        return jsonify({
-            "success": False,
-            "error_type": "missing_api_key",
-            "message": "Financial API key is not configured."
-        }), 500
-    except FinancialServiceUnavailableError as e:
-        current_app.logger.warning("Financial service unavailable: %s", e)
-        return jsonify({
-            "success": False,
-            "error_type": "provider_unavailable",
-            "message": "Financial data provider rate limit reached. Please try again shortly."
-        }), 503
-    except FinancialServiceBadResponseError as e:
-        current_app.logger.warning("Invalid ticker requested: %s (%s)", ticker_symbol, e)
-        return jsonify({
-            "success": False,
-            "error_type": "invalid_ticker",
-            "message": f"Invalid ticker symbol '{ticker_symbol}'. No financial data found."
-        }), 400
-    except Exception as e:
-        current_app.logger.error("Unexpected error validating ticker: %s", e)
-        return jsonify({
-            "success": False,
-            "error_type": "validation_failed",
-            "message": "Could not validate ticker symbol."
-        }), 400
-
-    # If financial provider returned valid quote, create exactly one record
+    # Server controls and populates company_name and ticker_symbol from verified database rows
     new_research = Research(
         user_id=user.id,
-        company_name=company_name,
-        ticker_symbol=ticker_symbol,
+        company_id=security.company.id,
+        security_id=security.id,
+        company_name=security.company.display_name,
+        ticker_symbol=security.symbol,
         research_type=research_type,
-        financial_data=json.dumps(financial_data),
         status="pending",
     )
 
@@ -181,9 +103,8 @@ def create_research():
 
     return jsonify({
         "success": True,
-        "message": "Research request created",
+        "message": "Research request created successfully.",
         "research": new_research.to_dict(),
-        "financial_data": financial_data
     }), 201
 
 

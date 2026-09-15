@@ -1,0 +1,7 @@
+SYMBOL,SERIES,SECURITY,RECORD_DATE,BC_START_DATE,BC_END_DATE,EX_DATE,PURPOSE,ISIN
+RELIANCE,EQ,Reliance Industries Limited,02-Sep-2026,NA,NA,01-Sep-2026,Face Value Split From Rs 10/- To Rs 2/-,INE002A01018
+TCS,EQ,Tata Consultancy Services Limited,16-Aug-2026,NA,NA,15-Aug-2026,Bonus 1:1,INE467B01029
+INFY,EQ,Infosys Limited,21-Jul-2026,NA,NA,20-Jul-2026,Interim Dividend - Rs 10 Per Share,INE009A01021
+HDFCBANK,EQ,HDFC Bank Limited,11-Jun-2026,NA,NA,10-Jun-2026,Scheme of Arrangement,INE040A01034
+UNKNOWNSEC,EQ,Unknown Security Limited,01-Jan-2026,NA,NA,01-Jan-2026,Bonus 1:1,INE999A01099
+RELIANCE,EQ,Reliance Industries Limited,05-May-2026,NA,NA,04-May-2026,Face Value Split From Rs 2/- To Rs 10/-,INE002A01018

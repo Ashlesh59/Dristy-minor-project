@@ -30,6 +30,9 @@ def rate_limit(max_requests=10, window_seconds=60, key_prefix="general"):
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
+            if current_app and current_app.config.get("TESTING"):
+                return fn(*args, **kwargs)
+
             # Identify caller by X-Forwarded-For or remote_addr
             forwarded = request.headers.get("X-Forwarded-For")
             if forwarded:

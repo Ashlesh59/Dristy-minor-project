@@ -1,0 +1,373 @@
+"""
+services/market_data_service.py
+--------------------------------------------------------------------------
+Business logic service for resolving and querying stored End-of-Day (EOD)
+DailyPrice records, calculating metrics, and assembling time-series history.
+--------------------------------------------------------------------------
+"""
+
+from datetime import datetime, date, timedelta
+from decimal import Decimal
+from typing import Dict, Any, Optional, List, Tuple
+from sqlalchemy import desc, asc
+
+from database.db import db
+from models.security import Security
+from models.daily_price import DailyPrice
+from models.adjusted_daily_price import AdjustedDailyPrice
+from models.corporate_action import CorporateAction
+
+
+class MarketDataServiceError(Exception):
+    """Base error for market data service operations."""
+    pass
+
+
+class SecurityNotFoundError(MarketDataServiceError):
+    """Raised when a security is missing or inactive."""
+    pass
+
+
+class InvalidRangeError(MarketDataServiceError):
+    """Raised when range or date parameters are invalid."""
+    pass
+
+
+# Range mappings: key -> timedelta approximation
+RANGE_DAYS_MAP = {
+    "1m": 30,
+    "3m": 90,
+    "6m": 180,
+    "1y": 365,
+    "3y": 365 * 3,
+    "5y": 365 * 5,
+    "max": None,
+}
+
+
+def _dec_str(val, decimals: int = 2) -> Optional[str]:
+    """
+    Safely serializes a Decimal / Numeric database value to standard base-10 string
+    without converting through binary float.
+    """
+    if val is None:
+        return None
+    d = Decimal(str(val))
+    quant = Decimal("0." + "0" * decimals) if decimals > 0 else Decimal("1")
+    return str(d.quantize(quant))
+
+
+class MarketDataService:
+    """
+    Dedicated service for retrieving and computing stored market data.
+    """
+
+    def __init__(self, db_session=None):
+        self.session = db_session or db.session
+
+    @classmethod
+    def get_security_or_fail(cls, security_id: int) -> Security:
+        """
+        Resolves an active Security record or raises SecurityNotFoundError.
+        """
+        security = Security.query.filter_by(id=security_id, is_active=True).first()
+        if not security:
+            raise SecurityNotFoundError(f"Security ID {security_id} not found or is inactive.")
+        if security.company and not security.company.is_active:
+            raise SecurityNotFoundError(f"Security ID {security_id} belongs to an inactive company.")
+        return security
+
+    @classmethod
+    def get_latest_market_data(cls, security_id: int) -> Dict[str, Any]:
+        """
+        Retrieves the most recent stored DailyPrice record for a security,
+        calculates absolute and percentage change safely, and formats metadata.
+        """
+        security = cls.get_security_or_fail(security_id)
+
+        # 1. Fetch latest daily price record
+        latest_price = (
+            DailyPrice.query.filter_by(security_id=security.id)
+            .order_by(desc(DailyPrice.trading_date))
+            .first()
+        )
+
+        security_payload = {
+            "security_id": security.id,
+            "company_id": security.company_id,
+            "company_name": security.company.display_name if security.company else security.symbol,
+            "symbol": security.symbol,
+            "exchange": security.exchange,
+            "series": security.series,
+            "isin": security.isin,
+            "currency": security.currency or "INR",
+        }
+
+        if not latest_price:
+            return {
+                "success": True,
+                "security": security_payload,
+                "market_data": None,
+                "freshness": {
+                    "data_type": "end_of_day",
+                    "last_trading_date": None,
+                    "is_real_time": False,
+                    "message": "No price data has been imported for this security yet.",
+                },
+            }
+
+        # 2. Resolve previous close
+        previous_close = latest_price.previous_close
+
+        if previous_close is None:
+            # Query immediately preceding daily price
+            prev_record = (
+                DailyPrice.query.filter(
+                    DailyPrice.security_id == security.id,
+                    DailyPrice.trading_date < latest_price.trading_date,
+                )
+                .order_by(desc(DailyPrice.trading_date))
+                .first()
+            )
+            if prev_record:
+                previous_close = prev_record.close_price
+
+        # 3. Calculate daily price change and change percentage
+        change = None
+        change_percent = None
+
+        if latest_price.close_price is not None and previous_close is not None:
+            change = latest_price.close_price - previous_close
+            # Division by zero protection
+            if previous_close > Decimal("0"):
+                change_percent = ((change / previous_close) * Decimal("100")).quantize(
+                    Decimal("0.0001")
+                )
+
+        market_data_payload = {
+            "trading_date": latest_price.trading_date.isoformat(),
+            "open": _dec_str(latest_price.open_price, 2),
+            "high": _dec_str(latest_price.high_price, 2),
+            "low": _dec_str(latest_price.low_price, 2),
+            "close": _dec_str(latest_price.close_price, 2),
+            "last_price": _dec_str(latest_price.last_price, 2),
+            "previous_close": _dec_str(previous_close, 2),
+            "change": _dec_str(change, 2),
+            "change_percent": _dec_str(change_percent, 4),
+            "vwap": _dec_str(latest_price.vwap, 2),
+            "volume": latest_price.volume,
+            "turnover": _dec_str(latest_price.turnover, 2),
+            "trade_count": latest_price.trade_count,
+            "deliverable_quantity": latest_price.deliverable_quantity,
+            "deliverable_percentage": _dec_str(latest_price.deliverable_percentage, 2),
+            "source": latest_price.source,
+            "is_adjusted": latest_price.is_adjusted,
+        }
+
+        return {
+            "success": True,
+            "security": security_payload,
+            "market_data": market_data_payload,
+            "freshness": {
+                "data_type": "end_of_day",
+                "last_trading_date": latest_price.trading_date.isoformat(),
+                "is_real_time": False,
+            },
+        }
+
+    @classmethod
+    def get_price_history(
+        cls,
+        security_id: int,
+        range_key: Optional[str] = None,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        limit: int = 2000,
+        price_mode: str = "raw",
+        adjustment_version: str = "split_bonus_v1",
+    ) -> Dict[str, Any]:
+        """
+        Retrieves historical EOD DailyPrice or AdjustedDailyPrice records in chronological order.
+        """
+        security = cls.get_security_or_fail(security_id)
+
+        # 1. Parameter ambiguity validation
+        if range_key and (start_date or end_date):
+            raise InvalidRangeError("Cannot specify predefined 'range' together with 'start' or 'end' dates.")
+
+        clean_range = (range_key or "1y").strip().lower() if not (start_date or end_date) else None
+
+        if clean_range and clean_range not in RANGE_DAYS_MAP:
+            valid_keys = ", ".join(sorted(RANGE_DAYS_MAP.keys()))
+            raise InvalidRangeError(f"Invalid range '{range_key}'. Allowed ranges are: {valid_keys}.")
+
+        # 2. Date boundary resolution
+        resolved_start = start_date
+        resolved_end = end_date
+
+        if clean_range:
+            days_offset = RANGE_DAYS_MAP[clean_range]
+            if days_offset is not None:
+                latest_record = (
+                    DailyPrice.query.filter_by(security_id=security.id)
+                    .order_by(desc(DailyPrice.trading_date))
+                    .first()
+                )
+                ref_date = latest_record.trading_date if latest_record else date.today()
+                resolved_end = ref_date
+                resolved_start = ref_date - timedelta(days=days_offset)
+
+        if resolved_start and resolved_end and resolved_start > resolved_end:
+            raise InvalidRangeError(
+                f"Start date '{resolved_start}' cannot be later than end date '{resolved_end}'."
+            )
+
+        safe_limit = min(max(1, limit), 5000)
+        clean_mode = (price_mode or "raw").strip().lower()
+
+        # 3. Check if split_adjusted is requested and available
+        if clean_mode == "split_adjusted":
+            # Check if adjusted prices exist for this security and version
+            adj_count = AdjustedDailyPrice.query.filter_by(
+                security_id=security.id,
+                adjustment_version=adjustment_version,
+            ).count()
+
+            if adj_count > 0:
+                # Query AdjustedDailyPrice
+                query = AdjustedDailyPrice.query.filter(
+                    AdjustedDailyPrice.security_id == security.id,
+                    AdjustedDailyPrice.adjustment_version == adjustment_version,
+                )
+                if resolved_start:
+                    query = query.filter(AdjustedDailyPrice.trading_date >= resolved_start)
+                if resolved_end:
+                    query = query.filter(AdjustedDailyPrice.trading_date <= resolved_end)
+
+                query = query.order_by(asc(AdjustedDailyPrice.trading_date))
+                records = query.limit(safe_limit + 1).all()
+
+                truncated = len(records) > safe_limit
+                display_records = records[:safe_limit]
+
+                prices_list = []
+                for r in display_records:
+                    prices_list.append({
+                        "date": r.trading_date.isoformat(),
+                        "open": _dec_str(r.adjusted_open, 2),
+                        "high": _dec_str(r.adjusted_high, 2),
+                        "low": _dec_str(r.adjusted_low, 2),
+                        "close": _dec_str(r.adjusted_close, 2),
+                        "volume": r.adjusted_volume,
+                        "cumulative_price_factor": _dec_str(r.cumulative_price_factor, 6),
+                    })
+
+                applied_action_count = (
+                    CorporateAction.query.filter_by(security_id=security.id)
+                    .filter(CorporateAction.action_type.in_(["stock_split", "bonus"]))
+                    .filter(CorporateAction.processing_status.in_(["applied", "verified"]))
+                    .count()
+                )
+
+                start_iso = resolved_start.isoformat() if resolved_start else (display_records[0].trading_date.isoformat() if display_records else None)
+                end_iso = resolved_end.isoformat() if resolved_end else (display_records[-1].trading_date.isoformat() if display_records else None)
+
+                return {
+                    "success": True,
+                    "security": {
+                        "security_id": security.id,
+                        "company_id": security.company_id,
+                        "company_name": security.company.display_name if security.company else security.symbol,
+                        "symbol": security.symbol,
+                        "exchange": security.exchange,
+                        "series": security.series,
+                        "isin": security.isin,
+                        "currency": security.currency or "INR",
+                    },
+                    "range": {
+                        "requested": clean_range or "custom",
+                        "start": start_iso,
+                        "end": end_iso,
+                        "count": len(prices_list),
+                        "truncated": truncated,
+                    },
+                    "prices": prices_list,
+                    "metadata": {
+                        "data_type": "end_of_day",
+                        "source": "NSE_UDIFF",
+                        "is_adjusted": True,
+                        "requested_price_mode": "split_adjusted",
+                        "returned_price_mode": "split_adjusted",
+                        "adjustment_version": adjustment_version,
+                        "applied_action_count": applied_action_count,
+                        "adjustment_scope": "split_bonus_only",
+                        "disclaimer": "Adjusted for stock splits and bonus issues. Cash dividends and rights issues are excluded.",
+                    },
+                }
+
+        # 4. Raw DailyPrice query (Default or Fallback when adjusted records are not built)
+        query = DailyPrice.query.filter(DailyPrice.security_id == security.id)
+        if resolved_start:
+            query = query.filter(DailyPrice.trading_date >= resolved_start)
+        if resolved_end:
+            query = query.filter(DailyPrice.trading_date <= resolved_end)
+
+        query = query.order_by(asc(DailyPrice.trading_date))
+        records = query.limit(safe_limit + 1).all()
+
+        truncated = len(records) > safe_limit
+        display_records = records[:safe_limit]
+
+        prices_list = []
+        for r in display_records:
+            prices_list.append({
+                "date": r.trading_date.isoformat(),
+                "open": _dec_str(r.open_price, 2),
+                "high": _dec_str(r.high_price, 2),
+                "low": _dec_str(r.low_price, 2),
+                "close": _dec_str(r.close_price, 2),
+                "volume": r.volume,
+                "turnover": _dec_str(r.turnover, 2),
+                "vwap": _dec_str(r.vwap, 2),
+            })
+
+        start_iso = resolved_start.isoformat() if resolved_start else (display_records[0].trading_date.isoformat() if display_records else None)
+        end_iso = resolved_end.isoformat() if resolved_end else (display_records[-1].trading_date.isoformat() if display_records else None)
+
+        metadata_dict = {
+            "data_type": "end_of_day",
+            "source": "NSE_UDIFF",
+            "is_adjusted": False,
+            "requested_price_mode": clean_mode,
+            "returned_price_mode": "raw",
+            "adjustment_version": None,
+            "applied_action_count": 0,
+            "adjustment_scope": "none",
+            "disclaimer": "Unadjusted nominal exchange prices. Excludes corporate action adjustments.",
+        }
+        if clean_mode == "split_adjusted":
+            metadata_dict["unavailable_reason"] = "Split-adjusted price history has not been calculated for this security."
+
+        return {
+            "success": True,
+            "security": {
+                "security_id": security.id,
+                "company_id": security.company_id,
+                "company_name": security.company.display_name if security.company else security.symbol,
+                "symbol": security.symbol,
+                "exchange": security.exchange,
+                "series": security.series,
+                "isin": security.isin,
+                "currency": security.currency or "INR",
+            },
+            "range": {
+                "requested": clean_range or "custom",
+                "start": start_iso,
+                "end": end_iso,
+                "count": len(prices_list),
+                "truncated": truncated,
+            },
+            "prices": prices_list,
+            "metadata": metadata_dict,
+        }
+

@@ -1,8 +1,48 @@
+# Environment & Secrets
 backend/.env
+.env
+*.env
+
+# SQLite Databases
 backend/database/investiq.db
+backend/database/*.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Cookies & Session Artifacts
 backend/cookies.txt
+*.cookies
+
+# Raw Market Data & Archives (Production / Live)
+data/raw/**
+data/raw/
+
+# Keep test fixtures tracked
+!backend/tests/fixtures/**
+
+# Python Virtual Environments & Cache
 venv/
+.venv/
+env/
 __pycache__/
 *.pyc
 *.pyo
-*.db
+*.pyd
+
+# Test Artefacts & Test DBs
+*.test.db
+test_*.db
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Generated Documents & PDFs
+*.pdf
+reports/*.pdf
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
