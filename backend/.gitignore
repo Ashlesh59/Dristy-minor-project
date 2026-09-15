@@ -1,0 +1,7 @@
+.env
+database/investiq.db
+cookies.txt
+__pycache__/
+*.pyc
+*.pyo
+*.db

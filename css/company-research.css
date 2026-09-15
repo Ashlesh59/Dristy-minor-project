@@ -1,0 +1,464 @@
+/* ==========================================================================
+   COMPANY-RESEARCH.CSS
+   --------------------------------------------------------------------------
+   Styles for company-research.html only. This page reuses the dashboard
+   shell (sidebar, topbar, .panel, .stat-cards, .search-chips, .badge,
+   .charts-grid, skeleton, etc.) from dashboard.css without redefining
+   any of it -- everything below is new, page-specific markup only:
+   the search bar, company overview card, AI insight panel, confidence
+   meter, and news cards.
+   ========================================================================== */
+
+/* This page has no right-hand insights panel, so the two-column
+   .dashboard-body grid from dashboard.css collapses to one column. */
+.dashboard-body--single {
+  grid-template-columns: 1fr;
+}
+
+/* A looser variant of .panel__head for use directly above a grid
+   (Popular Companies, Financial Summary) where it isn't sitting
+   inside a bordered .panel card. */
+.panel__head--loose {
+  margin-bottom: var(--space-4);
+}
+
+/* ------------------------------------------------------------------
+   SEARCH BAR
+   ------------------------------------------------------------------ */
+.research-search__form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.research-search__field {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.research-search__field > svg {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.research-search__field input {
+  width: 100%;
+  padding: var(--space-4) var(--space-9) var(--space-4) var(--space-9);
+  font-size: var(--fs-base);
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.research-search__field input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.research-search__field input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.ticker-autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 6px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.ticker-autocomplete-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--duration-fast, 150ms);
+}
+
+.ticker-autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.ticker-autocomplete-item:hover,
+.ticker-autocomplete-item.is-selected {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.ticker-autocomplete-item__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticker-autocomplete-item__name {
+  font-weight: 500;
+  font-size: var(--fs-sm, 0.875rem);
+  color: var(--color-text-primary);
+}
+
+.ticker-autocomplete-item__region {
+  font-size: var(--fs-xs, 0.75rem);
+  color: var(--color-text-muted);
+}
+
+.ticker-autocomplete-item__symbol {
+  font-weight: 600;
+  font-size: var(--fs-xs, 0.75rem);
+  background: var(--color-bg, #f1f5f9);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--color-primary);
+}
+
+.research-search__voice {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
+}
+
+.research-search__voice:hover {
+  background: var(--color-surface-tint);
+  color: var(--color-primary);
+}
+
+.research-search__voice svg {
+  width: 18px;
+  height: 18px;
+}
+
+.research-search__submit {
+  flex-shrink: 0;
+  padding: var(--space-4) var(--space-7);
+}
+
+/* ------------------------------------------------------------------
+   COMPANY OVERVIEW CARD
+   ------------------------------------------------------------------ */
+.company-overview__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+.company-overview__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.company-overview__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--color-navy);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-lg);
+  flex-shrink: 0;
+}
+
+.company-overview__name {
+  font-size: var(--fs-xl);
+  margin-bottom: 2px;
+}
+
+.company-overview__ticker {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+.company-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.company-overview__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.company-overview__label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.company-overview__value {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+}
+
+/* ------------------------------------------------------------------
+   FINANCIAL SUMMARY
+   Six cards instead of the dashboard's five -- override the column
+   count on top of the shared .stat-cards grid.
+   ------------------------------------------------------------------ */
+.financial-summary {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* ------------------------------------------------------------------
+   AI INSIGHT PANEL
+   ------------------------------------------------------------------ */
+.ai-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.ai-insight-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-tint);
+  border-radius: var(--radius-sm);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.ai-insight-row:hover {
+  transform: translateY(-2px);
+}
+
+.ai-insight-row__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+}
+
+/* Confidence meter -- a horizontal progress bar that fills to
+   --confidence-target (set inline in the HTML) once JS adds the
+   .is-filled class, driven by company-research.js. */
+.confidence-meter__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.confidence-meter__label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+.confidence-meter__value {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  color: var(--color-primary);
+}
+
+.confidence-meter__track {
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.confidence-meter__fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  transition: width 1.4s var(--ease-standard);
+}
+
+.confidence-meter__fill.is-filled {
+  width: var(--confidence-target, 0%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confidence-meter__fill {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   CHARTS -- three across instead of the dashboard's two
+   ------------------------------------------------------------------ */
+.charts-grid--triple {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ------------------------------------------------------------------
+   RECENT NEWS
+   ------------------------------------------------------------------ */
+.news-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.news-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard),
+              border-color var(--duration-base) var(--ease-standard);
+}
+
+.news-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
+}
+
+.news-card__thumb {
+  height: 110px;
+  background: var(--color-surface-tint);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.news-card__thumb svg {
+  width: 30px;
+  height: 30px;
+}
+
+.news-card__body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.news-card__tag {
+  align-self: flex-start;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.1);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.news-card__title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------
+   ACTION BUTTONS
+   ------------------------------------------------------------------ */
+.research-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1280px) {
+  .financial-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .company-overview__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .ai-insight-grid {
+    grid-template-columns: 1fr;
+  }
+  .news-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .research-search__form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .research-search__submit {
+    width: 100%;
+  }
+  .company-overview__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .financial-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .company-overview__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .company-overview__grid {
+    grid-template-columns: 1fr;
+  }
+  .financial-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .news-card-grid {
+    grid-template-columns: 1fr;
+  }
+  .research-actions {
+    flex-direction: column;
+  }
+  .research-actions .btn {
+    width: 100%;
+  }
+}

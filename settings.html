@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — InvestIQ</title>
+  <meta name="description" content="Manage your InvestIQ account, security, notification, and AI analysis preferences." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/profile.css" />
+  <link rel="stylesheet" href="css/settings.css" />
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="dashboard-shell">
+
+    <aside class="sidebar" id="sidebar">
+      <a href="index.html" class="sidebar__logo">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="3" y="16" width="4" height="9" rx="1" fill="currentColor"/>
+          <rect x="12" y="10" width="4" height="15" rx="1" fill="currentColor"/>
+          <rect x="21" y="3" width="4" height="22" rx="1" fill="currentColor"/>
+        </svg>
+        <span class="sidebar__logo-text">InvestIQ</span>
+      </a>
+
+      <nav class="sidebar__group">
+        <span class="sidebar__group-title">Workspace</span>
+        <a href="dashboard.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="company-research.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Company Research</span>
+        </a>
+        <a href="ai-analysis.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>AI Analysis</span>
+        </a>
+        <a href="investment-report.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Reports</span>
+        </a>
+        <a href="saved-reports.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>Saved Reports</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__spacer"></div>
+
+      <nav class="sidebar__group sidebar__footer">
+        <span class="sidebar__group-title">Account</span>
+        <a href="profile.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Profile</span>
+        </a>
+        <a href="settings.html" class="sidebar__link is-active" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>Settings</span>
+        </a>
+        <a href="help.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 1.7-2.4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="0.9" fill="currentColor"/></svg>
+          <span>Help</span>
+        </a>
+        <a href="index.html" class="sidebar__link sidebar__link--logout">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="dashboard-content">
+
+      <header class="topbar">
+        <button class="topbar__toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+
+        <div class="topbar__search">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="search" placeholder="Search companies, reports, tickers..." aria-label="Search" />
+        </div>
+
+        <div class="topbar__spacer"></div>
+
+        <span class="topbar__date" id="topbarDate"></span>
+
+        <div class="topbar__actions">
+          <div class="dropdown" data-dropdown>
+            <button class="topbar__icon-btn" data-dropdown-trigger aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <span class="topbar__badge" aria-hidden="true"></span>
+            </button>
+            <div class="dropdown__panel" role="menu">
+              <div class="dropdown__header">
+                Notifications
+                <a href="#">Mark all read</a>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Risk score updated for NVIDIA Corp.</div>
+                  <div class="notification-item__time">12 minutes ago</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Your Tesla Inc. report is ready to view.</div>
+                  <div class="notification-item__time">1 hour ago</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Weekly market summary is available.</div>
+                  <div class="notification-item__time">Yesterday</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dropdown" data-dropdown>
+            <button class="user-trigger" data-dropdown-trigger aria-label="Account menu" aria-expanded="false" aria-haspopup="true">
+              <span class="user-avatar">AS</span>
+              <span class="user-trigger__name">Aditi Sharma</span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="dropdown__panel user-menu" role="menu">
+              <div class="user-menu__identity">
+                <span class="user-avatar">AS</span>
+                <div>
+                  <div class="user-menu__identity-name">Aditi Sharma</div>
+                  <div class="user-menu__identity-email">aditi.sharma@investiq.com</div>
+                </div>
+              </div>
+              <a href="profile.html" class="dropdown-link">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Profile
+              </a>
+              <a href="settings.html" class="dropdown-link">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="index.html" class="dropdown-link dropdown-link--danger">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-body dashboard-body--single">
+        <main class="dashboard-main">
+
+          <section class="welcome">
+            <div>
+              <h1 class="welcome__title">Settings</h1>
+              <p class="welcome__subtitle">Manage your account, security, notifications, and AI analysis preferences.</p>
+            </div>
+          </section>
+
+          <form id="settingsForm" novalidate>
+
+            <!-- ==========================================================
+                 ACCOUNT SETTINGS
+                 ========================================================== -->
+            <section class="panel settings-section" aria-label="Account settings">
+              <div class="panel__head">
+                <h2 class="panel__title">Account Settings</h2>
+              </div>
+              <div class="settings-section__grid">
+                <div class="form-group">
+                  <label for="settingsEmail">Email Address</label>
+                  <div class="input-wrap">
+                    <input class="form-input" type="email" id="settingsEmail" name="email" value="" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="settingsUsername">Username <span class="badge badge--medium" style="font-size:0.7rem;">Local only</span></label>
+                  <div class="input-wrap">
+                    <input class="form-input" type="text" id="settingsUsername" name="username" value="" data-no-persist />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="settingsPlan">Subscription Plan</label>
+                  <div class="input-wrap">
+                    <input class="form-input" type="text" id="settingsPlan" name="plan" value="Not available in this MVP" readonly />
+                  </div>
+                </div>
+              </div>
+              <div class="settings-section__danger">
+                <div>
+                  <h3 class="settings-section__danger-title">Deactivate Account</h3>
+                  <p class="settings-section__danger-desc">Full account deactivation isn't available yet. This signs you out of your current session.</p>
+                </div>
+                <button type="button" class="btn btn-ghost settings-section__danger-btn" data-action="deactivate-account">
+                  <span class="btn-label">Sign Out</span>
+                </button>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 SECURITY SETTINGS
+                 ========================================================== -->
+            <section class="panel settings-section" aria-label="Security settings">
+              <div class="panel__head">
+                <h2 class="panel__title">Security Settings</h2>
+              </div>
+              <div class="settings-section__grid">
+                <div class="form-group">
+                  <label for="currentPassword">Current Password</label>
+                  <div class="input-wrap">
+                    <input class="form-input" type="password" id="currentPassword" name="currentPassword" placeholder="••••••••" autocomplete="current-password" />
+                    <button type="button" class="input-icon-btn" data-toggle-password="currentPassword" aria-label="Show password">
+                      <svg class="icon-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                      <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.2A11 11 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.1 3.8M6.2 6.2A13.6 13.6 0 0 0 1 12s4 7 11 7c1.3 0 2.5-.2 3.6-.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="newPassword">New Password</label>
+                  <div class="input-wrap">
+                    <input class="form-input" type="password" id="newPassword" name="newPassword" placeholder="••••••••" autocomplete="new-password" />
+                    <button type="button" class="input-icon-btn" data-toggle-password="newPassword" aria-label="Show password">
+                      <svg class="icon-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                      <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.2A11 11 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.1 3.8M6.2 6.2A13.6 13.6 0 0 0 1 12s4 7 11 7c1.3 0 2.5-.2 3.6-.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="confirmNewPassword">Confirm New Password</label>
+                  <div class="input-wrap">
+                    <input class="form-input" type="password" id="confirmNewPassword" name="confirmNewPassword" placeholder="••••••••" autocomplete="new-password" />
+                    <button type="button" class="input-icon-btn" data-toggle-password="confirmNewPassword" aria-label="Show password">
+                      <svg class="icon-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                      <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.2A11 11 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.1 3.8M6.2 6.2A13.6 13.6 0 0 0 1 12s4 7 11 7c1.3 0 2.5-.2 3.6-.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-toggle-list">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="twoFactorAuth" name="twoFactorAuth" checked />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">Two-Factor Authentication</span>
+                    <span class="toggle-switch__desc">Require a verification code in addition to your password when logging in.</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="settings-section__danger">
+                <div>
+                  <h3 class="settings-section__danger-title">Active Sessions</h3>
+                  <p class="settings-section__danger-desc">Session tracking across devices isn't available yet.</p>
+                </div>
+                <button type="button" class="btn btn-ghost settings-section__danger-btn" data-action="logout-sessions" disabled title="Coming soon">
+                  <span class="btn-label">Log Out Other Sessions (Coming Soon)</span>
+                </button>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 NOTIFICATION PREFERENCES
+                 ========================================================== -->
+            <section class="panel settings-section" aria-label="Notification preferences">
+              <div class="panel__head">
+                <h2 class="panel__title">Notification Preferences</h2>
+              </div>
+              <div class="settings-toggle-list">
+                <label class="toggle-switch">
+                  <input type="checkbox" name="notifyEmail" checked />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">Email Notifications</span>
+                    <span class="toggle-switch__desc">Receive important account and research updates by email.</span>
+                  </span>
+                </label>
+                <label class="toggle-switch">
+                  <input type="checkbox" name="notifyPush" checked />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">Push Notifications</span>
+                    <span class="toggle-switch__desc">Get real-time alerts in your browser while InvestIQ is open.</span>
+                  </span>
+                </label>
+                <label class="toggle-switch">
+                  <input type="checkbox" name="notifyWeeklySummary" checked />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">Weekly Market Summary</span>
+                    <span class="toggle-switch__desc">A digest of market movement and portfolio-relevant news every Monday.</span>
+                  </span>
+                </label>
+                <label class="toggle-switch">
+                  <input type="checkbox" name="notifyReportReady" checked />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">Report Ready Alerts</span>
+                    <span class="toggle-switch__desc">Notify me when an AI-generated report finishes processing.</span>
+                  </span>
+                </label>
+                <label class="toggle-switch">
+                  <input type="checkbox" name="notifyRiskChange" />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">Risk Score Changes</span>
+                    <span class="toggle-switch__desc">Alert me when a saved company's risk score changes significantly.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 THEME
+                 ========================================================== -->
+            <section class="panel settings-section" aria-label="Theme preference">
+              <div class="panel__head">
+                <h2 class="panel__title">Theme</h2>
+              </div>
+              <div class="theme-options" role="radiogroup" aria-label="Theme">
+                <label class="theme-option">
+                  <input type="radio" name="theme" value="light" checked />
+                  <span class="theme-option__swatch theme-option__swatch--light" aria-hidden="true"></span>
+                  <span class="theme-option__label">Light</span>
+                </label>
+                <label class="theme-option theme-option--disabled">
+                  <input type="radio" name="theme" value="dark" disabled />
+                  <span class="theme-option__swatch theme-option__swatch--dark" aria-hidden="true"></span>
+                  <span class="theme-option__label">Dark <span class="badge badge--medium">Coming Soon</span></span>
+                </label>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 CURRENCY + LANGUAGE
+                 ========================================================== -->
+            <section class="panel settings-section" aria-label="Currency and language preferences">
+              <div class="panel__head">
+                <h2 class="panel__title">Currency &amp; Language</h2>
+              </div>
+              <div class="settings-section__grid">
+                <div class="form-group">
+                  <label for="settingsCurrency">Currency Preference</label>
+                  <div class="input-wrap">
+                    <select class="form-input" id="settingsCurrency" name="currency">
+                      <option value="USD">USD — US Dollar</option>
+                      <option value="INR" selected>INR — Indian Rupee</option>
+                      <option value="EUR">EUR — Euro</option>
+                      <option value="GBP">GBP — British Pound</option>
+                      <option value="JPY">JPY — Japanese Yen</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="settingsLanguage">Language Preference</label>
+                  <div class="input-wrap">
+                    <select class="form-input" id="settingsLanguage" name="language">
+                      <option value="en" selected>English</option>
+                      <option value="hi">Hindi</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 AI ANALYSIS PREFERENCES
+                 ========================================================== -->
+            <section class="panel settings-section" aria-label="AI analysis preferences">
+              <div class="panel__head">
+                <h2 class="panel__title">AI Analysis Preferences</h2>
+                <span class="eyebrow">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="currentColor"/></svg>
+                  Personalization
+                </span>
+              </div>
+              <div class="settings-section__grid">
+                <div class="form-group">
+                  <label for="riskTolerance">Default Risk Tolerance</label>
+                  <div class="input-wrap">
+                    <select class="form-input" id="riskTolerance" name="riskTolerance">
+                      <option value="conservative">Conservative</option>
+                      <option value="balanced" selected>Balanced</option>
+                      <option value="aggressive">Aggressive</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="investmentHorizon">Default Investment Horizon</label>
+                  <div class="input-wrap">
+                    <select class="form-input" id="investmentHorizon" name="investmentHorizon">
+                      <option value="short">Short Term (&lt; 1 Year)</option>
+                      <option value="medium" selected>Medium Term (1–3 Years)</option>
+                      <option value="long">Long Term (3+ Years)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="confidenceThreshold">Minimum AI Confidence Threshold</label>
+                  <div class="input-wrap">
+                    <select class="form-input" id="confidenceThreshold" name="confidenceThreshold">
+                      <option value="60">60%</option>
+                      <option value="70" selected>70%</option>
+                      <option value="80">80%</option>
+                      <option value="90">90%</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-toggle-list">
+                <label class="toggle-switch">
+                  <input type="checkbox" name="includeSmallCap" />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">Include Speculative Small-Cap Companies</span>
+                    <span class="toggle-switch__desc">Allow AI Analysis to surface higher-volatility small-cap opportunities.</span>
+                  </span>
+                </label>
+                <label class="toggle-switch">
+                  <input type="checkbox" name="confidenceAlerts" checked />
+                  <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                  <span class="toggle-switch__text">
+                    <span class="toggle-switch__title">AI Confidence Threshold Alerts</span>
+                    <span class="toggle-switch__desc">Notify me when a recommendation's confidence drops below your threshold.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 SAVE / RESET ACTIONS
+                 ========================================================== -->
+            <section class="settings-actions" aria-label="Settings actions">
+              <button type="submit" class="btn btn-primary" data-action="save-settings">
+                <span class="btn-label">Save Settings</span>
+              </button>
+              <button type="button" class="btn btn-ghost" data-action="reset-settings">
+                <span class="btn-label">Reset to Default</span>
+              </button>
+            </section>
+
+          </form>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/dashboard.js" defer></script>
+  <script src="js/settings.js" defer></script>
+</body>
+</html>

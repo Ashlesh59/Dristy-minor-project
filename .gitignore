@@ -1,0 +1,8 @@
+backend/.env
+backend/database/investiq.db
+backend/cookies.txt
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db

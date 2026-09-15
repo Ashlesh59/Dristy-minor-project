@@ -1,0 +1,456 @@
+/* ==========================================================================
+   AI-ANALYSIS.CSS
+   --------------------------------------------------------------------------
+   Styles for ai-analysis.html only. Builds on top of dashboard.css and
+   company-research.css (.panel, .panel__head, .badge, .stat-cards,
+   .ai-insight-row, .chart-card__figure, .gauge-arc, .gauge-value,
+   .research-actions, .company-overview__label/__logo/__ticker) --
+   nothing already defined there is repeated here.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------
+   1. HEADER
+   A soft glass surface: a translucent tinted background over a blur,
+   sitting on top of the page background, rather than a flat white
+   card -- gives this page's "hero" moment a slightly elevated,
+   premium-AI feel without breaking from the rest of the design system.
+   ------------------------------------------------------------------ */
+.ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(255, 255, 255, 0.6));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+}
+
+.ai-header__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.ai-header__name {
+  font-size: var(--fs-xl);
+  margin-bottom: 2px;
+}
+
+.ai-header__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.ai-header__meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-header__confidence {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-lg);
+  color: var(--color-primary);
+}
+
+/* ------------------------------------------------------------------
+   2. OVERALL AI SCORE
+   ------------------------------------------------------------------ */
+.ai-score {
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.04), transparent 40%);
+}
+
+.ai-score__main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ai-score__circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.ai-score__circle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ai-score__circle-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.ai-score__number {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-2xl);
+  color: var(--color-text-primary);
+}
+
+.ai-score__out-of {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.ai-score__summary {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 52ch;
+  margin-top: var(--space-2);
+}
+
+/* Reuses .ai-insight-grid / .ai-insight-row from company-research.css
+   for the four breakdown metrics -- no redefinition needed. */
+.ai-score__breakdown {
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------------
+   3. AI RECOMMENDATION
+   ------------------------------------------------------------------ */
+.ai-recommendation__verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.ai-recommendation__verdict-label {
+  font-size: var(--fs-base);
+  padding: var(--space-2) var(--space-5);
+}
+
+.ai-recommendation__confidence {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+}
+
+.ai-recommendation__explanation {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  max-width: 80ch;
+}
+
+/* ------------------------------------------------------------------
+   4. SWOT ANALYSIS
+   Four color-coded quadrants -- green (strength), red (weakness),
+   blue (opportunity), amber (threat) -- reusing the same semantic
+   colors as risk badges elsewhere in the product, so the mapping
+   feels familiar rather than arbitrary.
+   ------------------------------------------------------------------ */
+.swot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+}
+
+.swot-quadrant {
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid transparent;
+  background: var(--color-surface);
+  transition: transform var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.swot-quadrant:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.swot-quadrant--strength {
+  border-left-color: var(--color-success);
+  background: linear-gradient(180deg, var(--color-success-bg) 0%, var(--color-surface) 22%);
+}
+
+.swot-quadrant--weakness {
+  border-left-color: var(--color-danger);
+  background: linear-gradient(180deg, var(--color-danger-bg) 0%, var(--color-surface) 22%);
+}
+
+.swot-quadrant--opportunity {
+  border-left-color: var(--color-primary);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.08) 0%, var(--color-surface) 22%);
+}
+
+.swot-quadrant--threat {
+  border-left-color: var(--color-warning);
+  background: linear-gradient(180deg, var(--color-warning-bg) 0%, var(--color-surface) 22%);
+}
+
+.swot-quadrant__title {
+  font-size: var(--fs-base);
+  margin-bottom: var(--space-3);
+}
+
+.swot-quadrant__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.swot-quadrant__list li {
+  position: relative;
+  padding-left: var(--space-4);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.swot-quadrant__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+/* ------------------------------------------------------------------
+   5. MARKET SENTIMENT
+   ------------------------------------------------------------------ */
+.market-sentiment__body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+}
+
+.market-sentiment__gauge {
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+
+.market-sentiment__breakdown {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ------------------------------------------------------------------
+   6. AI PROCESSING TIMELINE
+   A vertical connector line runs behind the markers via the ::before
+   pseudo-element on the list; each completed step's marker fills
+   solid, echoing the same "confirmed" visual language as badges.
+   ------------------------------------------------------------------ */
+.ai-timeline__list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-left: var(--space-2);
+}
+
+.ai-timeline__list::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.ai-timeline__step {
+  position: relative;
+  display: flex;
+  gap: var(--space-4);
+  padding-left: var(--space-8);
+}
+
+.ai-timeline__marker {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  transition: background-color var(--duration-base) var(--ease-standard),
+              border-color var(--duration-base) var(--ease-standard);
+}
+
+.ai-timeline__step.is-complete .ai-timeline__marker {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.ai-timeline__step.is-complete .ai-timeline__marker::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: translate(-50%, -65%) rotate(-45deg);
+}
+
+.ai-timeline__title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.ai-timeline__meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------------------------
+   7. FUTURE PREDICTION
+   ------------------------------------------------------------------ */
+.prediction-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.prediction-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: transform var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.prediction-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.prediction-card__value {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-2xl);
+}
+
+.prediction-card__value.positive {
+  color: var(--color-success);
+}
+
+.prediction-card__value.negative {
+  color: var(--color-danger);
+}
+
+.prediction-card__desc {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* Laptop */
+@media (max-width: 1280px) {
+  .prediction-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .ai-score__main {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .ai-score__breakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .swot-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .market-sentiment__body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .prediction-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .ai-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ai-header__meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ai-header__meta .btn {
+    width: 100%;
+    order: 3;
+  }
+
+  .ai-score__circle {
+    width: 96px;
+    height: 96px;
+  }
+
+  .ai-timeline__list::before {
+    left: 14px;
+  }
+
+  .prediction-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ai-header__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .ai-recommendation__verdict {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .market-sentiment__gauge {
+    width: 110px;
+    height: 110px;
+  }
+}

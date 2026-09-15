@@ -1,0 +1,466 @@
+/* ==========================================================================
+   HELP.CSS
+   --------------------------------------------------------------------------
+   Styles for help.html only. Reuses .panel, .panel__head/.panel__title,
+   .form-group/.form-input/.input-wrap, .btn/.btn-primary/.btn-ghost/
+   .btn-block, .badge, .alert/.alert-success/.alert-error, and
+   .profile-form__textarea as-is -- everything below is new markup
+   specific to this page: the help search bar, FAQ accordion, support
+   cards, ticket form, documentation grid, shortcuts table, and the
+   feedback star rating.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------
+   HELP SEARCH BAR
+   ------------------------------------------------------------------ */
+.help-search__form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.help-search__field {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.help-search__field svg {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.help-search__field input {
+  width: 100%;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-9);
+  font-size: var(--fs-base);
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.help-search__field input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.help-search__field input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.help-search__submit {
+  flex-shrink: 0;
+  padding: var(--space-4) var(--space-7);
+}
+
+/* ------------------------------------------------------------------
+   FAQ ACCORDION
+   Built on native <details>/<summary> for expand/collapse behavior
+   with zero JavaScript required -- the marker is replaced with a
+   custom chevron that rotates via the [open] attribute selector.
+   ------------------------------------------------------------------ */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.faq-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              background-color var(--duration-fast) var(--ease-standard);
+}
+
+.faq-item:hover {
+  border-color: var(--color-primary);
+}
+
+.faq-item[open] {
+  background: var(--color-surface-tint);
+  border-color: var(--color-primary);
+}
+
+.faq-item__question {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+}
+
+.faq-item__question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item__question::after {
+  content: '';
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: rotate(45deg);
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+
+.faq-item[open] .faq-item__question::after {
+  transform: rotate(-135deg);
+  border-color: var(--color-primary);
+}
+
+.faq-item__answer {
+  margin-top: var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* ------------------------------------------------------------------
+   SUPPORT GRID: Contact / Live Chat / System Status
+   ------------------------------------------------------------------ */
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.support-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: transform var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.support-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.support-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-tint);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.support-card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.support-card__title {
+  font-size: var(--fs-lg);
+}
+
+.support-card__desc {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.support-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--fw-medium);
+}
+
+.support-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-success);
+  margin-bottom: var(--space-1);
+}
+
+.support-card__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+  display: inline-block;
+}
+
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ------------------------------------------------------------------
+   RAISE A SUPPORT TICKET
+   ------------------------------------------------------------------ */
+.ticket-form__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.ticket-form .alert {
+  margin-top: var(--space-2);
+}
+
+/* ------------------------------------------------------------------
+   DOCUMENTATION & USER GUIDES
+   ------------------------------------------------------------------ */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+}
+
+.doc-card {
+  display: block;
+  transition: transform var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard),
+              border-color var(--duration-base) var(--ease-standard);
+}
+
+.doc-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
+}
+
+.doc-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-tint);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.doc-card__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.doc-card__title {
+  font-size: var(--fs-base);
+  margin-bottom: var(--space-2);
+}
+
+.doc-card__desc {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------
+   KEYBOARD SHORTCUTS TABLE
+   ------------------------------------------------------------------ */
+.shortcuts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.shortcuts-table th {
+  text-align: left;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.shortcuts-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.shortcuts-table tr:last-child td {
+  border-bottom: none;
+}
+
+kbd {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  background: var(--color-surface-tint);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  box-shadow: 0 1px 0 var(--color-border);
+}
+
+/* ------------------------------------------------------------------
+   FEEDBACK FORM
+   ------------------------------------------------------------------ */
+.feedback-form__rating {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.feedback-form__star {
+  position: relative;
+  cursor: pointer;
+}
+
+.feedback-form__star input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.feedback-form__star span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--color-border);
+  transition: color var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+
+.feedback-form__star:hover span,
+.feedback-form__star input:checked ~ span,
+.feedback-form__star:has(~ .feedback-form__star input:checked) span {
+  color: var(--color-warning);
+}
+
+.feedback-form__star input:focus-visible ~ span {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Fill every star up to and including the checked one (or hovered
+   one) using the general sibling combinator, so the rating reads as
+   a continuous row of filled stars rather than a single lit star. */
+.feedback-form__rating:hover .feedback-form__star span {
+  color: var(--color-border);
+}
+
+.feedback-form__star:hover ~ .feedback-form__star span {
+  color: var(--color-border);
+}
+
+.feedback-form__rating .feedback-form__star:hover span,
+.feedback-form__rating .feedback-form__star:hover ~ .feedback-form__star span {
+  color: var(--color-border);
+}
+
+/* ------------------------------------------------------------------
+   BACK TO DASHBOARD
+   ------------------------------------------------------------------ */
+.help-footer-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-2);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1280px) {
+  .support-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .doc-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .ticket-form__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .support-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .help-search__form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .help-search__submit {
+    width: 100%;
+  }
+  .ticket-form__grid {
+    grid-template-columns: 1fr;
+  }
+  .doc-grid {
+    grid-template-columns: 1fr;
+  }
+  .shortcuts-table,
+  .shortcuts-table tbody,
+  .shortcuts-table tr,
+  .shortcuts-table td {
+    display: block;
+  }
+  .shortcuts-table thead {
+    display: none;
+  }
+  .shortcuts-table tr {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .shortcuts-table td {
+    border-bottom: none;
+    padding: var(--space-1) 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .feedback-form__star span {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+}

@@ -1,0 +1,205 @@
+/* ==========================================================================
+   PROFILE.CSS
+   --------------------------------------------------------------------------
+   Styles for profile.html only. Reuses .panel, .form-group, .form-input,
+   .input-wrap (from auth.css), and .btn/.btn-primary/.btn-ghost as-is --
+   everything below is new markup specific to this page: the avatar +
+   identity header and the profile form grid, including its read-only
+   vs. editing visual states.
+   ========================================================================== */
+
+.profile-panel {
+  max-width: 880px;
+}
+
+/* ------------------------------------------------------------------
+   PROFILE HEADER: avatar + name/role + Edit Profile button
+   ------------------------------------------------------------------ */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding-bottom: var(--space-6);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.profile-avatar {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+}
+
+.profile-avatar__initials {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-2xl);
+}
+
+.profile-avatar__edit {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 2px solid var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+
+.profile-avatar__edit svg {
+  width: 14px;
+  height: 14px;
+}
+
+.profile-avatar__edit:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+  transform: scale(1.06);
+}
+
+.profile-header__identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-header__name {
+  font-size: var(--fs-xl);
+  margin-bottom: 2px;
+}
+
+.profile-header__role {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+.profile-header__edit-btn {
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------
+   PROFILE FORM
+   ------------------------------------------------------------------ */
+.profile-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-5);
+}
+
+.profile-form__bio {
+  margin-bottom: var(--space-2);
+}
+
+.profile-form__textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+  font-family: var(--font-body);
+}
+
+/* Read-only / disabled fields (default state, before "Edit Profile" is
+   clicked): flat, non-interactive look so it's visually obvious these
+   can't be typed into yet. */
+.form-input[readonly],
+.form-input:disabled {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+  cursor: default;
+}
+
+.form-input[readonly]:focus,
+.form-input:disabled:focus {
+  box-shadow: none;
+  border-color: var(--color-border);
+}
+
+/* Editing state, toggled by JS adding .is-editing to the form once
+   "Edit Profile" is clicked and fields become writable again. */
+.profile-form.is-editing .form-input:not([readonly]):not(:disabled) {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.profile-form.is-editing .form-input:not([readonly]):not(:disabled):focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  padding-right: var(--space-8);
+}
+
+/* ------------------------------------------------------------------
+   FORM ACTIONS
+   Hidden by default (view mode); revealed by JS alongside .is-editing
+   once "Edit Profile" is clicked.
+   ------------------------------------------------------------------ */
+.profile-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 860px) {
+  .profile-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-header {
+    flex-wrap: wrap;
+  }
+
+  .profile-header__edit-btn {
+    width: 100%;
+    justify-content: center;
+    order: 3;
+  }
+}
+
+@media (max-width: 560px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .profile-form__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .profile-form__actions .btn {
+    width: 100%;
+  }
+}

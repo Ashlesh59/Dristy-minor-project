@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — InvestIQ</title>
+    <meta
+      name="description"
+      content="Your AI-powered corporate investment research dashboard."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+  </head>
+  <body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <div class="dashboard-shell">
+      <!-- ==========================================================
+         SIDEBAR
+         ========================================================== -->
+      <aside class="sidebar" id="sidebar">
+        <a href="index.html" class="sidebar__logo">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 28 28"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <rect
+              x="3"
+              y="16"
+              width="4"
+              height="9"
+              rx="1"
+              fill="currentColor"
+            />
+            <rect
+              x="12"
+              y="10"
+              width="4"
+              height="15"
+              rx="1"
+              fill="currentColor"
+            />
+            <rect
+              x="21"
+              y="3"
+              width="4"
+              height="22"
+              rx="1"
+              fill="currentColor"
+            />
+          </svg>
+          <span class="sidebar__logo-text">InvestIQ</span>
+        </a>
+
+        <nav class="sidebar__group">
+          <span class="sidebar__group-title">Workspace</span>
+          <a
+            href="dashboard.html"
+            class="sidebar__link is-active"
+            aria-current="page"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="3"
+                y="3"
+                width="7"
+                height="9"
+                rx="1.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <rect
+                x="14"
+                y="3"
+                width="7"
+                height="5"
+                rx="1.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <rect
+                x="14"
+                y="12"
+                width="7"
+                height="9"
+                rx="1.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <rect
+                x="3"
+                y="16"
+                width="7"
+                height="5"
+                rx="1.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+            </svg>
+            <span>Dashboard</span>
+          </a>
+          <a href="company-research.html" class="sidebar__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle
+                cx="11"
+                cy="11"
+                r="7"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="m20 20-3.5-3.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>Company Research</span>
+          </a>
+          <a href="ai-analysis.html" class="sidebar__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+              <path
+                d="m9 12 2 2 4-4"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>AI Analysis</span>
+          </a>
+          <a href="investment-report.html" class="sidebar__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M7 3h7l5 5v13H7V3Z"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M14 3v5h5M9 13h6M9 17h6"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>Reports</span>
+          </a>
+          <a href="saved-reports.html" class="sidebar__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M6 3h12v18l-6-4-6 4V3Z"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>Saved Reports</span>
+          </a>
+        </nav>
+
+        <div class="sidebar__spacer"></div>
+
+        <nav class="sidebar__group sidebar__footer">
+          <span class="sidebar__group-title">Account</span>
+          <a href="profile.html" class="sidebar__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle
+                cx="12"
+                cy="8"
+                r="4"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>Profile</span>
+          </a>
+          <a href="settings.html" class="sidebar__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>Settings</span>
+          </a>
+          <a href="help.html" class="sidebar__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 1.7-2.4 3.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+              <circle cx="12" cy="16.5" r="0.9" fill="currentColor" />
+            </svg>
+            <span>Help</span>
+          </a>
+          <a href="index.html" class="sidebar__link sidebar__link--logout">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M16 17l5-5-5-5M21 12H9"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- ==========================================================
+         CONTENT COLUMN
+         ========================================================== -->
+      <div class="dashboard-content">
+        <!-- TOPBAR -->
+        <header class="topbar">
+          <button
+            class="topbar__toggle"
+            id="sidebarToggle"
+            aria-label="Toggle sidebar"
+            aria-expanded="false"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              width="20"
+              height="20"
+            >
+              <path
+                d="M4 6h16M4 12h16M4 18h16"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+
+          <div class="topbar__search">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle
+                cx="11"
+                cy="11"
+                r="7"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="m20 20-3.5-3.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+            <input
+              type="search"
+              placeholder="Search companies, reports, tickers..."
+              aria-label="Search"
+            />
+          </div>
+
+          <div class="topbar__spacer"></div>
+
+          <span class="topbar__date" id="topbarDate"></span>
+
+          <div class="topbar__actions">
+            <div class="dropdown" data-dropdown>
+              <button
+                class="topbar__icon-btn"
+                data-dropdown-trigger
+                aria-label="Notifications"
+                aria-expanded="false"
+                aria-haspopup="true"
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M6 8a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10 20a2 2 0 0 0 4 0"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <span class="topbar__badge" aria-hidden="true"></span>
+              </button>
+              <div class="dropdown__panel" role="menu">
+                <div class="dropdown__header">
+                  Notifications
+                  <a href="#">Mark all read</a>
+                </div>
+                <div class="notification-item">
+                  <span class="notification-item__dot"></span>
+                  <div>
+                    <div class="notification-item__title">
+                      Risk score updated for NVIDIA Corp.
+                    </div>
+                    <div class="notification-item__time">12 minutes ago</div>
+                  </div>
+                </div>
+                <div class="notification-item">
+                  <span class="notification-item__dot"></span>
+                  <div>
+                    <div class="notification-item__title">
+                      Your Tesla Inc. report is ready to view.
+                    </div>
+                    <div class="notification-item__time">1 hour ago</div>
+                  </div>
+                </div>
+                <div class="notification-item">
+                  <span class="notification-item__dot"></span>
+                  <div>
+                    <div class="notification-item__title">
+                      Weekly market summary is available.
+                    </div>
+                    <div class="notification-item__time">Yesterday</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dropdown" data-dropdown>
+              <button
+                class="user-trigger"
+                data-dropdown-trigger
+                aria-label="Account menu"
+                aria-expanded="false"
+                aria-haspopup="true"
+              >
+                <span class="user-avatar">AS</span>
+                <span class="user-trigger__name">Aditi Sharma</span>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="m6 9 6 6 6-6"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <div class="dropdown__panel user-menu" role="menu">
+                <div class="user-menu__identity">
+                  <span class="user-avatar">AS</span>
+                  <div>
+                    <div class="user-menu__identity-name">Aditi Sharma</div>
+                    <div class="user-menu__identity-email">
+                      aditi.sharma@investiq.com
+                    </div>
+                  </div>
+                </div>
+                <a href="#" class="dropdown-link">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle
+                      cx="12"
+                      cy="8"
+                      r="4"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+                    <path
+                      d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Profile
+                </a>
+                <a href="#" class="dropdown-link">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="3"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+                    <path
+                      d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Settings
+                </a>
+                <div class="dropdown-divider"></div>
+                <a
+                  href="index.html"
+                  class="dropdown-link dropdown-link--danger"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M16 17l5-5-5-5M21 12H9"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Logout
+                </a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- BODY -->
+        <div class="dashboard-body">
+          <main class="dashboard-main">
+            <!-- WELCOME -->
+            <section class="welcome">
+              <div>
+                <h1 class="welcome__title" id="dashboardWelcomeTitle">Welcome back 👋</h1>
+                <p class="welcome__subtitle" id="dashboardWelcomeSubtitle">
+                  Here's a summary of your research activity.
+                </p>
+              </div>
+            </section>
+
+            <!-- QUICK ACTIONS -->
+            <section class="quick-actions" aria-label="Quick actions">
+              <button type="button" class="quick-action" data-action="analyse">
+                <span class="quick-action__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle
+                      cx="11"
+                      cy="11"
+                      r="7"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+                    <path
+                      d="m20 20-3.5-3.5"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+                <span class="quick-action__label">Analyse Company</span>
+              </button>
+              <button type="button" class="quick-action" data-action="generate-report">
+                <span class="quick-action__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M7 3h7l5 5v13H7V3Z"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M14 3v5h5M9 13h6M9 17h6"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+                <span class="quick-action__label">Generate Report</span>
+              </button>
+              <button type="button" class="quick-action" data-action="market-trends">
+                <span class="quick-action__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M3 17 9 11l4 4 8-8"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M15 5h6v6"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span class="quick-action__label">View Market Trends</span>
+              </button>
+              <button type="button" class="quick-action" data-action="compare">
+                <span class="quick-action__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect
+                      x="3"
+                      y="4"
+                      width="8"
+                      height="16"
+                      rx="1"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+                    <rect
+                      x="13"
+                      y="4"
+                      width="8"
+                      height="16"
+                      rx="1"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+                  </svg>
+                </span>
+                <span class="quick-action__label">Compare Companies</span>
+              </button>
+            </section>
+
+            <!-- STAT CARDS -->
+            <section class="stat-cards" aria-label="Key statistics" id="dashboardStats">
+              <div class="stat-card">
+                <div class="stat-card__top">
+                  <span class="stat-card__icon stat-card__icon--blue">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 21V9l6-4 6 4v12M9 21V13h6v8" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15 21v-7l6-3v10" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                  </span>
+                </div>
+                <div class="stat-card__value" id="statCompaniesAnalysed">0</div>
+                <div class="stat-card__label">Companies Analysed</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-card__top">
+                  <span class="stat-card__icon stat-card__icon--blue">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </span>
+                </div>
+                <div class="stat-card__value" id="statReportsGenerated">0</div>
+                <div class="stat-card__label">Reports Generated</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-card__top">
+                  <span class="stat-card__icon stat-card__icon--green">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                </div>
+                <div class="stat-card__value" id="statAverageAiScore">--</div>
+                <div class="stat-card__label">Average AI Score</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-card__top">
+                  <span class="stat-card__icon stat-card__icon--amber">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 17 9 11l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 5h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </span>
+                </div>
+                <div class="stat-card__value" id="statResearchThisMonth">0</div>
+                <div class="stat-card__label">Research This Month</div>
+              </div>
+            </section>
+
+            <!-- CHARTS -->
+            <section class="panel" aria-label="Analytics" id="dashboardChartsSection">
+              <div class="panel__head">
+                <h2 class="panel__title">AI Score Trend</h2>
+              </div>
+              <p id="chartsEmptyState">Not enough completed research yet to show a trend. Complete a few AI analyses to see your average score over time.</p>
+              <div class="stat-cards" id="scoreDistribution" style="margin-top:1rem;"></div>
+            </section>
+
+
+            <!-- RECENT REPORTS TABLE -->
+            <section class="panel" aria-label="Recent reports">
+              <div class="panel__head">
+                <h2 class="panel__title">Recent Research</h2>
+                <a href="saved-reports.html" class="panel__link">View all</a>
+              </div>
+              <div class="table-scroll">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Company</th>
+                      <th>Ticker</th>
+                      <th>AI Score</th>
+                      <th>Recommendation</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentResearchBody"></tbody>
+                </table>
+              </div>
+              <p id="recentResearchEmpty" hidden>No research yet. <a href="company-research.html">Start your first company research</a>.</p>
+            </section>
+
+            <!-- RECENT SEARCHES -->
+            <section class="panel" aria-label="Recent searches">
+              <div class="panel__head">
+                <h2 class="panel__title">Recent Searches</h2>
+              </div>
+              <div class="search-chips" id="recentSearchChips"></div>
+              <p id="recentSearchEmpty" hidden>No recent searches yet.</p>
+            </section>
+          </main>
+
+          <!-- ==========================================================
+             RIGHT INSIGHTS PANEL
+             ========================================================== -->
+          <aside class="insights-panel" aria-label="Insights">
+            <div class="panel" data-skeleton>
+              <div class="panel__head">
+                <h2 class="panel__title">Market News</h2>
+                <a href="#" class="panel__link">More</a>
+              </div>
+              <div class="news-item">
+                <div class="news-item__title">
+                  RBI holds repo rate steady, markets react positively.
+                </div>
+                <div class="news-item__meta"><i></i> Reuters · 2h ago</div>
+              </div>
+              <div class="news-item">
+                <div class="news-item__title">
+                  Semiconductor stocks slide on export policy concerns.
+                </div>
+                <div class="news-item__meta">
+                  <i class="is-negative"></i> Bloomberg · 5h ago
+                </div>
+              </div>
+              <div class="news-item">
+                <div class="news-item__title">
+                  IT sector earnings season begins next week.
+                </div>
+                <div class="news-item__meta">
+                  <i class="is-neutral"></i> Economic Times · 1d ago
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head">
+                <h2 class="panel__title">AI Insights</h2>
+              </div>
+              <div class="insight-list">
+                <div class="insight-item">
+                  <span class="insight-item__icon">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="insight-item__title">
+                      NVIDIA's risk score improved 4 points this week.
+                    </div>
+                    <div class="insight-item__meta">
+                      Driven by stronger cash flow signals
+                    </div>
+                  </div>
+                </div>
+                <div class="insight-item">
+                  <span class="insight-item__icon">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M3 17 9 11l4 4 8-8"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="insight-item__title">
+                      Tech sector momentum trending upward.
+                    </div>
+                    <div class="insight-item__meta">
+                      3 of your tracked companies affected
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head">
+                <h2 class="panel__title">Upcoming Reports</h2>
+              </div>
+              <div class="insight-list">
+                <div class="insight-item">
+                  <span class="insight-item__icon">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect
+                        x="3"
+                        y="4"
+                        width="18"
+                        height="17"
+                        rx="2"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                      />
+                      <path
+                        d="M3 9h18M8 3v3M16 3v3"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="insight-item__title">
+                      Reliance Industries — quarterly review
+                    </div>
+                    <div class="insight-item__meta">
+                      Scheduled for 22 Jul 2026
+                    </div>
+                  </div>
+                </div>
+                <div class="insight-item">
+                  <span class="insight-item__icon">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect
+                        x="3"
+                        y="4"
+                        width="18"
+                        height="17"
+                        rx="2"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                      />
+                      <path
+                        d="M3 9h18M8 3v3M16 3v3"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="insight-item__title">
+                      TCS Ltd. — risk reassessment
+                    </div>
+                    <div class="insight-item__meta">
+                      Scheduled for 25 Jul 2026
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head">
+                <h2 class="panel__title">Recommended</h2>
+              </div>
+              <div class="recommend-item">
+                <div>
+                  <div class="recommend-item__name">Microsoft Corp.</div>
+                  <div class="recommend-item__reason">
+                    Consistent cloud revenue growth
+                  </div>
+                </div>
+                <span class="badge badge--completed">Buy</span>
+              </div>
+              <div class="recommend-item">
+                <div>
+                  <div class="recommend-item__name">TCS Ltd.</div>
+                  <div class="recommend-item__reason">
+                    Stable margins, low volatility
+                  </div>
+                </div>
+                <span class="badge badge--low">Hold</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/config.js" defer></script>
+    <script src="js/dashboard.js" defer></script>
+  </body>
+</html>

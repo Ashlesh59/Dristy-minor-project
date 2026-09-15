@@ -1,0 +1,313 @@
+/* ==========================================================================
+   INVESTMENT-REPORT.CSS
+   --------------------------------------------------------------------------
+   Styles for investment-report.html only. Builds on dashboard.css,
+   company-research.css, and ai-analysis.css -- .panel, .badge,
+   .stat-cards/.financial-summary, .company-overview__*, .swot*,
+   .ai-insight-row, .ai-recommendation*, .prediction-grid/.prediction-card,
+   .chart-card__figure, .gauge-arc/.gauge-value, .research-actions, and
+   .eyebrow are all reused as-is. Everything below is new markup specific
+   to the report layout: the header, executive summary, AI insights
+   columns, and risk analysis meter + breakdown.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------
+   1. REPORT HEADER
+   ------------------------------------------------------------------ */
+.report-header__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+.report-header__ai-badge {
+  flex-shrink: 0;
+}
+
+.report-header__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.report-header__recommendation {
+  font-size: var(--fs-sm);
+  padding: var(--space-1) var(--space-4);
+}
+
+/* ------------------------------------------------------------------
+   2. EXECUTIVE SUMMARY
+   ------------------------------------------------------------------ */
+.executive-summary__text {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.75;
+  max-width: 90ch;
+  margin-bottom: var(--space-4);
+}
+
+.executive-summary__text:last-of-type {
+  margin-bottom: var(--space-6);
+}
+
+.executive-summary__text strong {
+  color: var(--color-text-primary);
+}
+
+.executive-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ------------------------------------------------------------------
+   3. FINANCIAL HIGHLIGHTS
+   Eight cards instead of the dashboard's five / company-research's
+   six -- override the shared .financial-summary column count for
+   this page only.
+   ------------------------------------------------------------------ */
+.report-financials {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ------------------------------------------------------------------
+   4. AI INSIGHTS
+   Two color-coded columns (positive / negative) sitting side by side,
+   with a full-width outlook paragraph beneath -- same semantic color
+   language as badges and SWOT quadrants elsewhere in the product.
+   ------------------------------------------------------------------ */
+.report-insights__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.report-insights__title {
+  font-size: var(--fs-base);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.report-insights__title::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.report-insights__title--positive::before {
+  background: var(--color-success);
+}
+
+.report-insights__title--negative::before {
+  background: var(--color-danger);
+}
+
+.report-insights__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.report-insights__list li {
+  position: relative;
+  padding-left: var(--space-4);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.report-insights__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+
+.report-insights__outlook .report-insights__title {
+  margin-bottom: var(--space-3);
+}
+
+.report-insights__outlook .report-insights__title::before {
+  background: var(--color-primary);
+}
+
+/* ------------------------------------------------------------------
+   5. RISK ANALYSIS
+   Gauge on the left, badge rows on the right -- the same body layout
+   pattern as .market-sentiment__body in ai-analysis.css, reused here
+   under a report-specific class since this page doesn't load that
+   component wholesale.
+   ------------------------------------------------------------------ */
+.risk-analysis__body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+}
+
+.risk-analysis__meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.risk-analysis__meter .chart-card__figure {
+  width: 140px;
+  height: 140px;
+}
+
+.risk-analysis__breakdown {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ------------------------------------------------------------------
+   6. FUTURE FORECAST -- extra rows inside each prediction card
+   ------------------------------------------------------------------ */
+.prediction-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.prediction-card__row:first-of-type {
+  margin-top: var(--space-2);
+}
+
+/* ------------------------------------------------------------------
+   7. FINAL RECOMMENDATION
+   Slightly more emphasis than the reused .ai-recommendation base --
+   a soft tinted background so it reads as the report's closing word.
+   ------------------------------------------------------------------ */
+.final-recommendation {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), transparent 60%);
+  border: 1px solid var(--color-border);
+}
+
+/* ------------------------------------------------------------------
+   8. REPORT ACTIONS
+   Reuses .research-actions layout; the extra class only exists as a
+   styling hook for this page without affecting Company Research /
+   AI Analysis, which also use .research-actions.
+   ------------------------------------------------------------------ */
+.report-actions {
+  padding-top: var(--space-2);
+}
+
+/* ==========================================================================
+   PRINT STYLES
+   Triggered by the "Print Report" button (window.print()). Strips away
+   the app chrome so what prints is the report itself, not the sidebar,
+   topbar, or action buttons.
+   ========================================================================== */
+@media print {
+  .sidebar,
+  .sidebar-backdrop,
+  .topbar,
+  .report-actions {
+    display: none !important;
+  }
+
+  .dashboard-shell {
+    display: block;
+  }
+
+  .dashboard-body {
+    padding: 0;
+  }
+
+  .panel {
+    box-shadow: none;
+    border: 1px solid #d0d5dd;
+    break-inside: avoid;
+  }
+
+  body {
+    background: #ffffff;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1280px) {
+  .report-financials {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .executive-summary__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .report-insights__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  .risk-analysis__body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .report-financials {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .report-header__top {
+    flex-direction: column;
+  }
+
+  .report-header__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .executive-summary__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-financials {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .report-financials {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .risk-analysis__meter .chart-card__figure {
+    width: 110px;
+    height: 110px;
+  }
+}

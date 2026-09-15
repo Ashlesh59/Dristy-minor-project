@@ -1,0 +1,129 @@
+/* ==========================================================================
+   VARIABLES.CSS
+   --------------------------------------------------------------------------
+   This file holds every design "token" for InvestIQ: colors, fonts,
+   spacing, radii, shadows, and animation timings.
+
+   WHY THIS FILE EXISTS:
+   Instead of hardcoding a hex code or a pixel value in fifty different
+   places, we define it once here as a CSS Custom Property (a "variable").
+   Later, when we build the Dashboard, Reports page, or Company Analysis
+   page, every one of those files will reuse these SAME variables. This is
+   what makes the whole project "scalable" -- if the client ever asks to
+   change the brand blue, we change ONE line here instead of hunting
+   through thousands of lines of CSS.
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------
+     COLOR SYSTEM
+     Financial products live and die on trust, so every color here is
+     chosen for a psychological reason, not just because it looks nice.
+     ------------------------------------------------------------------ */
+
+  /* Brand blue: the "trust" color. Used for primary buttons, links,
+     active states, and the logo. Blue is the most trusted color in
+     finance (think Chase, PayPal, Visa, American Express). */
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #60a5fa;
+
+  /* Deep navy: our "authority" color. Used for the navbar background,
+     footer, and dark UI surfaces. Navy reads as serious and corporate
+     without the harshness of pure black. */
+  --color-navy: #0f172a;
+  --color-navy-soft: #1e293b;
+
+  /* Neutral surfaces */
+  --color-bg: #f8fafc;       /* page background - soft, not stark white */
+  --color-surface: #ffffff;  /* card background */
+  --color-surface-tint: #eef4ff; /* faint blue-tinted band, used to break
+                                     up light sections without going full
+                                     navy (keeps the navy "bookend" feel
+                                     reserved for hero-glow + footer only) */
+  --color-border: #e2e8f0;   /* hairline borders between elements */
+
+  /* Text colors */
+  --color-text-primary: #0f172a;   /* headings - near-black navy */
+  --color-text-secondary: #475569; /* body copy */
+  --color-text-muted: #94a3b8;     /* captions, timestamps, helper text */
+  --color-text-on-dark: #f1f5f9;   /* text placed on navy backgrounds */
+  --color-text-on-dark-muted: #94a3b8;
+
+  /* Signal colors -- these map directly to financial psychology.
+     Green = growth/gain, Red = risk/loss, Amber = caution/neutral. */
+  --color-success: #22c55e;
+  --color-success-bg: #dcfce7;
+  --color-danger: #ef4444;
+  --color-danger-bg: #fee2e2;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+
+  /* Gradients used sparingly for the hero "signature" panel only --
+     everywhere else stays flat and calm, so the one gradient we use
+     actually feels special instead of decorative noise. */
+  --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+
+  /* ------------------------------------------------------------------
+     TYPOGRAPHY
+     Poppins = display face (headlines only, used with restraint).
+     Inter   = body/UI face (paragraphs, buttons, nav, data tables) --
+     Inter has excellent legibility at small sizes and true tabular
+     figures, which matters a lot once we're rendering financial numbers.
+     ------------------------------------------------------------------ */
+  --font-display: 'Poppins', 'Inter', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --fs-xs: 0.75rem;    /* 12px - captions */
+  --fs-sm: 0.875rem;   /* 14px - helper text, nav links */
+  --fs-base: 1rem;     /* 16px - body copy */
+  --fs-lg: 1.125rem;   /* 18px - lead paragraphs */
+  --fs-xl: 1.5rem;     /* 24px - card titles */
+  --fs-2xl: 2rem;      /* 32px - section headings */
+  --fs-3xl: 2.75rem;   /* 44px - hero headline (desktop) */
+  --fs-4xl: 3.5rem;    /* 56px - reserved for extra-large displays */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ------------------------------------------------------------------
+     SPACING SYSTEM -- strict 8-point grid.
+     Every margin/padding in the project should be a multiple of 8px
+     (or occasionally 4px for tight spots). This is what makes a layout
+     feel "designed" rather than eyeballed.
+     ------------------------------------------------------------------ */
+  --space-1: 0.25rem;  /* 4px  */
+  --space-2: 0.5rem;   /* 8px  */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px */
+  --space-7: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px */
+  --space-9: 6rem;     /* 96px */
+  --space-10: 8rem;    /* 128px */
+
+  /* ------------------------------------------------------------------
+     RADIUS, SHADOW, MOTION
+     ------------------------------------------------------------------ */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --shadow-glow: 0 20px 60px rgba(37, 99, 235, 0.25);
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 500ms;
+
+  /* Max width for centered page content -- keeps lines of text and
+     layouts readable on large monitors instead of stretching edge to edge. */
+  --container-width: 1200px;
+}

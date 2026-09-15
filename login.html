@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In — InvestIQ</title>
+  <meta name="description" content="Log in to InvestIQ to access your AI-powered investment research dashboard." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/navbar.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+
+  <div class="auth-page">
+
+    <a href="index.html" class="auth-back">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+
+    <!-- ==========================================================
+         LEFT: BRAND PANEL (hidden below 960px, see auth.css)
+         ========================================================== -->
+    <aside class="auth-brand">
+      <a href="index.html" class="navbar__logo auth-brand__logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="3" y="16" width="4" height="9" rx="1" fill="currentColor"/>
+          <rect x="12" y="10" width="4" height="15" rx="1" fill="currentColor"/>
+          <rect x="21" y="3" width="4" height="22" rx="1" fill="currentColor"/>
+        </svg>
+        InvestIQ
+      </a>
+
+      <div class="auth-brand__content">
+        <h2 class="auth-brand__title">Smarter investment research starts here.</h2>
+        <p class="auth-brand__subtitle">Join analysts who cut research time by 85% with AI-powered financial insights.</p>
+        <ul class="auth-brand__features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Real-time company risk scoring
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Automated financial report generation
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Enterprise-grade data security
+          </li>
+        </ul>
+      </div>
+
+      <div class="auth-brand__quote">
+        <p>"InvestIQ cut our due-diligence time from days to hours."</p>
+        <span>— Portfolio Analyst, Fintech Corp</span>
+      </div>
+    </aside>
+
+    <!-- ==========================================================
+         RIGHT: FORM PANEL
+         ========================================================== -->
+    <main class="auth-panel">
+      <div class="auth-card">
+
+        <a href="index.html" class="navbar__logo auth-card__logo-mobile">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="3" y="16" width="4" height="9" rx="1" fill="currentColor"/>
+            <rect x="12" y="10" width="4" height="15" rx="1" fill="currentColor"/>
+            <rect x="21" y="3" width="4" height="22" rx="1" fill="currentColor"/>
+          </svg>
+          InvestIQ
+        </a>
+
+        <h1 class="auth-card__title">Welcome back</h1>
+        <p class="auth-card__subtitle">Log in to continue your research.</p>
+
+        <!-- Alert components: hidden until js/auth.js reveals one on submit -->
+        <div class="alert alert-success" role="status" aria-live="polite">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="alert__text"></span>
+        </div>
+        <div class="alert alert-error" role="alert" aria-live="assertive">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="alert__text"></span>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="loginEmail">Email address</label>
+            <div class="input-wrap">
+              <input class="form-input" type="email" id="loginEmail" name="email" placeholder="you@company.com" autocomplete="email" required />
+            </div>
+            <span class="field-error" role="alert"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <div class="input-wrap">
+              <input class="form-input" type="password" id="loginPassword" name="password" placeholder="••••••••" autocomplete="current-password" required />
+              <button type="button" class="input-icon-btn" data-toggle-password="loginPassword" aria-label="Show password">
+                <svg class="icon-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+                <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.2A11 11 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.1 3.8M6.2 6.2A13.6 13.6 0 0 0 1 12s4 7 11 7c1.3 0 2.5-.2 3.6-.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <span class="field-error" role="alert"></span>
+          </div>
+
+          <div class="form-checkbox-row">
+            <label class="checkbox">
+              <input type="checkbox" id="rememberMe" name="remember" />
+              Remember me
+            </label>
+            <a href="forget-password.html" class="auth-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            <span class="btn-label">Log In</span>
+          </button>
+        </form>
+
+        <div class="divider">or continue with</div>
+
+        <div class="social-buttons">
+          <button type="button" class="btn btn-ghost btn-social">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.47c-.28 1.5-1.13 2.77-2.4 3.62v3h3.88c2.27-2.09 3.55-5.17 3.55-8.65Z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.9l-3.88-3c-1.07.72-2.45 1.15-4.05 1.15-3.11 0-5.75-2.1-6.69-4.92H1.3v3.1C3.26 21.3 7.31 24 12 24Z"/><path fill="#FBBC05" d="M5.31 14.33A7.2 7.2 0 0 1 4.93 12c0-.81.14-1.6.38-2.33v-3.1H1.3A11.98 11.98 0 0 0 0 12c0 1.93.46 3.76 1.3 5.43l4.01-3.1Z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.3 6.57l4.01 3.1C6.25 6.85 8.89 4.75 12 4.75Z"/></svg>
+            Google
+          </button>
+          <button type="button" class="btn btn-ghost btn-social">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9" height="9" fill="#F25022"/><rect x="13" y="2" width="9" height="9" fill="#7FBA00"/><rect x="2" y="13" width="9" height="9" fill="#00A4EF"/><rect x="13" y="13" width="9" height="9" fill="#FFB900"/></svg>
+            Microsoft
+          </button>
+        </div>
+
+        <p class="auth-card__footer-link">Don't have an account? <a href="signup.html">Sign up free</a></p>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>

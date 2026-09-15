@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Help &amp; Support — InvestIQ</title>
+  <meta name="description" content="Find answers, contact support, raise a ticket, and learn how to get the most out of InvestIQ." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/company-research.css" />
+  <link rel="stylesheet" href="css/help.css" />
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="dashboard-shell">
+
+    <aside class="sidebar" id="sidebar">
+      <a href="index.html" class="sidebar__logo">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="3" y="16" width="4" height="9" rx="1" fill="currentColor"/>
+          <rect x="12" y="10" width="4" height="15" rx="1" fill="currentColor"/>
+          <rect x="21" y="3" width="4" height="22" rx="1" fill="currentColor"/>
+        </svg>
+        <span class="sidebar__logo-text">InvestIQ</span>
+      </a>
+
+      <nav class="sidebar__group">
+        <span class="sidebar__group-title">Workspace</span>
+        <a href="dashboard.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="company-research.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Company Research</span>
+        </a>
+        <a href="ai-analysis.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>AI Analysis</span>
+        </a>
+        <a href="investment-report.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Reports</span>
+        </a>
+        <a href="saved-reports.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>Saved Reports</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__spacer"></div>
+
+      <nav class="sidebar__group sidebar__footer">
+        <span class="sidebar__group-title">Account</span>
+        <a href="profile.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Profile</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>Settings</span>
+        </a>
+        <a href="help.html" class="sidebar__link is-active" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 1.7-2.4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="0.9" fill="currentColor"/></svg>
+          <span>Help</span>
+        </a>
+        <a href="index.html" class="sidebar__link sidebar__link--logout">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="dashboard-content">
+
+      <header class="topbar">
+        <button class="topbar__toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+
+        <div class="topbar__search">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="search" placeholder="Search companies, reports, tickers..." aria-label="Search" />
+        </div>
+
+        <div class="topbar__spacer"></div>
+
+        <span class="topbar__date" id="topbarDate"></span>
+
+        <div class="topbar__actions">
+          <div class="dropdown" data-dropdown>
+            <button class="topbar__icon-btn" data-dropdown-trigger aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <span class="topbar__badge" aria-hidden="true"></span>
+            </button>
+            <div class="dropdown__panel" role="menu">
+              <div class="dropdown__header">
+                Notifications
+                <a href="#">Mark all read</a>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Risk score updated for NVIDIA Corp.</div>
+                  <div class="notification-item__time">12 minutes ago</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Your Tesla Inc. report is ready to view.</div>
+                  <div class="notification-item__time">1 hour ago</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Weekly market summary is available.</div>
+                  <div class="notification-item__time">Yesterday</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dropdown" data-dropdown>
+            <button class="user-trigger" data-dropdown-trigger aria-label="Account menu" aria-expanded="false" aria-haspopup="true">
+              <span class="user-avatar">AS</span>
+              <span class="user-trigger__name">Aditi Sharma</span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="dropdown__panel user-menu" role="menu">
+              <div class="user-menu__identity">
+                <span class="user-avatar">AS</span>
+                <div>
+                  <div class="user-menu__identity-name">Aditi Sharma</div>
+                  <div class="user-menu__identity-email">aditi.sharma@investiq.com</div>
+                </div>
+              </div>
+              <a href="profile.html" class="dropdown-link">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Profile
+              </a>
+              <a href="settings.html" class="dropdown-link">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="index.html" class="dropdown-link dropdown-link--danger">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-body dashboard-body--single">
+        <main class="dashboard-main">
+
+          <section class="welcome">
+            <div>
+              <h1 class="welcome__title">Help &amp; Support</h1>
+              <p class="welcome__subtitle">Find answers, reach our team, or explore guides to get more out of InvestIQ.</p>
+            </div>
+          </section>
+
+          <!-- ==========================================================
+               SEARCH HELP BAR
+               ========================================================== -->
+          <section class="panel help-search" aria-label="Search help articles">
+            <form class="help-search__form" id="helpSearchForm">
+              <div class="help-search__field">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <input type="text" id="helpSearchInput" placeholder="Search help articles, FAQs, and guides..." aria-label="Search help" />
+              </div>
+              <button type="submit" class="btn btn-primary help-search__submit">
+                <span class="btn-label">Search</span>
+              </button>
+            </form>
+          </section>
+
+          <!-- ==========================================================
+               FAQ SECTION
+               ========================================================== -->
+          <section class="panel" aria-label="Frequently asked questions">
+            <div class="panel__head">
+              <h2 class="panel__title">Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-list" id="faqList">
+              <details class="faq-item">
+                <summary class="faq-item__question">How does InvestIQ generate its AI recommendations?</summary>
+                <p class="faq-item__answer">InvestIQ analyzes financial statements, market trends, and risk indicators using machine learning models trained on historical performance data, then combines these signals into a single confidence-scored recommendation.</p>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-item__question">How often is company data updated?</summary>
+                <p class="faq-item__answer">Financial data refreshes after each quarterly filing, while market trend and sentiment data updates continuously throughout each trading day.</p>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-item__question">Can I export a report to share with my team?</summary>
+                <p class="faq-item__answer">Yes. Every AI Analysis and Investment Report page includes Export and Download PDF options so you can share findings outside the platform.</p>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-item__question">What does the AI Confidence Score mean?</summary>
+                <p class="faq-item__answer">The confidence score reflects how strongly the underlying data supports a given recommendation. Higher scores indicate more consistent signals across financial, market, and sentiment factors.</p>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-item__question">How do I save a report for later?</summary>
+                <p class="faq-item__answer">Click "Save Research" on any Company Research or AI Analysis page. Saved reports appear under the Saved Reports section in your sidebar.</p>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-item__question">Is my account and research data secure?</summary>
+                <p class="faq-item__answer">Yes. InvestIQ uses enterprise-grade encryption in transit and at rest, and you can enable two-factor authentication from Settings → Security.</p>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-item__question">Can I change my default currency or language?</summary>
+                <p class="faq-item__answer">Yes. Go to Settings → Currency &amp; Language to update your preferences at any time.</p>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-item__question">How do I cancel or downgrade my subscription?</summary>
+                <p class="faq-item__answer">Visit Settings → Account Settings and use the account options there, or contact our support team below and we'll help you make the change.</p>
+              </details>
+            </div>
+          </section>
+
+          <!-- ==========================================================
+               CONTACT SUPPORT + LIVE CHAT
+               ========================================================== -->
+          <section class="support-grid" aria-label="Contact support">
+            <div class="panel support-card">
+              <div class="support-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18v13H3V6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m3 6 9 7 9-7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </div>
+              <h3 class="support-card__title">Contact Support</h3>
+              <p class="support-card__desc">Reach our support team directly by email or phone for account and billing questions.</p>
+              <ul class="support-card__list">
+                <li>support@investiq.com</li>
+                <li>+1 (800) 555-0148</li>
+                <li>Mon–Fri, 9 AM–6 PM IST</li>
+              </ul>
+            </div>
+
+            <div class="panel support-card">
+              <div class="support-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.8 8.4 8.6 8.6 0 0 1-3.3-.6L3 21l1.8-5.4A8.4 8.4 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </div>
+              <h3 class="support-card__title">Live Chat</h3>
+              <p class="support-card__desc">Chat with a member of our support team in real time for quick questions.</p>
+              <span class="support-card__status">
+                <i class="support-card__status-dot" aria-hidden="true"></i>
+                Agents online now
+              </span>
+              <button type="button" class="btn btn-primary btn-block" data-action="start-chat">
+                <span class="btn-label">Start Live Chat</span>
+              </button>
+            </div>
+
+            <div class="panel support-card">
+              <div class="support-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3 class="support-card__title">System Status</h3>
+              <p class="support-card__desc">Current operational status of InvestIQ's core services.</p>
+              <ul class="status-list">
+                <li class="status-item">
+                  <span>Platform &amp; Dashboard</span>
+                  <span class="badge badge--low">Operational</span>
+                </li>
+                <li class="status-item">
+                  <span>AI Analysis Engine</span>
+                  <span class="badge badge--low">Operational</span>
+                </li>
+                <li class="status-item">
+                  <span>Report Generation</span>
+                  <span class="badge badge--low">Operational</span>
+                </li>
+                <li class="status-item">
+                  <span>Market Data Feed</span>
+                  <span class="badge badge--medium">Degraded</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- ==========================================================
+               RAISE A SUPPORT TICKET
+               ========================================================== -->
+          <section class="panel" aria-label="Raise a support ticket">
+            <div class="panel__head">
+              <h2 class="panel__title">Raise a Support Ticket</h2>
+            </div>
+            <form class="ticket-form" id="ticketForm" novalidate>
+              <div class="ticket-form__grid">
+                <div class="form-group">
+                  <label for="ticketSubject">Subject</label>
+                  <div class="input-wrap">
+                    <input class="form-input" type="text" id="ticketSubject" name="subject" placeholder="Briefly describe your issue" required />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="ticketCategory">Category</label>
+                  <div class="input-wrap">
+                    <select class="form-input" id="ticketCategory" name="category">
+                      <option value="account">Account &amp; Billing</option>
+                      <option value="reports" selected>Reports &amp; AI Analysis</option>
+                      <option value="data">Data Accuracy</option>
+                      <option value="technical">Technical Issue</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="ticketPriority">Priority</label>
+                  <div class="input-wrap">
+                    <select class="form-input" id="ticketPriority" name="priority">
+                      <option value="low">Low</option>
+                      <option value="medium" selected>Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ticketDescription">Description</label>
+                <div class="input-wrap">
+                  <textarea class="form-input profile-form__textarea" id="ticketDescription" name="description" rows="5" placeholder="Include as much detail as possible — company, report, or page involved." required></textarea>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ticketAttachment">Attachment (optional)</label>
+                <div class="input-wrap">
+                  <input class="form-input" type="file" id="ticketAttachment" name="attachment" />
+                </div>
+              </div>
+
+              <div class="alert alert-success" role="status" aria-live="polite">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="alert__text"></span>
+              </div>
+              <div class="alert alert-error" role="alert" aria-live="assertive">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <span class="alert__text"></span>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                <span class="btn-label">Submit Ticket</span>
+              </button>
+            </form>
+          </section>
+
+          <!-- ==========================================================
+               DOCUMENTATION & USER GUIDES
+               ========================================================== -->
+          <section aria-label="Documentation and guides">
+            <div class="panel__head panel__head--loose">
+              <h2 class="panel__title">Documentation &amp; User Guides</h2>
+            </div>
+            <div class="doc-grid">
+              <a href="#" class="panel doc-card">
+                <div class="doc-card__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h16v16H4V4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </div>
+                <h3 class="doc-card__title">Getting Started Guide</h3>
+                <p class="doc-card__desc">A step-by-step walkthrough of researching your first company.</p>
+              </a>
+              <a href="#" class="panel doc-card">
+                <div class="doc-card__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 9-5 5 5 5M16 9l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3 class="doc-card__title">API Documentation</h3>
+                <p class="doc-card__desc">Reference docs for integrating InvestIQ data into your own tools.</p>
+              </a>
+              <a href="#" class="panel doc-card">
+                <div class="doc-card__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                </div>
+                <h3 class="doc-card__title">Video Tutorials</h3>
+                <p class="doc-card__desc">Short screencasts covering the Dashboard, AI Analysis, and Reports.</p>
+              </a>
+              <a href="#" class="panel doc-card">
+                <div class="doc-card__icon">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                </div>
+                <h3 class="doc-card__title">Security &amp; Privacy</h3>
+                <p class="doc-card__desc">How InvestIQ protects your account, data, and research history.</p>
+              </a>
+            </div>
+          </section>
+
+          <!-- ==========================================================
+               KEYBOARD SHORTCUTS
+               ========================================================== -->
+          <section class="panel" aria-label="Keyboard shortcuts">
+            <div class="panel__head">
+              <h2 class="panel__title">Keyboard Shortcuts</h2>
+            </div>
+            <table class="shortcuts-table">
+              <thead>
+                <tr>
+                  <th scope="col">Action</th>
+                  <th scope="col">Shortcut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Open global search</td>
+                  <td><kbd>Ctrl</kbd> + <kbd>K</kbd></td>
+                </tr>
+                <tr>
+                  <td>Go to Dashboard</td>
+                  <td><kbd>G</kbd> then <kbd>D</kbd></td>
+                </tr>
+                <tr>
+                  <td>Go to Company Research</td>
+                  <td><kbd>G</kbd> then <kbd>R</kbd></td>
+                </tr>
+                <tr>
+                  <td>Generate AI Report</td>
+                  <td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+                </tr>
+                <tr>
+                  <td>Toggle sidebar</td>
+                  <td><kbd>Ctrl</kbd> + <kbd>B</kbd></td>
+                </tr>
+                <tr>
+                  <td>Close dialog or dropdown</td>
+                  <td><kbd>Esc</kbd></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <!-- ==========================================================
+               FEEDBACK
+               ========================================================== -->
+          <section class="panel" aria-label="Send feedback">
+            <div class="panel__head">
+              <h2 class="panel__title">Share Feedback</h2>
+            </div>
+            <form class="feedback-form" id="feedbackForm" novalidate>
+              <div class="form-group">
+                <label>How would you rate your experience with InvestIQ?</label>
+                <div class="feedback-form__rating" role="radiogroup" aria-label="Rating">
+                  <label class="feedback-form__star">
+                    <input type="radio" name="rating" value="1" />
+                    <span aria-hidden="true">★</span>
+                  </label>
+                  <label class="feedback-form__star">
+                    <input type="radio" name="rating" value="2" />
+                    <span aria-hidden="true">★</span>
+                  </label>
+                  <label class="feedback-form__star">
+                    <input type="radio" name="rating" value="3" />
+                    <span aria-hidden="true">★</span>
+                  </label>
+                  <label class="feedback-form__star">
+                    <input type="radio" name="rating" value="4" />
+                    <span aria-hidden="true">★</span>
+                  </label>
+                  <label class="feedback-form__star">
+                    <input type="radio" name="rating" value="5" checked />
+                    <span aria-hidden="true">★</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="feedbackMessage">Tell us more</label>
+                <div class="input-wrap">
+                  <textarea class="form-input profile-form__textarea" id="feedbackMessage" name="message" rows="4" placeholder="What's working well? What could be better?"></textarea>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <span class="btn-label">Send Feedback</span>
+              </button>
+            </form>
+          </section>
+
+          <!-- ==========================================================
+               BACK TO DASHBOARD
+               ========================================================== -->
+          <section class="help-footer-actions" aria-label="Return to dashboard">
+            <a href="dashboard.html" class="btn btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="btn-label">Back to Dashboard</span>
+            </a>
+          </section>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/dashboard.js" defer></script>
+  <script src="js/help.js" defer></script>
+</body>
+</html>

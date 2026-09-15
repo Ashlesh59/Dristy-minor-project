@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InvestIQ — Smarter Corporate Investment Research with AI</title>
+    <meta
+      name="description"
+      content="InvestIQ automates corporate investment research with AI-driven financial analysis, risk scoring, and instant reporting."
+    />
+
+    <!-- Google Fonts: Poppins (display) + Inter (body/UI), as specified in the brief -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+    CSS LOAD ORDER MATTERS:
+    1. variables.css  -> design tokens must exist before anything uses them
+    2. base.css       -> reset + global element/utility defaults
+    3. component files -> navbar, hero, features, statistics, footer
+  -->
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
+    <link rel="stylesheet" href="css/hero.css" />
+    <link rel="stylesheet" href="css/features.css" />
+    <link rel="stylesheet" href="css/statistics.css" />
+    <link rel="stylesheet" href="css/how-it-works.css" />
+    <link rel="stylesheet" href="css/testimonials.css" />
+    <link rel="stylesheet" href="css/faq.css" />
+    <link rel="stylesheet" href="css/footer.css" />
+  </head>
+  <body>
+    <!-- ==========================================================
+       NAVBAR
+       ========================================================== -->
+    <header class="navbar" id="navbar">
+      <div class="container navbar__inner">
+        <a href="#" class="navbar__logo" aria-label="InvestIQ home">
+          <svg
+            class="navbar__logo-mark"
+            width="28"
+            height="28"
+            viewBox="0 0 28 28"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <rect
+              x="3"
+              y="16"
+              width="4"
+              height="9"
+              rx="1"
+              fill="currentColor"
+            />
+            <rect
+              x="12"
+              y="10"
+              width="4"
+              height="15"
+              rx="1"
+              fill="currentColor"
+            />
+            <rect
+              x="21"
+              y="3"
+              width="4"
+              height="22"
+              rx="1"
+              fill="currentColor"
+            />
+          </svg>
+          InvestIQ
+        </a>
+
+        <nav class="navbar__links" id="navbarLinks">
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#testimonials">Testimonials</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+
+        <div class="navbar__actions">
+          <a href="login.html" class="btn btn-ghost">Log in</a>
+          <a href="signup.html" class="btn btn-primary">Get Started</a>
+
+          <button
+            class="navbar__toggle"
+            id="navbarToggle"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            aria-controls="navbarLinks"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- ==========================================================
+         HERO
+         ========================================================== -->
+      <section class="hero">
+        <div class="container hero__inner">
+          <div class="hero__content">
+            <span class="eyebrow">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle cx="6" cy="6" r="6" fill="currentColor" />
+              </svg>
+              AI-Powered Research
+            </span>
+
+            <h1 class="hero__title">
+              Corporate investment research,<br />
+              <span class="accent">analyzed in minutes, not weeks.</span>
+            </h1>
+
+            <p class="hero__subtitle">
+              InvestIQ reads financial reports, tracks market trends, and scores
+              risk automatically — so your team spends less time gathering data
+              and more time making decisions.
+            </p>
+
+            <div class="hero__actions">
+              <a href="login.html" class="btn btn-primary btn-lg"
+                >Start Free Analysis</a
+              >
+              <a href="#how-it-works" class="btn btn-ghost btn-lg"
+                >See How It Works</a
+              >
+            </div>
+
+            <div class="hero__trust">
+              <div class="hero__trust-avatars" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </div>
+              <span>Built for analysts, trusted by finance teams</span>
+            </div>
+          </div>
+
+          <div class="hero__visual">
+            <div class="floating-chip floating-chip--risk">
+              <svg
+                class="floating-chip__icon"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M10 2 2 17h16L10 2Z"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M10 8v4"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                />
+                <circle cx="10" cy="14.2" r="0.9" fill="currentColor" />
+              </svg>
+              Risk Score 32 · Low
+            </div>
+
+            <div class="floating-chip floating-chip--growth">
+              <svg
+                class="floating-chip__icon"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 13 8 8l3 3 6-6"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M14 5h3v3"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Growth +14.2%
+            </div>
+
+            <div class="analysis-card">
+              <div class="analysis-card__header">
+                <div class="analysis-card__company">
+                  <div class="analysis-card__logo">NX</div>
+                  <div>
+                    <div class="analysis-card__name">Nexora Industries</div>
+                    <div class="analysis-card__ticker">NASDAQ: NXI</div>
+                  </div>
+                </div>
+                <span class="analysis-card__badge">
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <circle cx="5" cy="5" r="5" fill="currentColor" />
+                  </svg>
+                  Buy
+                </span>
+              </div>
+
+              <svg
+                class="analysis-card__chart"
+                viewBox="0 0 400 120"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  class="trend-fill"
+                  d="M0,95 C40,90 60,70 100,72 C140,74 160,50 200,45 C240,40 260,55 300,35 C340,20 360,25 400,10 L400,120 L0,120 Z"
+                  fill="url(#trendGradient)"
+                />
+                <path
+                  class="trend-line"
+                  d="M0,95 C40,90 60,70 100,72 C140,74 160,50 200,45 C240,40 260,55 300,35 C340,20 360,25 400,10"
+                />
+                <defs>
+                  <linearGradient
+                    id="trendGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stop-color="#2563EB"
+                      stop-opacity="0.25"
+                    />
+                    <stop offset="100%" stop-color="#2563EB" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+
+              <div class="analysis-card__metrics">
+                <div>
+                  <div class="analysis-card__metric-label">Revenue</div>
+                  <div
+                    class="analysis-card__metric-value"
+                    data-metric="revenue"
+                  >
+                    $482M
+                  </div>
+                </div>
+                <div>
+                  <div class="analysis-card__metric-label">Growth YoY</div>
+                  <div
+                    class="analysis-card__metric-value positive"
+                    data-metric="growth"
+                  >
+                    +14.2%
+                  </div>
+                </div>
+                <div>
+                  <div class="analysis-card__metric-label">Risk Score</div>
+                  <div class="analysis-card__metric-value" data-metric="risk">
+                    32 / 100
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================
+         FEATURES
+         ========================================================== -->
+      <section class="section" id="features">
+        <div class="container">
+          <div class="features__head">
+            <span class="eyebrow">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle cx="6" cy="6" r="6" fill="currentColor" />
+              </svg>
+              Platform Capabilities
+            </span>
+            <h2 class="features__title">
+              Everything an analyst does manually, automated
+            </h2>
+            <p class="features__subtitle">
+              InvestIQ reads financial statements, tracks markets, and scores
+              risk continuously, so your first draft of research is already
+              done.
+            </p>
+          </div>
+
+          <div class="features__grid">
+            <article class="feature-card">
+              <div class="feature-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M4 19V5m6 14V9m6 10V3"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h3 class="feature-card__title">Automated Financial Analysis</h3>
+              <p class="feature-card__desc">
+                Revenue, profit, debt, and cash flow extracted directly from
+                filings and summarized in plain language within minutes.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h3 class="feature-card__title">AI Risk Scoring</h3>
+              <p class="feature-card__desc">
+                Every company is scored 0–100 on financial risk using models
+                trained on historical performance and volatility.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M3 17 9 11l4 4 8-8"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M15 5h6v6"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h3 class="feature-card__title">Market Trend Detection</h3>
+              <p class="feature-card__desc">
+                Sector momentum and macro indicators are tracked continuously
+                and flagged the moment they shift.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M7 3h7l5 5v13H7V3Z"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M14 3v5h5M9 13h6M9 17h6"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </div>
+              <h3 class="feature-card__title">Instant Report Generation</h3>
+              <p class="feature-card__desc">
+                Turn any analysis into a client-ready PDF report with one click,
+                complete with charts and a recommendation.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect
+                    x="3"
+                    y="4"
+                    width="8"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+                  <rect
+                    x="13"
+                    y="4"
+                    width="8"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+                  <rect
+                    x="3"
+                    y="14"
+                    width="8"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+                  <rect
+                    x="13"
+                    y="14"
+                    width="8"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+                </svg>
+              </div>
+              <h3 class="feature-card__title">Side-by-Side Comparison</h3>
+              <p class="feature-card__desc">
+                Compare two or more companies across every key metric in a
+                single unified view before you decide.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="m9 12 2 2 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <h3 class="feature-card__title">Secure & Compliant</h3>
+              <p class="feature-card__desc">
+                Enterprise-grade encryption keeps every report and data source
+                private to your organization.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================
+         STATISTICS
+         ========================================================== -->
+      <section class="statistics">
+        <div class="container statistics__grid">
+          <div class="stat">
+            <span class="stat__value" data-target="12400" data-suffix="+"
+              >0</span
+            >
+            <span class="stat__label">Reports Generated</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value" data-target="85" data-suffix="%">0</span>
+            <span class="stat__label">Faster Than Manual Research</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value" data-target="340" data-suffix="+">0</span>
+            <span class="stat__label">Companies Tracked</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value" data-target="99" data-suffix=".9%"
+              >0</span
+            >
+            <span class="stat__label">Platform Uptime</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================
+         HOW IT WORKS
+         ========================================================== -->
+      <section class="section how-it-works" id="how-it-works">
+        <div class="container">
+          <div class="how-it-works__head">
+            <span class="eyebrow">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <circle cx="6" cy="6" r="6" fill="currentColor" />
+              </svg>
+              How It Works
+            </span>
+            <h2 class="how-it-works__title">From company name to full report in four steps</h2>
+            <p class="how-it-works__subtitle">
+              No spreadsheets, no manual filing lookups -- InvestIQ handles the
+              research pipeline end to end.
+            </p>
+          </div>
+
+          <div class="how-it-works__grid">
+            <article class="step-card">
+              <span class="step-card__number">1</span>
+              <h3 class="step-card__title">Search a company</h3>
+              <p class="step-card__desc">
+                Type any public company's name or ticker to pull up its latest
+                filings and market data.
+              </p>
+            </article>
+
+            <article class="step-card">
+              <span class="step-card__number">2</span>
+              <h3 class="step-card__title">AI reads the filings</h3>
+              <p class="step-card__desc">
+                Our models parse financial statements and market signals in
+                seconds, no manual data entry required.
+              </p>
+            </article>
+
+            <article class="step-card">
+              <span class="step-card__number">3</span>
+              <h3 class="step-card__title">Get a risk score</h3>
+              <p class="step-card__desc">
+                Review a plain-language summary with a 0-100 risk score backed
+                by the underlying numbers.
+              </p>
+            </article>
+
+            <article class="step-card">
+              <span class="step-card__number">4</span>
+              <h3 class="step-card__title">Save or export</h3>
+              <p class="step-card__desc">
+                Save the report to your dashboard or export a client-ready PDF
+                with one click.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================
+         TESTIMONIALS
+         ========================================================== -->
+      <section class="section testimonials" id="testimonials">
+        <div class="container">
+          <div class="testimonials__head">
+            <span class="eyebrow">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <circle cx="6" cy="6" r="6" fill="currentColor" />
+              </svg>
+              Testimonials
+            </span>
+            <h2 class="testimonials__title">Trusted by analysts who need speed and accuracy</h2>
+            <p class="testimonials__subtitle">
+              Teams use InvestIQ to cut research time without cutting corners
+              on diligence.
+            </p>
+          </div>
+
+          <div class="testimonials__grid">
+            <article class="testimonial-card">
+              <div class="testimonial-card__stars">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+              </div>
+              <p class="testimonial-card__quote">
+                "InvestIQ cut our due-diligence time from days to hours. The risk
+                scoring alone has changed how our team prioritizes coverage."
+              </p>
+              <div class="testimonial-card__author">
+                <span class="testimonial-card__avatar">RP</span>
+                <div>
+                  <div class="testimonial-card__name">Riya Patil</div>
+                  <div class="testimonial-card__role">Portfolio Analyst, Fintech Corp</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="testimonial-card">
+              <div class="testimonial-card__stars">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+              </div>
+              <p class="testimonial-card__quote">
+                "We generate client-ready reports in a fraction of the time it
+                used to take our junior analysts to pull the numbers together."
+              </p>
+              <div class="testimonial-card__author">
+                <span class="testimonial-card__avatar">AK</span>
+                <div>
+                  <div class="testimonial-card__name">Arjun Kapoor</div>
+                  <div class="testimonial-card__role">Research Lead, Meridian Capital</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="testimonial-card">
+              <div class="testimonial-card__stars">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+              </div>
+              <p class="testimonial-card__quote">
+                "The AI risk scores match what our own analysts arrive at
+                manually, but in minutes instead of a full day of digging."
+              </p>
+              <div class="testimonial-card__author">
+                <span class="testimonial-card__avatar">SN</span>
+                <div>
+                  <div class="testimonial-card__name">Sanjana Nair</div>
+                  <div class="testimonial-card__role">Investment Associate, Blue Harbor Advisors</div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================
+         FAQ
+         ========================================================== -->
+      <section class="section faq" id="faq">
+        <div class="container">
+          <div class="faq__head">
+            <span class="eyebrow">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <circle cx="6" cy="6" r="6" fill="currentColor" />
+              </svg>
+              FAQ
+            </span>
+            <h2 class="faq__title">Frequently asked questions</h2>
+            <p class="faq__subtitle">
+              Everything you need to know before you start researching with
+              InvestIQ.
+            </p>
+          </div>
+
+          <div class="faq__list">
+            <details class="faq-item">
+              <summary class="faq-item__question">
+                Is InvestIQ free to use?
+                <svg class="faq-item__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </summary>
+              <p class="faq-item__answer">
+                Yes. You can create a free account with no credit card required
+                and generate your first AI-powered company report right away.
+              </p>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-item__question">
+                Where does the financial data come from?
+                <svg class="faq-item__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </summary>
+              <p class="faq-item__answer">
+                Reports are built from public company filings and market data.
+                In this phase the platform runs on sample data while the
+                live financial-data integration is being built.
+              </p>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-item__question">
+                How accurate is the AI risk score?
+                <svg class="faq-item__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </summary>
+              <p class="faq-item__answer">
+                The score is a research aid, not financial advice. It's meant
+                to help you prioritize where to dig deeper, not replace your
+                own due diligence.
+              </p>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-item__question">
+                Can I export reports to share with clients?
+                <svg class="faq-item__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </summary>
+              <p class="faq-item__answer">
+                Yes, every report can be exported as a client-ready PDF or
+                printed directly from the Investment Report page.
+              </p>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-item__question">
+                Is my data secure?
+                <svg class="faq-item__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </summary>
+              <p class="faq-item__answer">
+                Enterprise-grade encryption keeps every report and data source
+                private to your organization. Full account security details
+                will expand as backend authentication rolls out.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ==========================================================
+       FOOTER
+       ========================================================== -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer__top">
+          <div class="footer__brand">
+            <a href="#" class="navbar__logo" aria-label="InvestIQ home">
+              <svg
+                class="navbar__logo-mark"
+                width="24"
+                height="24"
+                viewBox="0 0 28 28"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <rect
+                  x="3"
+                  y="16"
+                  width="4"
+                  height="9"
+                  rx="1"
+                  fill="currentColor"
+                />
+                <rect
+                  x="12"
+                  y="10"
+                  width="4"
+                  height="15"
+                  rx="1"
+                  fill="currentColor"
+                />
+                <rect
+                  x="21"
+                  y="3"
+                  width="4"
+                  height="22"
+                  rx="1"
+                  fill="currentColor"
+                />
+              </svg>
+              InvestIQ
+            </a>
+            <p class="footer__tagline">
+              Smarter corporate investment research with AI.
+            </p>
+          </div>
+
+          <div class="footer__col">
+            <div class="footer__col-title">Product</div>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#how-it-works">How It Works</a></li>
+              <li><a href="login.html">Dashboard</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <div class="footer__col-title">Company</div>
+            <ul>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <div class="footer__col-title">Legal</div>
+            <ul>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer__bottom">
+          <span id="footerYear">© 2026 InvestIQ. All rights reserved.</span>
+          <div class="footer__socials">
+            <a href="#" aria-label="InvestIQ on LinkedIn">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M4 4h16v16H4z"
+                  stroke="currentColor"
+                  stroke-width="0"
+                />
+                <path
+                  d="M6.94 8.5a1.94 1.94 0 1 0 0-3.88 1.94 1.94 0 0 0 0 3.88ZM5.3 10.2h3.3V19H5.3v-8.8Zm5.7 0h3.16v1.2h.04c.44-.8 1.5-1.65 3.1-1.65 3.3 0 3.9 2.17 3.9 5v4.25h-3.3v-3.77c0-.9-.02-2.05-1.25-2.05-1.26 0-1.45.98-1.45 1.99V19H11V10.2Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </a>
+            <a href="#" aria-label="InvestIQ on Twitter">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M20 6.5c-.6.3-1.3.5-2 .6a3.4 3.4 0 0 0 1.5-1.9c-.7.4-1.5.7-2.3.9a3.4 3.4 0 0 0-5.8 3.1A9.6 9.6 0 0 1 4.4 5.9a3.4 3.4 0 0 0 1.1 4.6c-.6 0-1.1-.2-1.6-.4v.1a3.4 3.4 0 0 0 2.7 3.4 3.5 3.5 0 0 1-1.5.06 3.4 3.4 0 0 0 3.2 2.4A6.9 6.9 0 0 1 3 17.4a9.7 9.7 0 0 0 5.3 1.6c6.3 0 9.8-5.3 9.8-9.8v-.5c.7-.5 1.3-1.1 1.8-1.8Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/config.js" defer></script>
+    <script src="js/navbar.js" defer></script>
+    <script src="js/hero.js" defer></script>
+    <script src="js/statistics.js" defer></script>
+    <script src="js/main.js" defer></script>
+  </body>
+</html>

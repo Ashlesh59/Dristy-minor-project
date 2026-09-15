@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Analysis — InvestIQ</title>
+  <meta name="description" content="AI-generated investment analysis, recommendation, SWOT, and multi-year predictions for a company." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/company-research.css" />
+  <link rel="stylesheet" href="css/ai-analysis.css" />
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="dashboard-shell">
+
+    <!-- ==========================================================
+         SIDEBAR (same structure as dashboard.html, AI Analysis active)
+         ========================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <a href="index.html" class="sidebar__logo">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="3" y="16" width="4" height="9" rx="1" fill="currentColor"/>
+          <rect x="12" y="10" width="4" height="15" rx="1" fill="currentColor"/>
+          <rect x="21" y="3" width="4" height="22" rx="1" fill="currentColor"/>
+        </svg>
+        <span class="sidebar__logo-text">InvestIQ</span>
+      </a>
+
+      <nav class="sidebar__group">
+        <span class="sidebar__group-title">Workspace</span>
+        <a href="dashboard.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="company-research.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Company Research</span>
+        </a>
+        <a href="ai-analysis.html" class="sidebar__link is-active" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>AI Analysis</span>
+        </a>
+        <a href="investment-report.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Reports</span>
+        </a>
+        <a href="saved-reports.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>Saved Reports</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__spacer"></div>
+
+      <nav class="sidebar__group sidebar__footer">
+        <span class="sidebar__group-title">Account</span>
+        <a href="profile.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Profile</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>Settings</span>
+        </a>
+        <a href="help.html" class="sidebar__link">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 1.7-2.4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="0.9" fill="currentColor"/></svg>
+          <span>Help</span>
+        </a>
+        <a href="index.html" class="sidebar__link sidebar__link--logout">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ==========================================================
+         CONTENT COLUMN
+         ========================================================== -->
+    <div class="dashboard-content">
+
+      <!-- TOPBAR (same structure as dashboard.html) -->
+      <header class="topbar">
+        <button class="topbar__toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+
+        <div class="topbar__search">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="search" placeholder="Search companies, reports, tickers..." aria-label="Search" />
+        </div>
+
+        <div class="topbar__spacer"></div>
+
+        <span class="topbar__date" id="topbarDate"></span>
+
+        <div class="topbar__actions">
+          <div class="dropdown" data-dropdown>
+            <button class="topbar__icon-btn" data-dropdown-trigger aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <span class="topbar__badge" aria-hidden="true"></span>
+            </button>
+            <div class="dropdown__panel" role="menu">
+              <div class="dropdown__header">
+                Notifications
+                <a href="#">Mark all read</a>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">AI analysis complete for NVIDIA Corp.</div>
+                  <div class="notification-item__time">12 minutes ago</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Your Tesla Inc. report is ready to view.</div>
+                  <div class="notification-item__time">1 hour ago</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <span class="notification-item__dot"></span>
+                <div>
+                  <div class="notification-item__title">Weekly market summary is available.</div>
+                  <div class="notification-item__time">Yesterday</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dropdown" data-dropdown>
+            <button class="user-trigger" data-dropdown-trigger aria-label="Account menu" aria-expanded="false" aria-haspopup="true">
+              <span class="user-avatar">AS</span>
+              <span class="user-trigger__name">Aditi Sharma</span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="dropdown__panel user-menu" role="menu">
+              <div class="user-menu__identity">
+                <span class="user-avatar">AS</span>
+                <div>
+                  <div class="user-menu__identity-name">Aditi Sharma</div>
+                  <div class="user-menu__identity-email">aditi.sharma@investiq.com</div>
+                </div>
+              </div>
+              <a href="#" class="dropdown-link">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Profile
+              </a>
+              <a href="#" class="dropdown-link">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="index.html" class="dropdown-link dropdown-link--danger">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- BODY -->
+      <div class="dashboard-body dashboard-body--single">
+        <main class="dashboard-main">
+
+          <!-- ==========================================================
+               HEADER — real research identity + status
+               ========================================================== -->
+          <section class="panel ai-header" aria-label="Analysis header" data-skeleton id="aiHeaderPanel">
+            <div class="ai-header__identity">
+              <div class="company-overview__logo" id="aiCompanyLogo">--</div>
+              <div>
+                <h1 class="ai-header__name" id="aiCompanyName">Select a company to analyze</h1>
+                <span class="company-overview__ticker" id="aiCompanyTicker"></span>
+              </div>
+            </div>
+
+            <div class="ai-header__meta">
+              <div class="ai-header__meta-item">
+                <span class="company-overview__label">Analysis Status</span>
+                <span class="badge" id="aiStatusBadge">Not started</span>
+              </div>
+              <div class="ai-header__meta-item">
+                <span class="company-overview__label">AI Score</span>
+                <span class="ai-header__confidence" id="aiHeaderScore">--</span>
+              </div>
+              <button type="button" class="btn btn-primary" id="runAnalysisBtn">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                <span class="btn-label">Run AI Analysis</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Empty state shown when no ?research_id= is present -->
+          <section class="panel" id="aiNoResearchNotice" hidden>
+            <p>No research selected. Start from <a href="company-research.html">Company Research</a> to create one, then come back here to run AI analysis on it.</p>
+          </section>
+
+          <!-- Error / provider-unavailable state -->
+          <section class="panel" id="aiErrorNotice" role="alert" hidden></section>
+
+          <!-- ==========================================================
+               OVERALL AI SCORE — real ai_score from Gemini (0-100),
+               validated server-side; never a fabricated default.
+               ========================================================== -->
+          <section class="panel ai-score" aria-label="Overall AI score" id="aiScoreSection" hidden>
+            <div class="ai-score__main">
+              <div class="ai-score__circle">
+                <svg viewBox="0 0 120 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--color-border)" stroke-width="10"/>
+                  <circle class="gauge-arc" id="aiScoreArc" style="--gauge-offset:100;" cx="60" cy="60" r="50" stroke="var(--color-primary)" pathLength="314" stroke-dasharray="314" transform="rotate(-90 60 60)"/>
+                </svg>
+                <div class="ai-score__circle-label">
+                  <span class="ai-score__number" id="aiScoreNumber">--</span>
+                  <span class="ai-score__out-of">/ 100</span>
+                </div>
+              </div>
+              <div>
+                <h2 class="panel__title">Overall AI Score</h2>
+                <p class="ai-score__summary" id="aiSummaryText"></p>
+              </div>
+            </div>
+            <p class="field-hint">AI-generated score based only on the financial data and news retrieved for this company — not a guarantee or certified rating.</p>
+          </section>
+
+          <!-- ==========================================================
+               FINANCIAL DATA — real Alpha Vantage quote (same fields
+               shown on Company Research), plus Gemini's plain-language
+               financial_assessment text. No fabricated Revenue/EPS/
+               Cash Flow/Debt/ROE, since the quote endpoint used here
+               doesn't provide them.
+               ========================================================== -->
+          <section aria-label="Financial data" id="aiFinancialSection" hidden>
+            <div class="panel__head panel__head--loose">
+              <h2 class="panel__title">Financial Data</h2>
+            </div>
+            <div class="stat-cards financial-summary" id="aiFinancialCards"></div>
+            <div class="panel" style="margin-top:1rem;">
+              <h3 class="panel__title" style="font-size:0.95rem;">AI Financial Assessment</h3>
+              <p id="aiFinancialAssessment"></p>
+            </div>
+          </section>
+
+          <!-- ==========================================================
+               AI RECOMMENDATION — real recommendation (Buy/Hold/Sell)
+               + ai_score as "confidence", explained with the model's
+               own overall_outlook text. Never phrased as certain.
+               ========================================================== -->
+          <section class="panel ai-recommendation" aria-label="AI recommendation" id="aiRecommendationSection" hidden>
+            <div class="panel__head">
+              <h2 class="panel__title">AI Recommendation</h2>
+              <span class="eyebrow">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="currentColor"/></svg>
+                AI Generated
+              </span>
+            </div>
+            <div class="ai-recommendation__body">
+              <div class="ai-recommendation__verdict">
+                <span class="ai-recommendation__verdict-label badge" id="aiRecommendationBadge">--</span>
+                <span class="ai-recommendation__confidence" id="aiRecommendationConfidence"></span>
+              </div>
+              <p class="ai-recommendation__explanation" id="aiOutlookText"></p>
+            </div>
+          </section>
+
+          <!-- ==========================================================
+               RISKS & OPPORTUNITIES — real key_risks/key_opportunities
+               text from Gemini. Renamed from "SWOT Analysis" since the
+               model isn't asked to produce a full four-quadrant SWOT.
+               ========================================================== -->
+          <section class="panel swot" aria-label="Risks and opportunities" id="aiRisksSection" hidden>
+            <div class="panel__head">
+              <h2 class="panel__title">Risks &amp; Opportunities</h2>
+            </div>
+            <div class="swot-grid">
+              <div class="swot-quadrant swot-quadrant--weakness">
+                <h3 class="swot-quadrant__title">Key Risks</h3>
+                <p id="aiKeyRisks"></p>
+              </div>
+              <div class="swot-quadrant swot-quadrant--opportunity">
+                <h3 class="swot-quadrant__title">Key Opportunities</h3>
+                <p id="aiKeyOpportunities"></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==========================================================
+               NEWS SENTIMENT — real news_sentiment text from Gemini,
+               based on the same articles fetched on Company Research.
+               No fabricated Analyst/Social sentiment sub-scores.
+               ========================================================== -->
+          <section class="panel market-sentiment" aria-label="News sentiment" id="aiNewsSentimentSection" hidden>
+            <div class="panel__head">
+              <h2 class="panel__title">News Sentiment</h2>
+            </div>
+            <p id="aiNewsSentimentText"></p>
+          </section>
+
+          <!-- ==========================================================
+               ACTION BUTTONS
+               ========================================================== -->
+          <section class="research-actions" aria-label="Analysis actions" id="aiActionsSection" hidden>
+            <button type="button" class="btn btn-primary" id="goToReportBtn">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M12 2 4 5v6c0 5.2 3.4 9 8 11 4.6-2 8-5.8 8-11V5l-8-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              <span class="btn-label">Generate Full Report</span>
+            </button>
+            <button type="button" class="btn btn-ghost" id="exportAnalysisBtn">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M7 3h7l5 5v13H7V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span class="btn-label">Export</span>
+            </button>
+          </section>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js" defer></script>
+  <script src="js/dashboard.js" defer></script>
+  <script src="js/ai-analysis.js" defer></script>
+</body>
+</html>

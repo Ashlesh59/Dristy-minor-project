@@ -1,0 +1,282 @@
+/* ==========================================================================
+   SETTINGS.CSS
+   --------------------------------------------------------------------------
+   Styles for settings.html only. Reuses .panel, .panel__head, .form-group,
+   .form-input, .input-wrap, .input-icon-btn (auth.css), .btn/.btn-primary/
+   .btn-ghost, .badge, and .eyebrow as-is -- everything below is new
+   markup specific to this page: stacked settings section cards, the
+   danger-zone row pattern, toggle switches, and the theme picker.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------
+   SETTINGS FORM LAYOUT
+   Each section is its own .panel, stacked vertically with consistent
+   spacing -- same rhythm as the dashboard's vertical stack of panels,
+   just applied to a single long settings form instead of a grid.
+   ------------------------------------------------------------------ */
+#settingsForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.settings-section__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  margin-bottom: var(--space-2);
+}
+
+/* ------------------------------------------------------------------
+   DANGER / SECONDARY ACTION ROW
+   Used for "Deactivate Account" and "Active Sessions" -- a quiet,
+   bordered row that sits below the main field grid within a section,
+   visually separated so it doesn't compete with primary form fields.
+   ------------------------------------------------------------------ */
+.settings-section__danger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-section__danger-title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.settings-section__danger-desc {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  max-width: 52ch;
+}
+
+.settings-section__danger-btn {
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------
+   TOGGLE SWITCH LIST
+   Reused across Security, Notification, and AI Analysis Preferences.
+   Built on a native checkbox for full keyboard/screen-reader support;
+   the checkbox itself is visually hidden and its checked state drives
+   the track/thumb appearance via sibling selectors.
+   ------------------------------------------------------------------ */
+.settings-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.settings-toggle-list + .settings-section__danger {
+  margin-top: var(--space-6);
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  cursor: pointer;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.toggle-switch:hover {
+  background: var(--color-surface-tint);
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.toggle-switch__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  margin-top: 2px;
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+
+.toggle-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+
+.toggle-switch input:checked ~ .toggle-switch__track {
+  background: var(--color-primary);
+}
+
+.toggle-switch input:checked ~ .toggle-switch__track .toggle-switch__thumb {
+  transform: translateX(18px);
+}
+
+.toggle-switch input:focus-visible ~ .toggle-switch__track {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.toggle-switch__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-switch__title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+.toggle-switch__desc {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------
+   THEME PICKER
+   ------------------------------------------------------------------ */
+.theme-options {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.theme-option:hover {
+  border-color: var(--color-primary);
+}
+
+.theme-option input[type="radio"] {
+  accent-color: var(--color-primary);
+  width: 16px;
+  height: 16px;
+}
+
+.theme-option:has(input:checked) {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.theme-option--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.theme-option--disabled:hover {
+  border-color: var(--color-border);
+}
+
+.theme-option__swatch {
+  width: 40px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.theme-option__swatch--light {
+  background: linear-gradient(135deg, #ffffff 50%, #f8fafc 50%);
+}
+
+.theme-option__swatch--dark {
+  background: linear-gradient(135deg, var(--color-navy) 50%, var(--color-navy-soft) 50%);
+}
+
+.theme-option__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+}
+
+/* ------------------------------------------------------------------
+   SAVE / RESET ACTIONS
+   ------------------------------------------------------------------ */
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .settings-section__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-section__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-section__danger {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .settings-section__danger-btn {
+    width: 100%;
+  }
+
+  .theme-options {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .settings-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .settings-actions .btn {
+    width: 100%;
+  }
+
+  .toggle-switch {
+    padding: var(--space-2);
+  }
+}

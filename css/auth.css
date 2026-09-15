@@ -1,0 +1,566 @@
+/* ==========================================================================
+   AUTH.CSS
+   --------------------------------------------------------------------------
+   Shared styles for login.html, signup.html, and forgot-password.html.
+   All three pages use the exact same split-screen skeleton:
+
+     ┌──────────────────────┬─────────────────────┐
+     │   .auth-brand         │    .auth-panel       │
+     │   (navy, marketing)   │    (white, the form) │
+     └──────────────────────┴─────────────────────┘
+
+   This is the same two-column pattern used by Stripe and Linear's auth
+   flows: the left panel keeps reinforcing trust/value while the user
+   fills the form, instead of dumping them on a bare white page. On
+   mobile the brand panel disappears entirely (see media query at the
+   bottom) and only the form remains, full width.
+
+   Every color/spacing/radius value below comes from variables.css --
+   nothing is hardcoded, so this file inherits the same design system
+   as the rest of the site automatically.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------
+   PAGE SHELL
+   ------------------------------------------------------------------ */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* "Back to home" link floats over the top-left corner of the whole
+   page, so it's reachable no matter which panel the user is looking at. */
+.auth-back {
+  position: absolute;
+  top: var(--space-5);
+  left: var(--space-5);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-on-dark-muted);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.auth-back:hover {
+  color: var(--color-text-on-dark);
+}
+
+.auth-back svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ------------------------------------------------------------------
+   LEFT PANEL: BRAND / MARKETING
+   Reuses --color-navy + a radial glow, echoing the hero section, so
+   the auth pages still feel like the same product rather than a
+   bolted-on third-party login screen.
+   ------------------------------------------------------------------ */
+.auth-brand {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-navy);
+  color: var(--color-text-on-dark-muted);
+  padding: var(--space-9) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.auth-brand::before {
+  content: '';
+  position: absolute;
+  top: -180px;
+  left: -180px;
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, rgba(37, 99, 235, 0) 70%);
+  pointer-events: none;
+}
+
+/* Faint dot-grid texture -- a common fintech-dashboard motif, kept
+   subtle enough that it reads as texture, not decoration. */
+.auth-brand::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.auth-brand__logo {
+  position: relative;
+  z-index: 1;
+  color: var(--color-text-on-dark) !important;
+}
+
+.auth-brand__content {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+}
+
+.auth-brand__title {
+  color: var(--color-text-on-dark);
+  font-size: var(--fs-2xl);
+  margin-bottom: var(--space-4);
+}
+
+.auth-brand__subtitle {
+  font-size: var(--fs-base);
+  line-height: 1.7;
+  margin-bottom: var(--space-6);
+}
+
+.auth-brand__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-brand__features li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--color-text-on-dark);
+}
+
+.auth-brand__features svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-success);
+}
+
+.auth-brand__quote {
+  position: relative;
+  z-index: 1;
+  border-left: 2px solid var(--color-primary-light);
+  padding-left: var(--space-4);
+}
+
+.auth-brand__quote p {
+  font-size: var(--fs-sm);
+  color: var(--color-text-on-dark);
+  font-style: italic;
+  margin-bottom: var(--space-2);
+}
+
+.auth-brand__quote span {
+  font-size: var(--fs-xs);
+  color: var(--color-text-on-dark-muted);
+}
+
+/* ------------------------------------------------------------------
+   RIGHT PANEL: THE FORM
+   ------------------------------------------------------------------ */
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Hidden on desktop (the brand panel already shows the logo);
+   revealed only when the brand panel is hidden on mobile. */
+.auth-card__logo-mobile {
+  display: none;
+  margin-bottom: var(--space-6);
+}
+
+.auth-card__title {
+  font-size: var(--fs-2xl);
+  margin-bottom: var(--space-2);
+}
+
+.auth-card__subtitle {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.auth-card__footer-link {
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-6);
+}
+
+.auth-card__footer-link a {
+  color: var(--color-primary);
+  font-weight: var(--fw-semibold);
+}
+
+.auth-card__footer-link a:hover {
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------
+   FORM FIELDS
+   ------------------------------------------------------------------ */
+.form-group {
+  margin-bottom: var(--space-5);
+}
+
+.form-group label {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-base);
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+/* Extra right padding on password fields so text never runs under
+   the show/hide eye icon button. */
+.input-wrap:has(.input-icon-btn) .form-input {
+  padding-right: var(--space-8);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.form-input.is-invalid {
+  border-color: var(--color-danger);
+}
+
+.form-input.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* Password show/hide toggle button, positioned inside the input. */
+.input-icon-btn {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  padding: var(--space-1);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.input-icon-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.input-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.input-icon-btn .icon-eye-off {
+  display: none;
+}
+
+.input-icon-btn.is-visible .icon-eye {
+  display: none;
+}
+
+.input-icon-btn.is-visible .icon-eye-off {
+  display: block;
+}
+
+/* Inline field-level error text -- hidden until JS adds .is-visible. */
+.field-error {
+  display: block;
+  font-size: var(--fs-xs);
+  color: var(--color-danger);
+  margin-top: var(--space-2);
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height var(--duration-base) var(--ease-standard),
+              opacity var(--duration-fast) var(--ease-standard);
+}
+
+.field-error.is-visible {
+  max-height: 40px;
+  opacity: 1;
+  margin-top: var(--space-2);
+}
+
+/* ------------------------------------------------------------------
+   PASSWORD STRENGTH METER (signup page only)
+   ------------------------------------------------------------------ */
+.strength-meter {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.strength-meter__bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.strength-meter__bar {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  transition: background-color var(--duration-base) var(--ease-standard);
+}
+
+.strength-meter__label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--fw-medium);
+}
+
+/* ------------------------------------------------------------------
+   CHECKBOX ROW (Remember me / Terms)
+   Uses the browser's native checkbox with `accent-color` rather than
+   a fully custom pseudo-element checkbox -- this keeps full native
+   keyboard and screen-reader support for free, at the cost of a
+   little less style control, which is the right trade-off here.
+   ------------------------------------------------------------------ */
+.form-checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  font-size: var(--fs-sm);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.checkbox input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.auth-link {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-primary);
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.form-terms {
+  margin-bottom: var(--space-6);
+  font-size: var(--fs-sm);
+}
+
+.form-terms a {
+  color: var(--color-primary);
+  font-weight: var(--fw-medium);
+}
+
+.form-terms a:hover {
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------
+   SUBMIT BUTTON + LOADING STATE
+   The button keeps its footprint identical whether it's showing text
+   or the spinner, so the layout never jumps when loading starts.
+   ------------------------------------------------------------------ */
+.btn-block {
+  width: 100%;
+  position: relative;
+  min-height: 46px;
+}
+
+.btn.is-loading {
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.btn.is-loading .btn-label {
+  visibility: hidden;
+}
+
+.btn.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ------------------------------------------------------------------
+   DIVIDER + SOCIAL LOGIN
+   ------------------------------------------------------------------ */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-block: var(--space-6);
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.social-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.btn-social {
+  gap: var(--space-2);
+}
+
+.btn-social svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ------------------------------------------------------------------
+   ALERTS (success / error) -- hidden by default, revealed by JS
+   toggling .is-visible. Placed at the top of the form.
+   ------------------------------------------------------------------ */
+.alert {
+  display: none;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-5);
+  animation: alert-in var(--duration-base) var(--ease-standard);
+}
+
+.alert.is-visible {
+  display: flex;
+}
+
+.alert svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-success {
+  background: var(--color-success-bg);
+  color: #166534;
+}
+
+.alert-error {
+  background: var(--color-danger-bg);
+  color: #991b1b;
+}
+
+@keyframes alert-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alert {
+    animation: none;
+  }
+  .btn.is-loading::after {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   RESPONSIVE
+   Below 960px the brand panel disappears completely and the form
+   panel becomes the entire page -- the mobile logo takes its place.
+   ------------------------------------------------------------------ */
+@media (max-width: 960px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand {
+    display: none;
+  }
+
+  .auth-card__logo-mobile {
+    display: flex;
+  }
+
+  .auth-back {
+    color: var(--color-text-secondary);
+  }
+
+  .auth-back:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+@media (max-width: 480px) {
+  .social-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .form-checkbox-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
