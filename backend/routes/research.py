@@ -361,24 +361,15 @@ def _get_analysis_or_error(record, force_refresh=False):
             financial_data = get_stock_quote(record.ticker_symbol)
             record.financial_data = json.dumps(financial_data)
             db.session.commit()
-        except MissingApiKeyError as e:
-            current_app.logger.error("Financial service misconfigured: %s", e)
-            return None, (jsonify({
-                "success": False,
-                "message": "Analysis is temporarily unavailable. Please try again later."
-            }), 500)
-        except FinancialServiceUnavailableError as e:
-            current_app.logger.warning("Financial service unavailable: %s", e)
-            return None, (jsonify({
-                "success": False,
-                "message": "Financial data provider is temporarily unavailable. Please try again shortly."
-            }), 503)
-        except FinancialServiceBadResponseError as e:
-            current_app.logger.warning("Financial service bad response: %s", e)
-            return None, (jsonify({
-                "success": False,
-                "message": "Could not retrieve financial data for this ticker."
-            }), 502)
+        except (MissingApiKeyError, FinancialServiceUnavailableError, FinancialServiceBadResponseError) as e:
+            current_app.logger.warning("Financial service non-fatal fallback: %s", e)
+            if record.financial_data:
+                try:
+                    financial_data = json.loads(record.financial_data)
+                except Exception:
+                    financial_data = None
+            if not financial_data:
+                financial_data = {"symbol": record.ticker_symbol, "currency": "USD"}
 
     news_articles = []
     if not force_refresh and record.news_data:

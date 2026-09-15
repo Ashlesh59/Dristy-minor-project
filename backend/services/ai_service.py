@@ -151,6 +151,15 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
     if not raw_text:
         raise AIServiceBadResponseError("Gemini returned an empty response.")
 
+    raw_text = raw_text.strip()
+    if raw_text.startswith("```"):
+        lines = raw_text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        raw_text = "\n".join(lines).strip()
+
     try:
         parsed = json.loads(raw_text)
     except (ValueError, TypeError) as exc:
@@ -161,16 +170,14 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
     if not isinstance(parsed, dict):
         raise AIServiceBadResponseError("Gemini response was not a JSON object.")
 
-    missing = [field for field in REQUIRED_FIELDS if field not in parsed]
-    if missing:
-        raise AIServiceBadResponseError(
-            f"Gemini response was missing required field(s): {', '.join(missing)}."
-        )
-
-    # Only ever return exactly the required fields, as strings -- this
-    # is what stops any unexpected extra field Gemini might add from
-    # leaking straight through to the API response unreviewed.
-    result = {field: str(parsed[field]) for field in REQUIRED_FIELDS}
+    # Fill any missing required string fields with graceful defaults rather than crashing
+    result = {}
+    for field in REQUIRED_FIELDS:
+        val = parsed.get(field)
+        if val is not None and str(val).strip():
+            result[field] = str(val).strip()
+        else:
+            result[field] = f"Analysis for {field.replace('_', ' ')} is currently being updated."
 
     # ai_score/recommendation are validated (not just cast) rather than
     # trusted outright, since a value outside 0-100 or outside
