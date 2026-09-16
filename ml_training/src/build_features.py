@@ -7,7 +7,6 @@ def calculate_rsi(series: pd.Series, window: int = 14) -> pd.Series:
     loss = (-delta.where(delta < 0, 0)).rolling(window=window, min_periods=window).mean()
     
     rs = np.zeros_like(gain)
-    # Safe division
     mask = loss != 0
     rs[mask] = gain[mask] / loss[mask]
     
@@ -30,12 +29,10 @@ def build_stock_features(group: pd.DataFrame) -> pd.DataFrame:
     close = df["close"]
     vol = df["volume"]
     
-    # Returns
     df["return_1d"] = close.pct_change(periods=1)
     df["return_5d"] = close.pct_change(periods=5)
     df["return_20d"] = close.pct_change(periods=20)
     
-    # Moving averages
     ma_5 = close.rolling(window=5).mean()
     ma_20 = close.rolling(window=20).mean()
     ma_50 = close.rolling(window=50).mean()
@@ -44,13 +41,10 @@ def build_stock_features(group: pd.DataFrame) -> pd.DataFrame:
     df["close_div_ma20"] = np.where(ma_20 > 0, close / ma_20, np.nan)
     df["close_div_ma50"] = np.where(ma_50 > 0, close / ma_50, np.nan)
     
-    # Volatility
     df["volatility_20d"] = df["return_1d"].rolling(window=20).std()
     
-    # RSI
     df["rsi_14"] = calculate_rsi(close, 14)
     
-    # Volume
     vol_ma20 = vol.rolling(window=20).mean()
     df["volume_ma20"] = vol_ma20
     df["vol_div_ma20"] = np.where(vol_ma20 > 0, vol / vol_ma20, np.nan)
@@ -60,17 +54,26 @@ def build_stock_features(group: pd.DataFrame) -> pd.DataFrame:
 def build_features(prices: pd.DataFrame, benchmark: pd.DataFrame) -> pd.DataFrame:
     bench_feat = build_benchmark_features(benchmark)
     
-    # Group by security and build features
-    stock_feat = prices.groupby("security_id", group_keys=False).apply(build_stock_features)
+    # Avoid groupby warning by setting include_groups=False, but then we must inject security_id back if it gets dropped.
+    # We use a loop approach to explicitly avoid deprecation warnings and index confusion.
+    # Let's just use a loop or index approach to be 100% safe, or just use apply(include_groups=False) and add it back from the original dataframe's index? No, order might change.
     
-    # Merge with benchmark features
+    # Safest way to avoid groupby warning and keep columns:
+    dfs = []
+    for sid, grp in prices.groupby("security_id"):
+        res = build_stock_features(grp)
+        res["security_id"] = sid
+        dfs.append(res)
+    stock_feat = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame(columns=prices.columns)
+    
     df = pd.merge(stock_feat, bench_feat, on="date", how="inner")
     
-    # Combined feature
     df["stock_minus_nifty_20d"] = df["return_20d"] - df["nifty_20d_return"]
     
-    # Drop warm-up rows (NaNs)
-    # The longest lookback is 50 days (ma_50), so we drop any rows containing NaN
+    # Handle infinite values (replace with NaN)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    
+    # Drop rows with NaN (warm-up rows and unsafe infinities)
     df = df.dropna().reset_index(drop=True)
     
     return df

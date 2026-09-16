@@ -2,17 +2,18 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, log_loss
 
-def evaluate_model(model, X, y) -> dict:
+def evaluate_model(model, X, y, y_train=None) -> dict:
     if len(y.unique()) < 2:
         raise ValueError("Only one class exists in this partition. Evaluation cannot proceed.")
         
     preds = model.predict(X)
     probs = model.predict_proba(X)[:, 1]
     
-    # Majority class baseline
-    majority_class = y.mode()[0]
+    # Majority class baseline from training data if provided, otherwise from y itself
+    y_base = y_train if y_train is not None else y
+    majority_class = y_base.mode()[0]
     baseline_preds = np.full_like(y, majority_class)
-    baseline_probs = np.full_like(y, y.mean()) # Baseline probability is the mean of positive class
+    baseline_probs = np.full_like(y, y_base.mean()) # Baseline probability is the mean of positive class in training
     
     metrics = {
         "accuracy": float(accuracy_score(y, preds)),
