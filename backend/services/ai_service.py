@@ -22,8 +22,8 @@ from google.genai import errors as genai_errors
 from google.genai.types import GenerateContentConfig
 
 # Primary and fallback models for Gemini API
-GEMINI_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"]
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"]
+GEMINI_MODEL = "gemini-2.0-flash"
 
 REQUIRED_FIELDS = [
     "summary",
