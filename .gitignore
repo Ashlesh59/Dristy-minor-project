@@ -46,3 +46,6 @@ reports/*.pdf
 Thumbs.db
 .vscode/
 .idea/
+
+.vercel
+.env*
