@@ -19,11 +19,11 @@ from decimal import Decimal
 
 from google import genai
 from google.genai import errors as genai_errors
-from google.genai.types import GenerateContentConfig
+from google.genai.types import GenerateContentConfig, ThinkingConfig
 
 # Primary and fallback models for Gemini API
-GEMINI_MODELS = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"]
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-2.5-pro"]
+GEMINI_MODEL = "gemini-2.5-flash"
 
 REQUIRED_FIELDS = [
     "summary",
@@ -295,6 +295,7 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
                 config=GenerateContentConfig(
                     response_mime_type="application/json",
                     temperature=0.2,
+                    thinking_config=ThinkingConfig(thinking_budget=0),
                 ),
             )
             if response and getattr(response, "text", None):
