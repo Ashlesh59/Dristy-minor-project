@@ -69,4 +69,5 @@ if ($ConfirmDeactivation) {
 
 # Run the seeder
 cd $rootDir
-python $commandArgs
+$pythonBin = if (Test-Path "$rootDir\venv\Scripts\python.exe") { "$rootDir\venv\Scripts\python.exe" } else { "python" }
+& $pythonBin $commandArgs
