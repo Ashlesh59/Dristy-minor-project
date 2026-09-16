@@ -2,11 +2,19 @@
    INVESTMENT-REPORT.JS
    --------------------------------------------------------------------------
    Behavior for investment-report.html.
-   - Reads `research_id` from the URL, loads the research record.
-   - Renders verified End-of-Day Market Performance panel and SVG price chart
-     from stored DailyPrice records in Neon Postgres.
-   - Renders persisted AI investment report or offers one-click report generation.
-   - Isolates chart range/mode switches from Gemini report generation.
+   - Loads research record & authoritative Security from Neon Postgres.
+   - Enforces strict zero-credit verified market data display:
+     * OHLC, Prev Close, VWAP, Volume, 30-Day Avg Volume, SMA20, SMA50,
+       Annualized Volatility, 52-Week Range, Period Returns (1M, 3M, 6M, 1Y).
+   - Renders interactive historical SVG price chart with exclusive states:
+     * setChartState("idle" | "loading" | "data" | "empty" | "error")
+     * Dynamic theme (green for gains, red for losses, neutral for flat).
+     * Interactive tooltip with OHLCV data.
+   - Renders structured AI Investment Decision Summary:
+     * Research View, Suggested Action, Confidence Level, "Why This View?",
+       Key Risks, Change Drivers, and Checklist.
+   - Generates AI analysis ONLY on explicit user click, and reuses saved DB
+     records with zero external API calls on subsequent views or prints.
    ========================================================================== */
 
 (function () {
@@ -14,16 +22,69 @@
 
   var marketHelper = window.MarketDataState || {
     escapeHtml: function (s) { return String(s || ''); },
-    formatDecimal: function (v) { return v !== null && v !== undefined ? String(v) : '—'; },
-    formatCurrency: function (v, c) { return (c || 'INR') + ' ' + (v || '—'); },
-    formatDailyChange: function (c, cp) { return { text: '—', isPositive: false, isNegative: false, isZero: true }; },
-    calculateSvgCoordinates: function () { return { isEmpty: true, points: [] }; },
-    formatPriceModeLabel: function () { return { label: 'Raw Unadjusted', badgeText: 'Unadjusted Prices', disclaimer: '' }; },
-    format52WeekRange: function () { return '—'; },
-    formatReturn: function () { return { text: '—', isPositive: false, isNegative: false, isZero: true }; }
+    formatDecimal: function (v, d) {
+      if (v === null || v === undefined || v === '') return '—';
+      var num = typeof v === 'number' ? v : parseFloat(String(v));
+      return isNaN(num) ? '—' : num.toLocaleString('en-IN', { minimumFractionDigits: d !== undefined ? d : 2, maximumFractionDigits: d !== undefined ? d : 2 });
+    },
+    formatCurrency: function (v, c) {
+      var curr = (c || 'INR').toUpperCase();
+      var sym = curr === 'INR' ? '₹' : (curr === 'USD' ? '$' : curr + ' ');
+      if (v === null || v === undefined || v === '') return '—';
+      var num = typeof v === 'number' ? v : parseFloat(String(v));
+      if (isNaN(num)) return '—';
+      return sym + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    },
+    formatDailyChange: function (c, cp) {
+      if (c === null || c === undefined || c === '') {
+        return { text: '—', isPositive: false, isNegative: false, isZero: true };
+      }
+      var num = typeof c === 'number' ? c : parseFloat(String(c));
+      if (isNaN(num)) return { text: '—', isPositive: false, isNegative: false, isZero: true };
+      var isPos = num > 0;
+      var isNeg = num < 0;
+      var sign = isPos ? '+' : (isNeg ? '-' : '');
+      var absFormatted = Math.abs(num).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      var pctFormatted = cp ? (' (' + (isPos ? '+' : (isNeg ? '-' : '')) + Math.abs(parseFloat(String(cp))).toFixed(2) + '%)') : '';
+      return {
+        text: sign + '₹' + absFormatted + pctFormatted,
+        isPositive: isPos,
+        isNegative: isNeg,
+        isZero: num === 0
+      };
+    },
+    calculateSvgCoordinates: function (prices, w, h, pad) {
+      if (!prices || !prices.length) return { isEmpty: true, points: [] };
+      return window.MarketDataState.calculateSvgCoordinates(prices, w, h, pad);
+    },
+    formatPriceModeLabel: function (mode, meta) {
+      if (mode === 'split_adjusted' && meta && meta.is_adjusted) {
+        return { label: 'Split/Bonus Adjusted', badgeText: 'Split & Bonus Adjusted', disclaimer: 'Adjusted for splits and bonus issues.' };
+      }
+      return { label: 'Raw Unadjusted', badgeText: 'Official NSE Closing Prices', disclaimer: 'Unadjusted nominal exchange closing prices.' };
+    },
+    format52WeekRange: function (l, h, c) {
+      if (!l || !h) return '—';
+      return (c === 'INR' ? '₹' : '') + l + ' – ' + (c === 'INR' ? '₹' : '') + h;
+    },
+    formatReturn: function (ret) {
+      if (ret === null || ret === undefined || ret === '') return { text: '—', isPositive: false, isNegative: false, isZero: true };
+      var num = typeof ret === 'number' ? ret : parseFloat(String(ret));
+      if (isNaN(num)) return { text: '—', isPositive: false, isNegative: false, isZero: true };
+      var isPos = num > 0;
+      var isNeg = num < 0;
+      var sign = isPos ? '+' : (isNeg ? '-' : '');
+      return {
+        text: sign + Math.abs(num).toFixed(2) + '%',
+        isPositive: isPos,
+        isNegative: isNeg,
+        isZero: num === 0,
+        raw: num
+      };
+    }
   };
 
-  var API_BASE_URL = window.INVESTIQ_API_BASE || 'http://127.0.0.1:5000';
+  var API_BASE_URL = window.INVESTIQ_API_BASE || '';
   var params = new URLSearchParams(window.location.search);
   var researchId = params.get('research_id');
 
@@ -36,59 +97,95 @@
     companyLogo: document.getElementById('reportCompanyLogo'),
     companyName: document.getElementById('reportCompanyName'),
     companyTicker: document.getElementById('reportCompanyTicker'),
+    companyExchange: document.getElementById('reportCompanyExchange'),
+    companySeries: document.getElementById('reportCompanySeries'),
+    companyIsin: document.getElementById('reportCompanyIsin'),
+    aiStatusBadge: document.getElementById('reportAiStatusBadge'),
+    tradingDate: document.getElementById('reportTradingDate'),
+    marketSession: document.getElementById('reportMarketSession'),
+    historicalCoverage: document.getElementById('reportHistoricalCoverage'),
     timestamp: document.getElementById('reportTimestamp'),
     recommendationBadge: document.getElementById('reportRecommendationBadge'),
     content: document.getElementById('reportContent'),
 
-    // Market Performance Elements
+    // Numerical Market Metrics
     marketPerformancePanel: document.getElementById('reportMarketPerformance'),
     marketDataAvailable: document.getElementById('reportMarketDataAvailable'),
     marketDataEmptyNotice: document.getElementById('reportMarketDataEmptyNotice'),
-    badgeEod: document.getElementById('reportBadgeEod'),
-    badgeDate: document.getElementById('reportBadgeDate'),
     badgeSource: document.getElementById('reportBadgeSource'),
+    badgeImported: document.getElementById('reportBadgeImported'),
     latestClose: document.getElementById('reportLatestClose'),
     dayChange: document.getElementById('reportDayChange'),
+    prevClose: document.getElementById('reportPrevClose'),
+    dayRange: document.getElementById('reportDayRange'),
+    currency: document.getElementById('reportCurrency'),
+    dayOpen: document.getElementById('reportDayOpen'),
     dayHigh: document.getElementById('reportDayHigh'),
     dayLow: document.getElementById('reportDayLow'),
-    prevClose: document.getElementById('reportPrevClose'),
-    volume: document.getElementById('reportVolume'),
     vwap: document.getElementById('reportVwap'),
+    volume: document.getElementById('reportVolume'),
+    avgVolume30: document.getElementById('reportAvgVolume30'),
+    sma20: document.getElementById('reportSma20'),
+    sma50: document.getElementById('reportSma50'),
+    volatility: document.getElementById('reportVolatility'),
     week52Range: document.getElementById('report52WeekRange'),
     return1M: document.getElementById('reportReturn1M'),
     return3M: document.getElementById('reportReturn3M'),
     return6M: document.getElementById('reportReturn6M'),
     return1Y: document.getElementById('reportReturn1Y'),
 
-    // SVG Chart Elements
+    // AI Executive Summary
+    companyOverview: document.getElementById('reportCompanyOverview'),
+    investmentSummary: document.getElementById('reportInvestmentSummary'),
+    aiScore: document.getElementById('reportAiScore'),
+    aiRecommendation: document.getElementById('reportAiRecommendation'),
+    coverageQuality: document.getElementById('reportCoverageQuality'),
+
+    // Signals & News
+    financialAssessment: document.getElementById('reportFinancialAssessment'),
+    positiveSignalsList: document.getElementById('reportPositiveSignalsList'),
+    newsSection: document.getElementById('reportNewsSection'),
+    newsSentiment: document.getElementById('reportNewsSentiment'),
+    keyRisks: document.getElementById('reportKeyRisks'),
+    keyOpportunities: document.getElementById('reportKeyOpportunities'),
+
+    // Investment Decision Summary (Section 17)
+    decisionSummaryCard: document.getElementById('reportDecisionSummaryCard'),
+    researchViewBadge: document.getElementById('reportResearchViewBadge'),
+    confidenceBadge: document.getElementById('reportConfidenceBadge'),
+    suggestedAction: document.getElementById('reportSuggestedAction'),
+    whyThisViewList: document.getElementById('reportWhyThisViewList'),
+    keyRisksList: document.getElementById('reportKeyRisksList'),
+    whatCouldChange: document.getElementById('reportWhatCouldChange'),
+    checkNextList: document.getElementById('reportCheckNextList'),
+
+    // SVG Historical Price Chart (Section 8 & 9)
     chartContainer: document.getElementById('reportChartContainer'),
     chartLoading: document.getElementById('reportChartLoading'),
     chartEmpty: document.getElementById('reportChartEmpty'),
     chartEmptyMessage: document.getElementById('reportChartEmptyMessage'),
+    chartError: document.getElementById('reportChartError'),
+    chartErrorMessage: document.getElementById('reportChartErrorMessage'),
+    chartRetryBtn: document.getElementById('reportChartRetryBtn'),
     priceHistorySvg: document.getElementById('reportPriceHistorySvg'),
     svgGridlines: document.getElementById('reportSvgGridlines'),
     svgAxes: document.getElementById('reportSvgAxes'),
     svgAreaPath: document.getElementById('reportSvgAreaPath'),
     svgLinePath: document.getElementById('reportSvgLinePath'),
+    svgCrosshair: document.getElementById('reportSvgCrosshair'),
     svgPoints: document.getElementById('reportSvgPoints'),
+    chartTooltip: document.getElementById('reportChartTooltip'),
     chartAccessibleSummary: document.getElementById('reportChartAccessibleSummary'),
     chartSubtitle: document.getElementById('reportChartSubtitle'),
     chartDisclaimerText: document.getElementById('reportChartDisclaimerText'),
-    rangeButtons: document.querySelectorAll('#reportMarketPerformance .range-btn'),
-    priceModeButtons: document.querySelectorAll('#reportMarketPerformance .mode-btn'),
+    chartPeriodReturn: document.getElementById('reportChartPeriodReturn'),
+    chartPeriodLow: document.getElementById('reportChartPeriodLow'),
+    chartPeriodHigh: document.getElementById('reportChartPeriodHigh'),
+    chartPlottedCount: document.getElementById('reportChartPlottedCount'),
+    rangeButtons: document.querySelectorAll('.range-btn'),
+    priceModeButtons: document.querySelectorAll('.mode-btn'),
 
-    // Report body elements
-    companyOverview: document.getElementById('reportCompanyOverview'),
-    investmentSummary: document.getElementById('reportInvestmentSummary'),
-    aiScore: document.getElementById('reportAiScore'),
-    aiRecommendation: document.getElementById('reportAiRecommendation'),
-    financialCards: document.getElementById('reportFinancialCards'),
-    financialAssessment: document.getElementById('reportFinancialAssessment'),
-    newsSentiment: document.getElementById('reportNewsSentiment'),
-    keyRisks: document.getElementById('reportKeyRisks'),
-    keyOpportunities: document.getElementById('reportKeyOpportunities'),
-    outlook: document.getElementById('reportOutlook'),
-    conclusion: document.getElementById('reportConclusion'),
+    // Actions
     printBtn: document.getElementById('printReportBtn'),
     shareBtn: document.getElementById('shareReportBtn')
   };
@@ -100,6 +197,7 @@
   var activePriceMode = 'raw';
   var historyAbortController = null;
   var historyRequestSeq = 0;
+  var cachedHistoryPrices = [];
 
   function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -111,19 +209,38 @@
       .replace(/'/g, '&#039;');
   }
 
-  function getCurrencySymbol(currency) {
-    if (!currency) return '₹';
-    var c = String(currency).toUpperCase();
-    if (c === 'INR') return '₹';
-    if (c === 'USD') return '$';
-    if (c === 'GBP') return '£';
-    if (c === 'EUR') return '€';
-    return c + ' ';
+  function formatIST(isoStr) {
+    if (!isoStr) return '—';
+    try {
+      var d = new Date(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
+      return d.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      }) + ' IST';
+    } catch (e) {
+      return isoStr;
+    }
   }
 
-  function formatPrice(val, currency) {
-    if (val === null || val === undefined || val === '') return '—';
-    return marketHelper.formatCurrency(val, currency);
+  function formatDateOnly(isoDateStr) {
+    if (!isoDateStr) return '—';
+    try {
+      var parts = isoDateStr.split('T')[0].split('-');
+      if (parts.length === 3) {
+        var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+      return isoDateStr;
+    } catch (e) {
+      return isoDateStr;
+    }
   }
 
   function showError(message) {
@@ -147,16 +264,43 @@
       });
   }
 
-  function recommendationBadgeClass(rec) {
-    if (rec === 'Buy') return 'badge--low';
-    if (rec === 'Sell') return 'badge--high';
-    return 'badge--medium';
+  // =========================================================================
+  // 1. EXCLUSIVE CHART STATES (Section 9)
+  // setChartState("idle" | "loading" | "data" | "empty" | "error")
+  // Exactly ONE state is visible at any time.
+  // =========================================================================
+  function setChartState(state, message) {
+    // Hide all states first
+    if (els.chartLoading) els.chartLoading.hidden = true;
+    if (els.chartEmpty) els.chartEmpty.hidden = true;
+    if (els.chartError) els.chartError.hidden = true;
+    if (els.chartContainer) els.chartContainer.hidden = true;
+
+    if (state === 'loading') {
+      if (els.chartLoading) els.chartLoading.hidden = false;
+    } else if (state === 'data') {
+      if (els.chartContainer) els.chartContainer.hidden = false;
+    } else if (state === 'empty') {
+      if (els.chartEmpty) {
+        els.chartEmpty.hidden = false;
+        if (els.chartEmptyMessage && message) {
+          els.chartEmptyMessage.textContent = message;
+        }
+      }
+    } else if (state === 'error') {
+      if (els.chartError) {
+        els.chartError.hidden = false;
+        if (els.chartErrorMessage && message) {
+          els.chartErrorMessage.textContent = message;
+        }
+      }
+    }
+    // "idle" leaves all states hidden
   }
 
   // =========================================================================
-  // MARKET PERFORMANCE & CHART RENDERING
+  // 2. CORE NUMERICAL MARKET PERFORMANCE (Section 6)
   // =========================================================================
-
   function renderMarketSummary(summaryData, securityMeta) {
     currentSecurityMeta = securityMeta || (summaryData && summaryData.security) || null;
     var md = (summaryData && (summaryData.summary || summaryData.market_data)) || null;
@@ -171,15 +315,29 @@
     if (els.marketDataEmptyNotice) els.marketDataEmptyNotice.hidden = true;
     if (els.marketDataAvailable) els.marketDataAvailable.hidden = false;
 
-    // Badges
-    if (els.badgeDate) {
-      els.badgeDate.textContent = 'Trading Date: ' + (md.trading_date || '—');
+    // Freshness & Identity
+    if (els.tradingDate) {
+      els.tradingDate.textContent = formatDateOnly(md.trading_date);
     }
-    if (els.badgeSource) {
-      els.badgeSource.textContent = md.source || 'NSE CM-UDiFF';
+    if (els.marketSession) {
+      els.marketSession.textContent = 'NSE End-of-Day';
     }
 
-    // Latest Close & Change
+    var cov = md.coverage || {};
+    if (els.historicalCoverage) {
+      if (cov.start_date && cov.end_date) {
+        els.historicalCoverage.textContent = formatDateOnly(cov.start_date) + ' to ' + formatDateOnly(cov.end_date) +
+          ' (' + (cov.total_sessions || 0) + ' sessions)';
+      } else {
+        els.historicalCoverage.textContent = 'Verified EOD Dataset';
+      }
+    }
+
+    if (els.badgeSource) {
+      els.badgeSource.textContent = 'Source: ' + (md.source || 'NSE CM-UDiFF');
+    }
+
+    // Latest Price & Day Movement
     if (els.latestClose) {
       els.latestClose.textContent = marketHelper.formatCurrency(md.close, currency);
     }
@@ -191,12 +349,26 @@
          changeObj.isNegative ? 'price-highlight__change--neg' : 'price-highlight__change--neutral');
     }
 
-    // Metric Cards
+    if (els.prevClose) els.prevClose.textContent = md.previous_close ? marketHelper.formatCurrency(md.previous_close, currency) : '—';
+    if (els.dayRange) {
+      if (md.low && md.high) {
+        els.dayRange.textContent = marketHelper.formatCurrency(md.low, currency) + ' – ' + marketHelper.formatCurrency(md.high, currency);
+      } else {
+        els.dayRange.textContent = '—';
+      }
+    }
+    if (els.currency) els.currency.textContent = currency + ' (' + (currency === 'INR' ? '₹' : currency) + ')';
+
+    // Numerical Metrics
+    if (els.dayOpen) els.dayOpen.textContent = md.open ? marketHelper.formatCurrency(md.open, currency) : '—';
     if (els.dayHigh) els.dayHigh.textContent = md.high ? marketHelper.formatCurrency(md.high, currency) : '—';
     if (els.dayLow) els.dayLow.textContent = md.low ? marketHelper.formatCurrency(md.low, currency) : '—';
-    if (els.prevClose) els.prevClose.textContent = md.previous_close ? marketHelper.formatCurrency(md.previous_close, currency) : '—';
-    if (els.volume) els.volume.textContent = md.volume !== null && md.volume !== undefined ? marketHelper.formatDecimal(md.volume, 0) : '—';
     if (els.vwap) els.vwap.textContent = md.vwap ? marketHelper.formatCurrency(md.vwap, currency) : '—';
+    if (els.volume) els.volume.textContent = md.volume !== null && md.volume !== undefined ? Number(md.volume).toLocaleString('en-IN') : '—';
+    if (els.avgVolume30) els.avgVolume30.textContent = md.average_volume_30 ? Number(md.average_volume_30).toLocaleString('en-IN') : '—';
+    if (els.sma20) els.sma20.textContent = md.sma_20 ? marketHelper.formatCurrency(md.sma_20, currency) : '—';
+    if (els.sma50) els.sma50.textContent = md.sma_50 ? marketHelper.formatCurrency(md.sma_50, currency) : '—';
+    if (els.volatility) els.volatility.textContent = md.volatility || '—';
     if (els.week52Range) els.week52Range.textContent = marketHelper.format52WeekRange(md.week_52_low, md.week_52_high, currency);
 
     // Period Returns
@@ -220,47 +392,75 @@
     applyReturnStyle(els.return1Y, r1y);
   }
 
+  // =========================================================================
+  // 3. ACCURATE SVG CHART & TOOLTIP (Section 8)
+  // =========================================================================
   function renderSvgChart(historyData) {
     if (!els.priceHistorySvg) return;
 
     var prices = (historyData && historyData.prices) || [];
+    cachedHistoryPrices = prices;
     var currency = (currentSecurityMeta && currentSecurityMeta.currency) || 'INR';
 
-    // Clear previous SVG contents
+    // Clear previous SVG paths and text
     if (els.svgGridlines) els.svgGridlines.innerHTML = '';
     if (els.svgAxes) els.svgAxes.innerHTML = '';
     if (els.svgPoints) els.svgPoints.innerHTML = '';
+    if (els.svgCrosshair) els.svgCrosshair.innerHTML = '';
     if (els.svgAreaPath) els.svgAreaPath.setAttribute('d', '');
     if (els.svgLinePath) els.svgLinePath.setAttribute('d', '');
 
     if (prices.length === 0) {
-      if (els.chartContainer) els.chartContainer.hidden = true;
-      if (els.chartEmpty) {
-        els.chartEmpty.hidden = false;
-        if (els.chartEmptyMessage) {
-          els.chartEmptyMessage.textContent = 'No verified NSE price records found for range ' + activeRange.toUpperCase() + '.';
-        }
-      }
+      setChartState('empty', 'No verified NSE price records found for range ' + activeRange.toUpperCase() + '.');
       if (els.chartAccessibleSummary) {
         els.chartAccessibleSummary.textContent = 'No historical data points available.';
       }
       return;
     }
 
-    if (els.chartEmpty) els.chartEmpty.hidden = true;
-    if (els.chartContainer) els.chartContainer.hidden = false;
+    setChartState('data');
 
-    var width = 600;
-    var height = 260;
-    var pad = { top: 25, right: 35, bottom: 35, left: 60 };
+    var width = 640;
+    var height = 280;
+    var pad = { top: 25, right: 35, bottom: 35, left: 65 };
 
     var coords = marketHelper.calculateSvgCoordinates(prices, width, height, pad);
+
+    // Period Return & Color Theme
+    var firstPrice = prices[0].close;
+    var lastPrice = prices[prices.length - 1].close;
+    var numFirst = typeof firstPrice === 'number' ? firstPrice : parseFloat(String(firstPrice || 0));
+    var numLast = typeof lastPrice === 'number' ? lastPrice : parseFloat(String(lastPrice || 0));
+    var periodReturnPct = (numFirst > 0) ? ((numLast - numFirst) / numFirst * 100) : 0;
+    var isPositive = periodReturnPct > 0;
+    var isNegative = periodReturnPct < 0;
+
+    if (els.chartPeriodReturn) {
+      var retSign = isPositive ? '+' : (isNegative ? '-' : '');
+      els.chartPeriodReturn.textContent = retSign + Math.abs(periodReturnPct).toFixed(2) + '%';
+      els.chartPeriodReturn.className = isPositive ? 'return-item__value--pos' : (isNegative ? 'return-item__value--neg' : 'return-item__value--neutral');
+    }
+
+    // Apply color theme to paths
+    var strokeColor = isPositive ? '#16a34a' : (isNegative ? '#dc2626' : '#2563eb');
+    var gradientId = isPositive ? '#reportChartGradientPos' : (isNegative ? '#reportChartGradientNeg' : '#reportChartGradient');
+
+    if (els.svgLinePath) {
+      els.svgLinePath.setAttribute('d', coords.pathD);
+      els.svgLinePath.style.stroke = strokeColor;
+    }
+    if (els.svgAreaPath) {
+      els.svgAreaPath.setAttribute('d', coords.areaPathD);
+      els.svgAreaPath.setAttribute('fill', 'url(' + gradientId + ')');
+    }
 
     // Gridlines and Y-axis
     var plotHeight = height - pad.top - pad.bottom;
     var yLevels = [
       { y: pad.top, price: coords.maxPrice },
-      { y: pad.top + plotHeight / 2, price: (coords.minPrice + coords.maxPrice) / 2 },
+      { y: pad.top + plotHeight * 0.25, price: coords.minPrice + (coords.maxPrice - coords.minPrice) * 0.75 },
+      { y: pad.top + plotHeight * 0.5, price: coords.minPrice + (coords.maxPrice - coords.minPrice) * 0.5 },
+      { y: pad.top + plotHeight * 0.75, price: coords.minPrice + (coords.maxPrice - coords.minPrice) * 0.25 },
       { y: pad.top + plotHeight, price: coords.minPrice }
     ];
 
@@ -268,8 +468,8 @@
     var axesHtml = '';
 
     yLevels.forEach(function (lvl) {
-      gridHtml += '<line class="chart-gridline" x1="' + pad.left + '" y1="' + lvl.y + '" x2="' + (width - pad.right) + '" y2="' + lvl.y + '" />';
-      axesHtml += '<text class="chart-axis-text" x="' + (pad.left - 8) + '" y="' + (lvl.y + 4) + '" text-anchor="end">' +
+      gridHtml += '<line class="chart-gridline" x1="' + pad.left + '" y1="' + lvl.y.toFixed(2) + '" x2="' + (width - pad.right) + '" y2="' + lvl.y.toFixed(2) + '" />';
+      axesHtml += '<text class="chart-axis-text" x="' + (pad.left - 8) + '" y="' + (lvl.y + 4).toFixed(2) + '" text-anchor="end">' +
         marketHelper.escapeHtml(marketHelper.formatDecimal(lvl.price, 2)) + '</text>';
     });
 
@@ -286,46 +486,88 @@
     if (els.svgGridlines) els.svgGridlines.innerHTML = gridHtml;
     if (els.svgAxes) els.svgAxes.innerHTML = axesHtml;
 
-    // Line & Area Paths
-    if (els.svgLinePath) els.svgLinePath.setAttribute('d', coords.pathD);
-    if (els.svgAreaPath) els.svgAreaPath.setAttribute('d', coords.areaPathD);
-
-    // Data dots
+    // Interactive Hover & Data Points
     var pointsHtml = '';
     var renderAllDots = coords.points.length <= 40 || coords.isSingle;
+
     coords.points.forEach(function (pt, pIdx) {
       var isEdge = pIdx === 0 || pIdx === coords.points.length - 1;
       if (renderAllDots || isEdge) {
-        var dotTitle = pt.date + ': ' + marketHelper.formatCurrency(pt.close, currency);
-        pointsHtml += '<circle class="chart-dot" cx="' + pt.x + '" cy="' + pt.y + '" r="' + (coords.isSingle ? '6' : '3.5') + '">' +
-          '<title>' + marketHelper.escapeHtml(dotTitle) + '</title>' +
-          '</circle>';
+        pointsHtml += '<circle class="chart-dot" data-idx="' + pIdx + '" cx="' + pt.x + '" cy="' + pt.y + '" r="' + (coords.isSingle ? '6' : '3.5') + '" style="stroke:' + strokeColor + ';" />';
       }
     });
     if (els.svgPoints) els.svgPoints.innerHTML = pointsHtml;
 
-    // Subtitle & Disclaimer
+    // Markers & Metadata
+    if (els.chartPeriodLow) els.chartPeriodLow.textContent = marketHelper.formatCurrency(coords.minPrice, currency);
+    if (els.chartPeriodHigh) els.chartPeriodHigh.textContent = marketHelper.formatCurrency(coords.maxPrice, currency);
+    if (els.chartPlottedCount) els.chartPlottedCount.textContent = prices.length + ' sessions';
+
     var modeInfo = marketHelper.formatPriceModeLabel(activePriceMode, historyData.metadata);
     if (els.chartSubtitle) {
       els.chartSubtitle.textContent = modeInfo.badgeText;
     }
     if (els.chartDisclaimerText) {
-      if (modeInfo.isAdjusted) {
-        els.chartDisclaimerText.innerHTML = '<strong>' + marketHelper.escapeHtml(modeInfo.badgeText) + ':</strong> ' +
-          marketHelper.escapeHtml(modeInfo.disclaimer) + ' <em>(' + marketHelper.escapeHtml(modeInfo.actionCountText) + ')</em>';
-      } else {
-        els.chartDisclaimerText.innerHTML = '<strong>' + marketHelper.escapeHtml(modeInfo.badgeText) + ':</strong> ' +
-          marketHelper.escapeHtml(modeInfo.disclaimer);
+      els.chartDisclaimerText.innerHTML = '<strong>' + marketHelper.escapeHtml(modeInfo.badgeText) + ':</strong> ' +
+        marketHelper.escapeHtml(modeInfo.disclaimer);
+    }
+
+    if (els.chartAccessibleSummary) {
+      var sym = currentSecurityMeta ? currentSecurityMeta.symbol : 'equity';
+      els.chartAccessibleSummary.textContent = 'Price history for ' + sym + ' (' + activeRange.toUpperCase() + '): ' +
+        prices.length + ' sessions plotted. Period low ₹' + coords.minPrice.toFixed(2) + ', period high ₹' + coords.maxPrice.toFixed(2) +
+        ', net change ' + periodReturnPct.toFixed(2) + '%.';
+    }
+
+    // Attach Tooltip Hover Interaction
+    setupChartTooltip(coords.points, currency);
+  }
+
+  function setupChartTooltip(points, currency) {
+    if (!els.priceHistorySvg || !els.chartTooltip) return;
+
+    var svgRect = null;
+
+    function handleMouseMove(e) {
+      if (!points || !points.length) return;
+      svgRect = els.priceHistorySvg.getBoundingClientRect();
+      var mouseX = e.clientX - svgRect.left;
+      var svgX = (mouseX / svgRect.width) * 640;
+
+      // Find closest point by X coordinate
+      var closest = points[0];
+      var minDiff = Math.abs(svgX - closest.x);
+      for (var i = 1; i < points.length; i++) {
+        var diff = Math.abs(svgX - points[i].x);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = points[i];
+        }
+      }
+
+      if (closest && closest.raw) {
+        var r = closest.raw;
+        var tooltipHtml = '<strong>' + escapeHtml(r.date) + ' (NSE EOD)</strong><br/>' +
+          'Close: ' + marketHelper.formatCurrency(r.close, currency) + '<br/>' +
+          'Open: ' + marketHelper.formatCurrency(r.open, currency) + '<br/>' +
+          'High: ' + marketHelper.formatCurrency(r.high, currency) + ' | Low: ' + marketHelper.formatCurrency(r.low, currency) + '<br/>' +
+          'Volume: ' + (r.volume ? Number(r.volume).toLocaleString('en-IN') : '—');
+
+        els.chartTooltip.innerHTML = tooltipHtml;
+        els.chartTooltip.style.display = 'block';
+        var pointScreenX = (closest.x / 640) * svgRect.width;
+        var pointScreenY = (closest.y / 280) * svgRect.height;
+        els.chartTooltip.style.left = pointScreenX + 'px';
+        els.chartTooltip.style.top = pointScreenY + 'px';
       }
     }
 
-    // Accessible text summary
-    if (els.chartAccessibleSummary) {
-      var summaryText = 'Price history for ' + (currentSecurityMeta ? currentSecurityMeta.symbol : 'security') +
-        ' (' + activeRange.toUpperCase() + ' - ' + modeInfo.label + '): ' + prices.length + ' trading days plotted. ' +
-        'Low: ' + marketHelper.formatCurrency(coords.minPrice, currency) + ', High: ' + marketHelper.formatCurrency(coords.maxPrice, currency);
-      els.chartAccessibleSummary.textContent = summaryText;
+    function handleMouseLeave() {
+      if (els.chartTooltip) els.chartTooltip.style.display = 'none';
     }
+
+    els.priceHistorySvg.onmousemove = handleMouseMove;
+    els.priceHistorySvg.onmouseleave = handleMouseLeave;
   }
 
   function loadPriceHistory(securityId, rangeKey, priceMode) {
@@ -341,8 +583,7 @@
     historyRequestSeq++;
     var thisSeq = historyRequestSeq;
 
-    if (els.chartLoading) els.chartLoading.hidden = false;
-    if (els.chartEmpty) els.chartEmpty.hidden = true;
+    setChartState('loading');
 
     var modeParam = priceMode || activePriceMode || 'raw';
     var url = '/api/securities/' + encodeURIComponent(securityId) +
@@ -354,17 +595,10 @@
       signal: historyAbortController ? historyAbortController.signal : undefined
     })
       .then(function (result) {
-        if (thisSeq !== historyRequestSeq) return; // Stale request prevention
-        if (els.chartLoading) els.chartLoading.hidden = true;
+        if (thisSeq !== historyRequestSeq) return; // Discard stale responses
 
         if (!result.ok || !result.data || !result.data.success) {
-          if (els.chartEmpty) {
-            els.chartEmpty.hidden = false;
-            if (els.chartEmptyMessage) {
-              els.chartEmptyMessage.textContent = 'No verified NSE price records found for range ' + rangeKey.toUpperCase() + '.';
-            }
-          }
-          if (els.chartContainer) els.chartContainer.hidden = true;
+          setChartState('empty', 'No verified NSE price records found for range ' + rangeKey.toUpperCase() + '.');
           return;
         }
 
@@ -373,13 +607,7 @@
       .catch(function (err) {
         if (err && err.name === 'AbortError') return;
         if (thisSeq !== historyRequestSeq) return;
-        if (els.chartLoading) els.chartLoading.hidden = true;
-        if (els.chartEmpty) {
-          els.chartEmpty.hidden = false;
-          if (els.chartEmptyMessage) {
-            els.chartEmptyMessage.textContent = 'Unable to load price history.';
-          }
-        }
+        setChartState('error', 'Unable to retrieve historical market records.');
       });
   }
 
@@ -392,10 +620,8 @@
 
     currentSecurityId = securityId;
 
-    // 1. Fetch Latest Market Summary
-    fetchJson('/api/securities/' + encodeURIComponent(securityId) + '/market-data/summary', {
-      method: 'GET'
-    })
+    // Fetch Latest Market Summary
+    fetchJson('/api/securities/' + encodeURIComponent(securityId) + '/market-data/summary', { method: 'GET' })
       .then(function (result) {
         if (result.ok && result.data && result.data.success) {
           renderMarketSummary(result.data, result.data.security);
@@ -409,56 +635,97 @@
         if (els.marketDataEmptyNotice) els.marketDataEmptyNotice.hidden = false;
       });
 
-    // 2. Fetch Historical Time-Series for Chart
+    // Fetch Historical Time-Series
     loadPriceHistory(securityId, activeRange, activePriceMode);
   }
 
   // =========================================================================
-  // REPORT RENDERING & AI INTERACTION
+  // 4. INVESTMENT DECISION SUMMARY & REPORT RENDERING (Section 17)
   // =========================================================================
+  function renderDecisionSummary(reportObj, record) {
+    var dec = (reportObj && reportObj.decision_summary) || {};
+    var rView = dec.research_view || (reportObj.recommendation === 'Buy' ? 'Positive' : (reportObj.recommendation === 'Sell' ? 'Cautious' : 'Neutral'));
+    var sAction = dec.suggested_action || (rView === 'Positive' ? 'Consider for further research' : 'Add to watchlist');
+    var cLevel = dec.confidence_level || 'Medium';
 
-  function renderFinancialCards(financialData) {
-    if (!els.financialCards) return;
-    els.financialCards.innerHTML = '';
-    if (!financialData) {
-      els.financialCards.innerHTML = '<p class="field-hint">No financial highlights were available for this research.</p>';
-      return;
+    // View Badge
+    if (els.researchViewBadge) {
+      els.researchViewBadge.textContent = rView;
+      var vClass = 'decision-view-badge--' + (
+        rView === 'Positive' ? 'positive' :
+        (rView === 'Cautious' ? 'cautious' :
+         (rView === 'Insufficient Data' ? 'insufficient' : 'neutral'))
+      );
+      els.researchViewBadge.className = 'decision-view-badge ' + vClass;
     }
 
-    var fin = financialData;
-    if (typeof fin === 'string') {
-      try { fin = JSON.parse(fin); } catch (e) { fin = null; }
-    }
-    if (!fin) {
-      els.financialCards.innerHTML = '<p class="field-hint">No financial highlights were available for this research.</p>';
-      return;
+    // Confidence Badge
+    if (els.confidenceBadge) {
+      els.confidenceBadge.textContent = cLevel + ' Confidence';
+      var cClass = 'confidence-badge--' + (cLevel === 'High' ? 'high' : (cLevel === 'Low' ? 'low' : 'medium'));
+      els.confidenceBadge.className = 'confidence-badge ' + cClass;
     }
 
-    var curr = fin.currency || 'INR';
-    var cards = [
-      { label: 'Last Close (EOD)', value: fin.price ? formatPrice(fin.price, curr) : null },
-      { label: 'Day Change', value: fin.change },
-      { label: 'Day Change %', value: fin.change_percent },
-      { label: 'Day High', value: fin.high ? formatPrice(fin.high, curr) : null },
-      { label: 'Day Low', value: fin.low ? formatPrice(fin.low, curr) : null },
-      { label: 'Volume', value: fin.volume ? Number(fin.volume).toLocaleString('en-IN') : null }
-    ];
-    cards.forEach(function (c) {
-      if (!c.value) return;
-      var card = document.createElement('div');
-      card.className = 'stat-card';
-      var valEl = document.createElement('div');
-      valEl.className = 'stat-card__value';
-      valEl.textContent = c.value;
-      var lblEl = document.createElement('div');
-      lblEl.className = 'stat-card__label';
-      lblEl.textContent = c.label;
-      card.appendChild(valEl);
-      card.appendChild(lblEl);
-      els.financialCards.appendChild(card);
-    });
-    if (!els.financialCards.children.length) {
-      els.financialCards.innerHTML = '<p class="field-hint">No financial highlights were available for this research.</p>';
+    // Suggested Action
+    if (els.suggestedAction) {
+      els.suggestedAction.textContent = sAction;
+    }
+
+    // "Why This View?" Reasons
+    if (els.whyThisViewList) {
+      els.whyThisViewList.innerHTML = '';
+      var reasons = dec.why_this_view || [];
+      if (!reasons.length) {
+        reasons = [
+          'Evaluated from official NSE EOD closing series.',
+          'Assigned ' + (reportObj.recommendation || 'Neutral') + ' research posture.'
+        ];
+      }
+      reasons.forEach(function (r) {
+        var li = document.createElement('li');
+        li.textContent = r;
+        els.whyThisViewList.appendChild(li);
+      });
+    }
+
+    // Key Risks List
+    if (els.keyRisksList) {
+      els.keyRisksList.innerHTML = '';
+      var risks = dec.key_risks_list || reportObj.key_risks_list || [];
+      if (!risks.length) {
+        risks = [
+          'Market-wide volatility and macroeconomic headwinds.',
+          'Verified fundamental balance sheet figures pending quarterly import.'
+        ];
+      }
+      risks.forEach(function (r) {
+        var li = document.createElement('li');
+        li.textContent = r;
+        els.keyRisksList.appendChild(li);
+      });
+    }
+
+    // What Could Change
+    if (els.whatCouldChange) {
+      els.whatCouldChange.textContent = dec.what_could_change_view ||
+        'A sustained breakout above 50-session moving averages on elevated volume or release of audited quarterly earnings statements would update this assessment.';
+    }
+
+    // Checklist
+    if (els.checkNextList) {
+      els.checkNextList.innerHTML = '';
+      var checklist = dec.check_next_checklist || [
+        'Review upcoming quarterly audited financial statements',
+        'Verify trading volume relative to 30-session average',
+        'Compare performance with sector peers',
+        'Check corporate action updates on NSE'
+      ];
+      checklist.forEach(function (item) {
+        var li = document.createElement('li');
+        li.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ' +
+          escapeHtml(item);
+        els.checkNextList.appendChild(li);
+      });
     }
   }
 
@@ -478,38 +745,62 @@
 
     var initials = escapeHtml((record.company_name || '?').trim().slice(0, 2).toUpperCase());
     if (els.companyLogo) els.companyLogo.textContent = initials;
-    if (els.companyName) els.companyName.textContent = record.company_name + ' — Investment Report';
+    if (els.companyName) els.companyName.textContent = record.company_name;
     if (els.companyTicker) els.companyTicker.textContent = record.ticker_symbol;
+    if (els.companyExchange) els.companyExchange.textContent = 'NSE';
+    if (els.companySeries) els.companySeries.textContent = 'Series: EQ';
 
     if (els.timestamp) {
-      els.timestamp.textContent = reportObj.generated_at
-        ? new Date(reportObj.generated_at).toLocaleString()
-        : new Date().toLocaleString();
+      els.timestamp.textContent = formatIST(reportObj.generated_at || record.created_at);
     }
 
-    var rec = reportObj.recommendation || record.recommendation || 'Not available';
+    var rec = reportObj.recommendation || record.recommendation || 'Hold';
     if (els.recommendationBadge) {
       els.recommendationBadge.textContent = rec;
-      els.recommendationBadge.className = 'badge report-header__recommendation ' + recommendationBadgeClass(rec);
+      els.recommendationBadge.className = 'badge report-header__recommendation ' +
+        (rec === 'Buy' ? 'badge--low' : (rec === 'Sell' ? 'badge--high' : 'badge--medium'));
     }
 
     if (els.companyOverview) els.companyOverview.textContent = reportObj.company_overview || '';
     if (els.investmentSummary) els.investmentSummary.textContent = reportObj.investment_summary || '';
     if (els.aiScore) {
       var scoreVal = (typeof reportObj.ai_score === 'number') ? reportObj.ai_score : record.ai_score;
-      els.aiScore.textContent = (typeof scoreVal === 'number') ? (scoreVal + ' / 100') : 'Not available';
+      els.aiScore.textContent = (typeof scoreVal === 'number') ? (scoreVal + ' / 100') : '—';
     }
     if (els.aiRecommendation) els.aiRecommendation.textContent = rec;
 
-    renderFinancialCards(record.financial_data);
     if (els.financialAssessment) els.financialAssessment.textContent = reportObj.financial_assessment || '';
-    if (els.newsSentiment) els.newsSentiment.textContent = reportObj.news_sentiment || '';
-    if (els.keyRisks) els.keyRisks.textContent = reportObj.key_risks || '';
-    if (els.keyOpportunities) els.keyOpportunities.textContent = reportObj.key_opportunities || '';
-    if (els.outlook) els.outlook.textContent = reportObj.overall_outlook || '';
-    if (els.conclusion) els.conclusion.textContent = reportObj.conclusion || '';
 
-    // Load Market Performance & Chart
+    // Positive Signals List
+    if (els.positiveSignalsList) {
+      els.positiveSignalsList.innerHTML = '';
+      var posSignals = reportObj.positive_signals || [];
+      if (!posSignals.length) {
+        posSignals = [
+          'Listed on NSE equity segment with verified daily market activity.',
+          'Official EOD price series archived and validated in database.'
+        ];
+      }
+      posSignals.forEach(function (s) {
+        var li = document.createElement('li');
+        li.textContent = s;
+        els.positiveSignalsList.appendChild(li);
+      });
+    }
+
+    // News Sentiment
+    if (els.newsSentiment) {
+      els.newsSentiment.textContent = reportObj.news_sentiment || 'Verified news sentiment neutral/pending live feed.';
+    }
+
+    // Key Risks & Opportunities
+    if (els.keyRisks) els.keyRisks.textContent = reportObj.key_risks || 'Market volatility and unverified fundamental earnings data.';
+    if (els.keyOpportunities) els.keyOpportunities.textContent = reportObj.key_opportunities || 'Domestic sector expansion and sustained market liquidity.';
+
+    // Decision Summary Section
+    renderDecisionSummary(reportObj, record);
+
+    // Load Core Market Performance & Chart
     var secId = record.security_id || (record.security && record.security.id);
     loadMarketPerformance(secId);
   }
@@ -550,7 +841,7 @@
           var lbl = els.generateBtn.querySelector('.btn-label');
           if (lbl) lbl.textContent = 'Generate Investment Report';
         }
-        showError('Unable to connect to the server. Please make sure the backend is running.');
+        showError('Unable to connect to the server. Please check your network connection.');
       });
   }
 
@@ -574,13 +865,20 @@
         }
       })
       .catch(function () {
-        showError('Unable to connect to the server. Please make sure the backend is running.');
+        showError('Unable to connect to the server. Please check your network connection.');
       });
   }
 
   function bindActions() {
     if (els.generateBtn) {
       els.generateBtn.addEventListener('click', generateReport);
+    }
+    if (els.chartRetryBtn) {
+      els.chartRetryBtn.addEventListener('click', function () {
+        if (currentSecurityId) {
+          loadPriceHistory(currentSecurityId, activeRange, activePriceMode);
+        }
+      });
     }
     if (els.printBtn) {
       els.printBtn.addEventListener('click', function () {
@@ -603,7 +901,7 @@
       });
     }
 
-    // Chart Range Selector Buttons (Independent of Gemini)
+    // Chart Range Selector Buttons (Zero External Calls)
     if (els.rangeButtons) {
       els.rangeButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -625,7 +923,7 @@
       });
     }
 
-    // Chart Price Mode Buttons (Independent of Gemini)
+    // Chart Price Mode Buttons (Zero External Calls)
     if (els.priceModeButtons) {
       els.priceModeButtons.forEach(function (btn) {
         btn.addEventListener('click', function () {

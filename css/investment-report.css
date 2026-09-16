@@ -1,19 +1,22 @@
 /* ==========================================================================
    INVESTMENT-REPORT.CSS
    --------------------------------------------------------------------------
-   Styles for investment-report.html only. Builds on dashboard.css,
-   company-research.css, and ai-analysis.css -- .panel, .badge,
-   .stat-cards/.financial-summary, .company-overview__*, .swot*,
-   .ai-insight-row, .ai-recommendation*, .prediction-grid/.prediction-card,
-   .chart-card__figure, .gauge-arc/.gauge-value, .research-actions, and
-   .eyebrow are all reused as-is. Everything below is new markup specific
-   to the report layout: the header, executive summary, AI insights
-   columns, and risk analysis meter + breakdown.
+   Styles for investment-report.html only.
+   Clean, professional financial-dashboard appearance:
+   - Clean white cards, consistent spacing, clear content hierarchy
+   - Limited, intentional color (green for positive, red for negative, blue/gray for info)
+   - Exclusive chart states
+   - Investment Decision Summary card
+   - High-fidelity print styles
    ========================================================================== */
 
 /* ------------------------------------------------------------------
-   1. REPORT HEADER
+   1. REPORT HEADER & COMPANY IDENTITY
    ------------------------------------------------------------------ */
+.report-header {
+  margin-bottom: var(--space-5);
+}
+
 .report-header__top {
   display: flex;
   align-items: flex-start;
@@ -23,211 +26,144 @@
   margin-bottom: var(--space-5);
 }
 
+.report-header__badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.company-meta-tags {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.market-badge--verified {
+  background: rgba(16, 185, 129, 0.12);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .report-header__ai-badge {
   flex-shrink: 0;
 }
 
 .report-header__meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-7);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-4);
   padding-top: var(--space-5);
   border-top: 1px solid var(--color-border);
-  flex-wrap: wrap;
 }
 
 .report-header__recommendation {
   font-size: var(--fs-sm);
   padding: var(--space-1) var(--space-4);
+  display: inline-block;
+  font-weight: 700;
 }
 
 /* ------------------------------------------------------------------
-   2. EXECUTIVE SUMMARY
+   2. CTA & NOTICE CARDS
    ------------------------------------------------------------------ */
-.executive-summary__text {
-  font-size: var(--fs-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.75;
-  max-width: 90ch;
-  margin-bottom: var(--space-4);
-}
-
-.executive-summary__text:last-of-type {
-  margin-bottom: var(--space-6);
-}
-
-.executive-summary__text strong {
-  color: var(--color-text-primary);
-}
-
-.executive-summary__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.report-cta-card {
+  display: flex;
+  align-items: center;
   gap: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--color-border);
+  padding: var(--space-4);
+  flex-wrap: wrap;
 }
 
-/* ------------------------------------------------------------------
-   3. FINANCIAL HIGHLIGHTS
-   Eight cards instead of the dashboard's five / company-research's
-   six -- override the shared .financial-summary column count for
-   this page only.
-   ------------------------------------------------------------------ */
-.report-financials {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* ------------------------------------------------------------------
-   4. AI INSIGHTS
-   Two color-coded columns (positive / negative) sitting side by side,
-   with a full-width outlook paragraph beneath -- same semantic color
-   language as badges and SWOT quadrants elsewhere in the product.
-   ------------------------------------------------------------------ */
-.report-insights__grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  margin-bottom: var(--space-6);
-  padding-bottom: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.report-insights__title {
-  font-size: var(--fs-base);
-  margin-bottom: var(--space-3);
+.report-cta-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md, 8px);
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-}
-
-.report-insights__title::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.report-insights__title--positive::before {
-  background: var(--color-success);
-}
-
-.report-insights__title--negative::before {
-  background: var(--color-danger);
-}
-
-.report-insights__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.report-insights__list li {
-  position: relative;
-  padding-left: var(--space-4);
-  font-size: var(--fs-sm);
+.market-empty-state {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
   color: var(--color-text-secondary);
-  line-height: 1.6;
 }
 
-.report-insights__list li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--color-text-muted);
-}
-
-.report-insights__outlook .report-insights__title {
+.market-empty-state svg {
+  color: var(--color-text-muted);
   margin-bottom: var(--space-3);
 }
 
-.report-insights__outlook .report-insights__title::before {
-  background: var(--color-primary);
-}
-
 /* ------------------------------------------------------------------
-   5. RISK ANALYSIS
-   Gauge on the left, badge rows on the right -- the same body layout
-   pattern as .market-sentiment__body in ai-analysis.css, reused here
-   under a report-specific class since this page doesn't load that
-   component wholesale.
-   ------------------------------------------------------------------ */
-.risk-analysis__body {
-  display: flex;
-  align-items: center;
-  gap: var(--space-7);
-}
-
-.risk-analysis__meter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  flex-shrink: 0;
-}
-
-.risk-analysis__meter .chart-card__figure {
-  width: 140px;
-  height: 140px;
-}
-
-.risk-analysis__breakdown {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* ------------------------------------------------------------------
-   6. FUTURE FORECAST -- extra rows inside each prediction card
-   ------------------------------------------------------------------ */
-.prediction-card__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
-}
-
-.prediction-card__row:first-of-type {
-  margin-top: var(--space-2);
-}
-
-/* ------------------------------------------------------------------
-   7. FINAL RECOMMENDATION
-   Slightly more emphasis than the reused .ai-recommendation base --
-   a soft tinted background so it reads as the report's closing word.
-   ------------------------------------------------------------------ */
-.final-recommendation {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), transparent 60%);
-  border: 1px solid var(--color-border);
-}
-
-/* ------------------------------------------------------------------
-   8. REPORT ACTIONS
-   Reuses .research-actions layout; the extra class only exists as a
-   styling hook for this page without affecting Company Research /
-   AI Analysis, which also use .research-actions.
-   ------------------------------------------------------------------ */
-.report-actions {
-  padding-top: var(--space-2);
-}
-
-/* ------------------------------------------------------------------
-   9. MARKET PERFORMANCE PANEL
+   3. MARKET PERFORMANCE & METRICS
    ------------------------------------------------------------------ */
 .market-performance-panel {
   margin-bottom: var(--space-6);
 }
 
+.price-highlight-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: var(--space-5);
+}
+
+.price-highlight {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.price-highlight__value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-family: var(--font-display, var(--font-body));
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.price-highlight__change {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.price-highlight__change--pos {
+  color: var(--color-success, #16a34a);
+}
+
+.price-highlight__change--neg {
+  color: var(--color-danger, #dc2626);
+}
+
+.price-highlight__change--neutral {
+  color: var(--color-text-secondary, #64748b);
+}
+
+.price-highlight__sub {
+  display: flex;
+  gap: var(--space-3);
+  font-size: var(--fs-xs, 0.8rem);
+  color: var(--color-text-secondary, #64748b);
+  flex-wrap: wrap;
+}
+
 .market-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: var(--space-4);
   margin-bottom: var(--space-5);
 }
@@ -240,7 +176,7 @@
   background: var(--color-bg, #f8fafc);
   border: 1px solid var(--color-border, #e2e8f0);
   border-radius: var(--radius-sm, 6px);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
 }
 
 .return-item {
@@ -275,6 +211,22 @@
   color: var(--color-text-secondary, #64748b);
 }
 
+.fundamental-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: #f1f5f9;
+  border-radius: var(--radius-sm, 6px);
+  font-size: var(--fs-xs, 0.78rem);
+  color: #475569;
+}
+
+.fundamental-notice svg {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
 .market-data-unavailable {
   display: flex;
   align-items: center;
@@ -287,82 +239,644 @@
   margin-top: var(--space-4);
 }
 
-.market-data-unavailable svg {
-  color: var(--color-text-muted, #94a3b8);
+/* ------------------------------------------------------------------
+   4. EXECUTIVE SUMMARY & SIGNALS
+   ------------------------------------------------------------------ */
+.executive-summary__text {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.75;
+  margin-bottom: var(--space-4);
+}
+
+.executive-summary__text:last-of-type {
+  margin-bottom: var(--space-5);
+}
+
+.executive-summary__text strong {
+  color: var(--color-text-primary);
+}
+
+.executive-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.signals-card {
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md, 8px);
+}
+
+.signals-card__title {
+  font-size: var(--fs-sm, 0.9rem);
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.signals-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.signals-list li {
+  position: relative;
+  padding-left: var(--space-4);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.signals-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--color-success, #16a34a);
+  font-weight: bold;
+}
+
+/* ------------------------------------------------------------------
+   5. INVESTMENT DECISION SUMMARY (Section 17)
+   ------------------------------------------------------------------ */
+.decision-summary-card {
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  margin-bottom: var(--space-6);
+}
+
+.decision-summary-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.decision-summary-card__title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 2px 0 0 0;
+  color: var(--color-text-primary);
+}
+
+.decision-summary-card__badges {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.decision-view-badge {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill, 9999px);
+  font-size: var(--fs-xs, 0.8rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.decision-view-badge--positive {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.decision-view-badge--neutral {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.decision-view-badge--cautious {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.decision-view-badge--insufficient {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.confidence-badge {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill, 9999px);
+  font-size: var(--fs-xs, 0.8rem);
+  font-weight: 600;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.confidence-badge--high {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.confidence-badge--medium {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.confidence-badge--low {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+.decision-action-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(37, 99, 235, 0.02));
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: var(--radius-md, 8px);
+  margin: var(--space-4) 0;
+}
+
+.decision-action-banner__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-/* ==========================================================================
-   PRINT STYLES
-   Triggered by the "Print Report" button (window.print()). Strips away
-   the app chrome so what prints is the report itself, not the sidebar,
-   topbar, or action buttons.
-   ========================================================================== */
+.decision-action-banner__label {
+  font-size: var(--fs-xs, 0.75rem);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.decision-action-banner__action {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.decision-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.decision-col {
+  padding: var(--space-4);
+  background: var(--color-bg, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+}
+
+.decision-col__heading {
+  font-size: var(--fs-sm, 0.9rem);
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: #0f172a;
+}
+
+.decision-col__heading--risk {
+  color: #991b1b;
+}
+
+.decision-reasons-list,
+.decision-risks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.decision-reasons-list li,
+.decision-risks-list li {
+  position: relative;
+  padding-left: var(--space-4);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.decision-reasons-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.decision-risks-list li::before {
+  content: '⚠';
+  position: absolute;
+  left: 0;
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+.decision-followup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.decision-change-card,
+.decision-checklist-card {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+  background: #ffffff;
+}
+
+.decision-change-card__title,
+.decision-checklist-card__title {
+  font-size: var(--fs-sm, 0.88rem);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+}
+
+.decision-change-card p {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.checklist-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.checklist-items li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+}
+
+.checklist-items li svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.decision-card-footer {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ------------------------------------------------------------------
+   6. HISTORICAL PRICE CHART & EXCLUSIVE STATES
+   ------------------------------------------------------------------ */
+/* Mandatory state exclusivity rule */
+.chart-status-message[hidden],
+.svg-chart-container[hidden] {
+  display: none !important;
+}
+
+.chart-card {
+  margin-top: 1.5rem;
+  margin-bottom: var(--space-6);
+}
+
+.chart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.chart-controls__right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.chart-status-message {
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--color-text-secondary);
+  background: var(--color-bg, #f8fafc);
+  border: 1px dashed var(--color-border, #cbd5e1);
+  border-radius: var(--radius-md, 8px);
+  margin: var(--space-4) 0;
+}
+
+.chart-status-message svg {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.chart-status-message--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.chart-skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.chart-skeleton__line {
+  width: 80%;
+  height: 120px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm, 6px);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.svg-chart-container {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  background: #ffffff;
+  padding: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.chart-legend-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--fs-xs, 0.8rem);
+  color: var(--color-text-secondary);
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.chart-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.chart-legend-color--primary {
+  background: #2563eb;
+}
+
+.svg-chart {
+  width: 100%;
+  height: 280px;
+  overflow: visible;
+  display: block;
+}
+
+.chart-gridline {
+  stroke: #e2e8f0;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.chart-axis-text {
+  font-size: 11px;
+  fill: #64748b;
+  font-family: var(--font-body);
+}
+
+.chart-line {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-line--pos {
+  stroke: #16a34a;
+}
+
+.chart-line--neg {
+  stroke: #dc2626;
+}
+
+.chart-dot {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: r 0.15s ease, stroke-width 0.15s ease;
+}
+
+.chart-dot:hover,
+.chart-dot.is-active {
+  r: 6;
+  stroke-width: 3;
+}
+
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  transform: translate(-50%, -100%);
+  margin-top: -8px;
+}
+
+.chart-bounds-bar {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--fs-xs, 0.78rem);
+  color: var(--color-text-secondary);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.bound-tag strong {
+  color: var(--color-text-primary);
+}
+
+.unadjusted-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs, 0.78rem);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  background: #f8fafc;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.unadjusted-disclaimer svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------
+   7. DISCLAIMERS & METHODOLOGY
+   ------------------------------------------------------------------ */
+.report-disclaimers {
+  margin-bottom: var(--space-6);
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+}
+
+.disclaimer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.disclaimer-item {
+  font-size: var(--fs-xs, 0.8rem);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.disclaimer-item strong {
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* ------------------------------------------------------------------
+   8. PRINT STYLES (Window.print())
+   ------------------------------------------------------------------ */
 @media print {
+  @page {
+    margin: 1.2cm;
+    size: A4 portrait;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt;
+  }
+
   .sidebar,
   .sidebar-backdrop,
   .topbar,
   .report-actions,
   .range-buttons,
-  .price-mode-buttons {
+  .price-mode-buttons,
+  .btn,
+  #reportChartLoading,
+  #reportChartError,
+  #reportNoResearchNotice,
+  #reportGenerateNotice {
     display: none !important;
   }
 
   .dashboard-shell {
-    display: block;
+    display: block !important;
   }
 
   .dashboard-body {
-    padding: 0;
+    padding: 0 !important;
   }
 
   .panel {
-    box-shadow: none;
-    border: 1px solid #d0d5dd;
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
     break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem !important;
+    padding: 1.25rem !important;
   }
 
-  body {
-    background: #ffffff;
+  .decision-summary-card {
+    border: 2px solid #94a3b8 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .svg-chart {
-    max-height: 220px;
+    max-height: 240px !important;
   }
 
   .chart-card {
-    border: 1px solid #d0d5dd;
-    box-shadow: none;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Force browsers to print exact SVG colors and gradients */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
-/* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
-
-@media (max-width: 1280px) {
-  .report-financials {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
+/* ------------------------------------------------------------------
+   9. RESPONSIVE LAYOUT
+   ------------------------------------------------------------------ */
 @media (max-width: 1024px) {
+  .decision-details-grid,
+  .decision-followup-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .returns-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .executive-summary__grid {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .report-insights__grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-5);
-  }
-
-  .risk-analysis__body {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .report-financials {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -371,34 +885,25 @@
     flex-direction: column;
   }
 
-  .report-header__meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-4);
+  .market-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .executive-summary__grid {
     grid-template-columns: 1fr;
   }
 
-  .report-financials {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .market-metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .returns-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .chart-controls {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
 @media (max-width: 560px) {
-  .report-financials {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .market-metrics-grid {
     grid-template-columns: 1fr;
   }
@@ -407,8 +912,7 @@
     grid-template-columns: 1fr;
   }
 
-  .risk-analysis__meter .chart-card__figure {
-    width: 110px;
-    height: 110px;
+  .price-highlight__value {
+    font-size: 1.75rem;
   }
 }

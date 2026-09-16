@@ -33,6 +33,7 @@ from services.news_service import (
 )
 from services.ai_service import (
     generate_research_analysis,
+    generate_deterministic_analysis,
     MissingApiKeyError as AIMissingApiKeyError,
     AIServiceUnavailableError,
     AIServiceBadResponseError,
@@ -401,8 +402,18 @@ def _get_analysis_or_error(record, force_refresh=False):
                         "low": str(s.get("low") or ""),
                         "previous_close": str(s.get("previous_close") or ""),
                         "volume": str(s.get("volume") or ""),
+                        "vwap": str(s.get("vwap") or ""),
+                        "week_52_high": str(s.get("week_52_high") or ""),
+                        "week_52_low": str(s.get("week_52_low") or ""),
+                        "sma_20": str(s.get("sma_20") or ""),
+                        "sma_50": str(s.get("sma_50") or ""),
+                        "average_volume_30": str(s.get("average_volume_30") or ""),
+                        "volatility": str(s.get("volatility") or ""),
+                        "returns": s.get("returns") or {},
+                        "coverage": s.get("coverage") or {},
                         "currency": sec.currency or "INR",
-                        "source": "NSE Bhavcopy"
+                        "source": "NSE Bhavcopy",
+                        "source_date": s.get("trading_date"),
                     }
                     record.financial_data = json.dumps(financial_data)
                     db.session.commit()
@@ -448,24 +459,14 @@ def _get_analysis_or_error(record, force_refresh=False):
             financial_data=financial_data,
             news_articles=news_articles,
         )
-    except AIMissingApiKeyError as e:
-        current_app.logger.error("AI service misconfigured: %s", e)
-        return None, (jsonify({
-            "success": False,
-            "message": "AI analysis is temporarily unavailable. Please try again later."
-        }), 500)
-    except AIServiceUnavailableError as e:
-        current_app.logger.warning("AI service unavailable: %s", e)
-        return None, (jsonify({
-            "success": False,
-            "message": "AI analysis provider is temporarily unavailable. Please try again shortly."
-        }), 503)
-    except AIServiceBadResponseError as e:
-        current_app.logger.warning("AI service bad response: %s", e)
-        return None, (jsonify({
-            "success": False,
-            "message": "Could not generate an analysis for this research."
-        }), 502)
+    except (AIMissingApiKeyError, AIServiceUnavailableError, AIServiceBadResponseError, Exception) as e:
+        current_app.logger.warning("AI service fallback to deterministic data-driven report: %s", e)
+        analysis = generate_deterministic_analysis(
+            company_name=record.company_name,
+            ticker_symbol=record.ticker_symbol,
+            financial_data=financial_data,
+            news_articles=news_articles,
+        )
 
     return analysis, None
 

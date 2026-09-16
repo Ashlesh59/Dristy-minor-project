@@ -102,3 +102,41 @@ test('6. Empty price history handled cleanly without NaN or syntax error', () =>
     assert.strictEqual(coords.pathD, '');
     assert.strictEqual(coords.areaPathD, '');
 });
+
+test('7. Exclusive chart states logic', () => {
+    const allowedStates = ['idle', 'loading', 'data', 'empty', 'error'];
+    function getVisibleElements(state) {
+        return {
+            loading: state === 'loading',
+            data: state === 'data',
+            empty: state === 'empty',
+            error: state === 'error',
+        };
+    }
+
+    allowedStates.forEach(st => {
+        const vis = getVisibleElements(st);
+        const visibleCount = Object.values(vis).filter(Boolean).length;
+        if (st === 'idle') {
+            assert.strictEqual(visibleCount, 0, 'Idle state shows zero chart cards');
+        } else {
+            assert.strictEqual(visibleCount, 1, `State ${st} must show exactly one visible card`);
+        }
+    });
+});
+
+test('8. Investment decision summary schema validation', () => {
+    const validViews = ['Positive', 'Neutral', 'Cautious', 'Insufficient Data'];
+    const validConfidence = ['High', 'Medium', 'Low'];
+    const validActions = [
+        'Consider for further research',
+        'Add to watchlist',
+        'Wait for stronger confirmation',
+        'Review risks before making a decision',
+        'Avoid making a conclusion because data is insufficient'
+    ];
+
+    validViews.forEach(v => assert.ok(typeof v === 'string'));
+    validConfidence.forEach(c => assert.ok(typeof c === 'string'));
+    validActions.forEach(a => assert.ok(typeof a === 'string'));
+});

@@ -165,6 +165,11 @@ class MarketDataService:
             "deliverable_percentage": _dec_str(latest_price.deliverable_percentage, 2),
             "week_52_high": metrics["week_52_high"],
             "week_52_low": metrics["week_52_low"],
+            "sma_20": metrics.get("sma_20"),
+            "sma_50": metrics.get("sma_50"),
+            "average_volume_30": metrics.get("average_volume_30"),
+            "volatility": metrics.get("volatility"),
+            "coverage": metrics.get("coverage"),
             "returns": metrics["returns"],
             "source": latest_price.source,
             "is_adjusted": latest_price.is_adjusted,
@@ -246,9 +251,70 @@ class MarketDataService:
             ret = ((latest_c - base_c) / base_c * Decimal("100")).quantize(Decimal("0.01"))
             return str(ret)
 
+        # 3. Query chronological price slice for technical indicators
+        recent_prices = (
+            DailyPrice.query.filter_by(security_id=security_id)
+            .order_by(desc(DailyPrice.trading_date))
+            .limit(260)
+            .all()
+        )
+        total_sessions = DailyPrice.query.filter_by(security_id=security_id).count()
+        earliest_rec = (
+            DailyPrice.query.filter_by(security_id=security_id)
+            .order_by(asc(DailyPrice.trading_date))
+            .first()
+        )
+        coverage_start = earliest_rec.trading_date.isoformat() if earliest_rec else None
+        coverage_end = latest_price.trading_date.isoformat() if latest_price else None
+
+        # 4. Moving averages: 20-session and 50-session
+        sma_20 = None
+        sma_50 = None
+        if len(recent_prices) >= 20:
+            p20 = [r.close_price for r in recent_prices[:20] if r.close_price is not None]
+            if len(p20) == 20:
+                sma_20 = _dec_str(sum(p20) / Decimal("20"), 2)
+
+        if len(recent_prices) >= 50:
+            p50 = [r.close_price for r in recent_prices[:50] if r.close_price is not None]
+            if len(p50) == 50:
+                sma_50 = _dec_str(sum(p50) / Decimal("50"), 2)
+
+        # 5. Average Volume (30 sessions)
+        avg_volume_30 = None
+        v30 = [r.volume for r in recent_prices[:30] if r.volume is not None]
+        if v30:
+            avg_volume_30 = int(round(sum(v30) / len(v30)))
+
+        # 6. Annualized Historical Volatility (sample std dev of daily log returns * sqrt(252))
+        volatility = None
+        if len(recent_prices) >= 20:
+            try:
+                import math
+                closes = [float(r.close_price) for r in reversed(recent_prices) if r.close_price is not None]
+                if len(closes) >= 20:
+                    returns = [math.log(closes[i] / closes[i - 1]) for i in range(1, len(closes)) if closes[i - 1] > 0]
+                    if len(returns) >= 19:
+                        mean_ret = sum(returns) / len(returns)
+                        var = sum((r - mean_ret) ** 2 for r in returns) / (len(returns) - 1)
+                        std_dev = math.sqrt(var)
+                        annualized_vol = std_dev * math.sqrt(252) * 100.0
+                        volatility = f"{annualized_vol:.2f}%"
+            except Exception:
+                volatility = None
+
         return {
             "week_52_high": _dec_str(w52_high, 2),
             "week_52_low": _dec_str(w52_low, 2),
+            "sma_20": sma_20,
+            "sma_50": sma_50,
+            "average_volume_30": avg_volume_30,
+            "volatility": volatility,
+            "coverage": {
+                "start_date": coverage_start,
+                "end_date": coverage_end,
+                "total_sessions": total_sessions,
+            },
             "returns": {
                 "return_1m": _calc_return(30),
                 "return_3m": _calc_return(90),

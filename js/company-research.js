@@ -706,10 +706,47 @@
       });
   }
 
+  function initPopularChips() {
+    var chips = document.querySelectorAll('.search-chip');
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function (e) {
+        e.preventDefault();
+        var ticker = chip.getAttribute('data-ticker') || chip.getAttribute('data-company');
+        if (!ticker) return;
+
+        if (nameInput) {
+          nameInput.value = ticker;
+          nameInput.focus();
+        }
+
+        clearError();
+        showLoading(true);
+
+        fetchJson('/api/companies/search?q=' + encodeURIComponent(ticker), { method: 'GET' })
+          .then(function (result) {
+            showLoading(false);
+            if (result.ok && result.data && result.data.results && result.data.results.length > 0) {
+              var topMatch = result.data.results[0];
+              selectItem(topMatch);
+              // Trigger research creation
+              handleFormSubmit(new Event('submit'));
+            } else {
+              showError('Could not find verified security for ' + ticker + '.');
+            }
+          })
+          .catch(function () {
+            showLoading(false);
+            showError('Unable to connect to search service.');
+          });
+      });
+    });
+  }
+
   form.addEventListener('submit', handleFormSubmit);
   initAutocomplete();
   initRangeControls();
   initPriceModeControls();
+  initPopularChips();
 
   // URL query parameter deep-linking support
   var urlParams = new URLSearchParams(window.location.search);

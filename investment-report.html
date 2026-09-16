@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Investment Report — InvestIQ</title>
-  <meta name="description" content="AI-generated investment report with executive summary, financial highlights, risk analysis, and forecast." />
+  <title>Verified Market Intelligence & Investment Report — InvestIQ</title>
+  <meta name="description" content="Verified NSE market intelligence, end-of-day numeric performance, interactive SVG price chart, and AI investment decision summary." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,9 +23,7 @@
 
   <div class="dashboard-shell">
 
-    <!-- ==========================================================
-         SIDEBAR (same structure as other app pages, Reports active)
-         ========================================================== -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <a href="index.html" class="sidebar__logo">
         <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -83,12 +81,10 @@
       </nav>
     </aside>
 
-    <!-- ==========================================================
-         CONTENT COLUMN
-         ========================================================== -->
+    <!-- CONTENT COLUMN -->
     <div class="dashboard-content">
 
-      <!-- TOPBAR (same structure as other app pages) -->
+      <!-- TOPBAR -->
       <header class="topbar">
         <button class="topbar__toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -105,66 +101,16 @@
 
         <div class="topbar__actions">
           <div class="dropdown" data-dropdown>
-            <button class="topbar__icon-btn" data-dropdown-trigger aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-              <span class="topbar__badge" aria-hidden="true"></span>
-            </button>
-            <div class="dropdown__panel" role="menu">
-              <div class="dropdown__header">
-                Notifications
-                <a href="#">Mark all read</a>
-              </div>
-              <div class="notification-item">
-                <span class="notification-item__dot"></span>
-                <div>
-                  <div class="notification-item__title">Your NVIDIA Corp. report has finished generating.</div>
-                  <div class="notification-item__time">Just now</div>
-                </div>
-              </div>
-              <div class="notification-item">
-                <span class="notification-item__dot"></span>
-                <div>
-                  <div class="notification-item__title">Your Tesla Inc. report is ready to view.</div>
-                  <div class="notification-item__time">1 hour ago</div>
-                </div>
-              </div>
-              <div class="notification-item">
-                <span class="notification-item__dot"></span>
-                <div>
-                  <div class="notification-item__title">Weekly market summary is available.</div>
-                  <div class="notification-item__time">Yesterday</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="dropdown" data-dropdown>
             <button class="user-trigger" data-dropdown-trigger aria-label="Account menu" aria-expanded="false" aria-haspopup="true">
               <span class="user-avatar">AS</span>
               <span class="user-trigger__name">Aditi Sharma</span>
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="dropdown__panel user-menu" role="menu">
-              <div class="user-menu__identity">
-                <span class="user-avatar">AS</span>
-                <div>
-                  <div class="user-menu__identity-name">Aditi Sharma</div>
-                  <div class="user-menu__identity-email">aditi.sharma@investiq.com</div>
-                </div>
-              </div>
-              <a href="#" class="dropdown-link">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.6-3.8 5-6 8-6s6.4 2.2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                Profile
-              </a>
-              <a href="#" class="dropdown-link">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.5a7 7 0 0 0-2 1.2l-2.4-.9-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.5a7 7 0 0 0 2-1.2l2.4.9 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-                Settings
-              </a>
+              <a href="profile.html" class="dropdown-link">Profile</a>
+              <a href="settings.html" class="dropdown-link">Settings</a>
               <div class="dropdown-divider"></div>
-              <a href="index.html" class="dropdown-link dropdown-link--danger">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Logout
-              </a>
+              <a href="index.html" class="dropdown-link dropdown-link--danger">Logout</a>
             </div>
           </div>
         </div>
@@ -174,28 +120,78 @@
       <div class="dashboard-body dashboard-body--single">
         <main class="dashboard-main report">
 
+          <!-- Notice States -->
+          <section class="panel" id="reportNoResearchNotice" hidden>
+            <div class="market-empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <h3>No Company Research Selected</h3>
+              <p>Search for an active NSE equity in <a href="company-research.html">Company Research</a> to view verified market intelligence and generate reports.</p>
+            </div>
+          </section>
+
+          <section class="panel" id="reportGenerateNotice" hidden>
+            <div class="report-cta-card">
+              <div class="report-cta-card__icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              <div>
+                <h3 class="panel__title">AI Investment Report Ready to Generate</h3>
+                <p class="field-hint" style="margin-top: 4px;">Synthesize verified NSE closing prices, moving averages, volatility metrics, and news sentiment into a comprehensive decision summary.</p>
+              </div>
+              <button type="button" class="btn btn-primary" id="generateReportBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span class="btn-label">Generate Investment Report</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="panel" id="reportErrorNotice" role="alert" hidden></section>
+
           <!-- ==========================================================
-               REPORT HEADER — real research identity + persisted
-               report metadata (generated_at, recommendation, ai_score)
+               1. REPORT HEADER & COMPANY IDENTITY
                ========================================================== -->
           <header class="panel report-header" aria-label="Report header" id="reportHeaderPanel" hidden>
             <div class="report-header__top">
               <div class="ai-header__identity">
                 <div class="company-overview__logo" id="reportCompanyLogo">--</div>
                 <div>
-                  <h1 class="ai-header__name" id="reportCompanyName"></h1>
-                  <span class="company-overview__ticker" id="reportCompanyTicker"></span>
+                  <h1 class="ai-header__name" id="reportCompanyName">--</h1>
+                  <div class="company-meta-tags">
+                    <span class="badge badge--pill" id="reportCompanyTicker">--</span>
+                    <span class="badge badge--pill" id="reportCompanyExchange">NSE</span>
+                    <span class="badge badge--pill" id="reportCompanySeries">Series: EQ</span>
+                    <span class="badge badge--pill" id="reportCompanyIsin">ISIN: —</span>
+                  </div>
                 </div>
               </div>
-              <span class="eyebrow report-header__ai-badge">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="currentColor"/></svg>
-                AI Generated
-              </span>
+              <div class="report-header__badges">
+                <span class="market-badge market-badge--verified">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  Verified NSE Data
+                </span>
+                <span class="eyebrow report-header__ai-badge" id="reportAiStatusBadge">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="currentColor"/></svg>
+                  AI Generated
+                </span>
+              </div>
             </div>
 
+            <!-- Freshness & Metadata Bar -->
             <div class="report-header__meta">
               <div class="ai-header__meta-item">
-                <span class="company-overview__label">Report Generated</span>
+                <span class="company-overview__label">Trading Date</span>
+                <span class="company-overview__value" id="reportTradingDate">--</span>
+              </div>
+              <div class="ai-header__meta-item">
+                <span class="company-overview__label">Market Session</span>
+                <span class="company-overview__value" id="reportMarketSession">NSE End-of-Day</span>
+              </div>
+              <div class="ai-header__meta-item">
+                <span class="company-overview__label">Data Coverage</span>
+                <span class="company-overview__value" id="reportHistoricalCoverage">--</span>
+              </div>
+              <div class="ai-header__meta-item">
+                <span class="company-overview__label">Report Generated (IST)</span>
                 <span class="company-overview__value" id="reportTimestamp">--</span>
               </div>
               <div class="ai-header__meta-item">
@@ -205,42 +201,45 @@
             </div>
           </header>
 
-          <!-- Empty / loading / error states -->
-          <section class="panel" id="reportNoResearchNotice" hidden>
-            <p>No research selected. Start from <a href="company-research.html">Company Research</a>, then generate a report from AI Analysis.</p>
-          </section>
-          <section class="panel" id="reportGenerateNotice" hidden>
-            <p>This research doesn't have a generated report yet.</p>
-            <button type="button" class="btn btn-primary" id="generateReportBtn">
-              <span class="btn-label">Generate Investment Report</span>
-            </button>
-          </section>
-          <section class="panel" id="reportErrorNotice" role="alert" hidden></section>
-
           <div id="reportContent" hidden>
+
             <!-- ==========================================================
-                 MARKET PERFORMANCE — verified DailyPrice EOD data from Neon Postgres
+                 2. CORE NUMERICAL MARKET INFORMATION (Facts First)
                  ========================================================== -->
-            <section class="panel market-performance-panel" id="reportMarketPerformance" aria-label="Market Performance">
+            <section class="panel market-performance-panel" id="reportMarketPerformance" aria-label="Core Market Information">
               <div class="panel__head panel__head--between">
                 <div>
-                  <h2 class="panel__title">Market Performance</h2>
-                  <div class="market-badges" style="margin-top: 4px;">
-                    <span class="market-badge market-badge--eod" id="reportBadgeEod">NSE End-of-Day Data</span>
-                    <span class="market-badge" id="reportBadgeDate">Trading Date: —</span>
-                    <span class="market-badge" id="reportBadgeSource">NSE CM-UDiFF</span>
-                  </div>
+                  <h2 class="panel__title">Verified Market Information</h2>
+                  <p class="field-hint">Official end-of-day market statistics from National Stock Exchange (NSE) Bhavcopy archives.</p>
+                </div>
+                <div class="market-badges">
+                  <span class="market-badge" id="reportBadgeSource">Source: NSE CM-UDiFF</span>
+                  <span class="market-badge" id="reportBadgeImported">Database Verified</span>
                 </div>
               </div>
 
-              <!-- Price highlights and metric cards -->
+              <!-- Price Highlight & Metrics -->
               <div class="market-performance__overview" id="reportMarketDataAvailable">
-                <div class="price-highlight" id="reportPriceHighlight">
-                  <span class="price-highlight__value" id="reportLatestClose">--</span>
-                  <span class="price-highlight__change" id="reportDayChange">--</span>
+                <div class="price-highlight-banner">
+                  <div class="price-highlight" id="reportPriceHighlight">
+                    <span class="price-highlight__value" id="reportLatestClose">--</span>
+                    <span class="price-highlight__change" id="reportDayChange">--</span>
+                  </div>
+                  <div class="price-highlight__sub">
+                    <span>Previous Close: <strong id="reportPrevClose">--</strong></span>
+                    <span>•</span>
+                    <span>Day Range: <strong id="reportDayRange">--</strong></span>
+                    <span>•</span>
+                    <span>Currency: <strong id="reportCurrency">INR (₹)</strong></span>
+                  </div>
                 </div>
 
+                <!-- Numerical Metrics Grid -->
                 <div class="market-metrics-grid">
+                  <div class="stat-card">
+                    <div class="stat-card__label">Open Price</div>
+                    <div class="stat-card__value" id="reportDayOpen">--</div>
+                  </div>
                   <div class="stat-card">
                     <div class="stat-card__label">Day High</div>
                     <div class="stat-card__value" id="reportDayHigh">--</div>
@@ -250,108 +249,68 @@
                     <div class="stat-card__value" id="reportDayLow">--</div>
                   </div>
                   <div class="stat-card">
-                    <div class="stat-card__label">Previous Close</div>
-                    <div class="stat-card__value" id="reportPrevClose">--</div>
-                  </div>
-                  <div class="stat-card">
-                    <div class="stat-card__label">Volume</div>
-                    <div class="stat-card__value" id="reportVolume">--</div>
-                  </div>
-                  <div class="stat-card">
                     <div class="stat-card__label">VWAP</div>
                     <div class="stat-card__value" id="reportVwap">--</div>
                   </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">Trading Volume</div>
+                    <div class="stat-card__value" id="reportVolume">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">30-Session Avg Volume</div>
+                    <div class="stat-card__value" id="reportAvgVolume30">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">20-Session SMA</div>
+                    <div class="stat-card__value" id="reportSma20">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">50-Session SMA</div>
+                    <div class="stat-card__value" id="reportSma50">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">Annualized Volatility</div>
+                    <div class="stat-card__value" id="reportVolatility">--</div>
+                  </div>
                   <div class="stat-card stat-card--wide">
-                    <div class="stat-card__label">52-Week Range</div>
+                    <div class="stat-card__label">52-Week Price Range</div>
                     <div class="stat-card__value" id="report52WeekRange">--</div>
                   </div>
                 </div>
 
-                <!-- Period Returns -->
+                <!-- Historical Trailing Returns -->
+                <div class="panel__subhead" style="margin: 1.25rem 0 0.5rem 0;">
+                  <h3 class="field-hint" style="font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Trailing Historical Returns</h3>
+                </div>
                 <div class="returns-grid" aria-label="Historical period returns">
                   <div class="return-item">
-                    <span class="return-item__label">1M Return</span>
+                    <span class="return-item__label">1-Month Return</span>
                     <span class="return-item__value" id="reportReturn1M">--</span>
                   </div>
                   <div class="return-item">
-                    <span class="return-item__label">3M Return</span>
+                    <span class="return-item__label">3-Month Return</span>
                     <span class="return-item__value" id="reportReturn3M">--</span>
                   </div>
                   <div class="return-item">
-                    <span class="return-item__label">6M Return</span>
+                    <span class="return-item__label">6-Month Return</span>
                     <span class="return-item__value" id="reportReturn6M">--</span>
                   </div>
                   <div class="return-item">
-                    <span class="return-item__label">1Y Return</span>
+                    <span class="return-item__label">1-Year Return</span>
                     <span class="return-item__value" id="reportReturn1Y">--</span>
                   </div>
                 </div>
 
-                <!-- HISTORICAL PRICE CHART -->
-                <div class="chart-card" style="margin-top: 1.5rem;" aria-label="Historical price chart">
-                  <div class="chart-controls">
-                    <div>
-                      <h3 class="panel__title" style="margin:0; font-size:1.1rem;">Price History</h3>
-                      <p class="field-hint" style="margin:2px 0 0 0;" id="reportChartSubtitle">Official daily closing prices</p>
-                    </div>
-
-                    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-                      <!-- Price Mode Toggle -->
-                      <div class="price-mode-buttons" role="group" aria-label="Price adjustment mode">
-                        <button type="button" class="mode-btn is-active" data-mode="raw" aria-pressed="true" id="reportModeRawBtn">Raw</button>
-                        <button type="button" class="mode-btn" data-mode="split_adjusted" aria-pressed="false" id="reportModeAdjBtn">Split/Bonus Adjusted</button>
-                      </div>
-
-                      <!-- Range Controls -->
-                      <div class="range-buttons" role="group" aria-label="Chart time range selection">
-                        <button type="button" class="range-btn" data-range="1m" aria-pressed="false">1M</button>
-                        <button type="button" class="range-btn" data-range="3m" aria-pressed="false">3M</button>
-                        <button type="button" class="range-btn" data-range="6m" aria-pressed="false">6M</button>
-                        <button type="button" class="range-btn is-active" data-range="1y" aria-pressed="true">1Y</button>
-                        <button type="button" class="range-btn" data-range="max" aria-pressed="false">MAX</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Loading & Chart States -->
-                  <div id="reportChartLoading" class="chart-status-message" hidden>
-                    <p>Loading historical price data...</p>
-                  </div>
-
-                  <div id="reportChartEmpty" class="chart-status-message" hidden>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <p id="reportChartEmptyMessage">No historical price records found for the requested range.</p>
-                  </div>
-
-                  <!-- Native SVG Chart -->
-                  <div class="svg-chart-container" id="reportChartContainer">
-                    <svg id="reportPriceHistorySvg" class="svg-chart" viewBox="0 0 600 260" preserveAspectRatio="none" role="img" aria-label="Stock price history chart">
-                      <defs>
-                        <linearGradient id="reportChartGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3"/>
-                          <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/>
-                        </linearGradient>
-                      </defs>
-                      <g id="reportSvgGridlines"></g>
-                      <g id="reportSvgAxes"></g>
-                      <path id="reportSvgAreaPath" class="chart-area" d="" fill="url(#reportChartGradient)" />
-                      <path id="reportSvgLinePath" class="chart-line" d="" />
-                      <g id="reportSvgPoints"></g>
-                    </svg>
-                    <p id="reportChartAccessibleSummary" class="sr-only" aria-live="polite"></p>
-                  </div>
-
-                  <!-- Adjustment / Unadjusted Disclaimer -->
-                  <div id="reportChartAdjustmentDisclaimer" class="unadjusted-disclaimer" style="margin-top: 1rem;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <span id="reportChartDisclaimerText">Official NSE closing prices. Corporate actions excluded in raw mode.</span>
-                  </div>
+                <!-- Fundamental Data Notice -->
+                <div class="fundamental-notice">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <span>Verified fundamental data (P/E, Revenue, EPS) is pending corporate filings database integration. Unverified estimates are excluded.</span>
                 </div>
               </div>
 
-              <!-- Empty state notice when no daily price data exists -->
+              <!-- Market Data Unavailable Notice -->
               <div id="reportMarketDataEmptyNotice" class="market-data-unavailable" hidden>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <div>
                   <strong>No verified NSE price data available</strong>
                   <p class="field-hint" style="margin-top: 2px;">End-of-day daily market data has not been imported for this security yet.</p>
@@ -360,91 +319,292 @@
             </section>
 
             <!-- ==========================================================
-                 EXECUTIVE SUMMARY — company_overview + investment_summary
-                 from report_service.py, both AI-generated text.
+                 3. AI EXECUTIVE SUMMARY
                  ========================================================== -->
             <section class="panel executive-summary" aria-label="Executive summary">
               <div class="panel__head">
-                <h2 class="panel__title">Executive Summary</h2>
+                <h2 class="panel__title">AI Executive Summary</h2>
+                <span class="eyebrow">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="6" fill="currentColor"/></svg>
+                  Grounded in Verified Data
+                </span>
               </div>
               <p class="executive-summary__text" id="reportCompanyOverview"></p>
-              <p class="executive-summary__text"><strong>AI Summary:</strong> <span id="reportInvestmentSummary"></span></p>
+              <p class="executive-summary__text"><strong>Core Takeaway:</strong> <span id="reportInvestmentSummary"></span></p>
               <div class="executive-summary__grid">
                 <div class="company-overview__item">
-                  <span class="company-overview__label">AI Score</span>
+                  <span class="company-overview__label">AI Research Score</span>
                   <span class="company-overview__value" id="reportAiScore">--</span>
                 </div>
                 <div class="company-overview__item">
-                  <span class="company-overview__label">Recommendation</span>
+                  <span class="company-overview__label">Stance</span>
                   <span class="company-overview__value" id="reportAiRecommendation">--</span>
+                </div>
+                <div class="company-overview__item">
+                  <span class="company-overview__label">Coverage Quality</span>
+                  <span class="company-overview__value" id="reportCoverageQuality">Verified EOD Series</span>
                 </div>
               </div>
             </section>
 
             <!-- ==========================================================
-                 FINANCIAL ASSESSMENT — real quote data + Gemini's
-                 financial_assessment text. No fabricated Revenue/EPS.
+                 4. AI FINANCIAL ASSESSMENT & POSITIVE SIGNALS
                  ========================================================== -->
-            <section aria-label="Financial assessment">
-              <div class="panel__head panel__head--loose">
-                <h2 class="panel__title">Financial Assessment</h2>
+            <section class="panel" aria-label="Financial assessment and signals">
+              <div class="panel__head">
+                <h2 class="panel__title">Financial Assessment &amp; Verified Signals</h2>
               </div>
-              <div class="stat-cards financial-summary" id="reportFinancialCards"></div>
-              <div class="panel" style="margin-top:1rem;">
-                <p id="reportFinancialAssessment"></p>
+              <p class="executive-summary__text" id="reportFinancialAssessment"></p>
+              
+              <!-- Positive Signals Card -->
+              <div class="signals-card" id="reportSignalsCard">
+                <h3 class="signals-card__title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Strongest Positive Signals
+                </h3>
+                <ul class="signals-list" id="reportPositiveSignalsList">
+                  <li>Listed on NSE active equity segment with verified daily market activity.</li>
+                  <li>Official price series archived in Neon database with checksum validation.</li>
+                </ul>
               </div>
             </section>
 
             <!-- ==========================================================
-                 NEWS SENTIMENT
+                 5. NEWS SENTIMENT (Rendered only when genuine news exists)
                  ========================================================== -->
-            <section class="panel" aria-label="News sentiment">
+            <section class="panel" id="reportNewsSection" aria-label="News sentiment">
               <div class="panel__head">
                 <h2 class="panel__title">News Sentiment</h2>
               </div>
-              <p id="reportNewsSentiment"></p>
+              <p id="reportNewsSentiment">Verified news sentiment neutral or pending live feed integration.</p>
             </section>
 
             <!-- ==========================================================
-                 RISKS & OPPORTUNITIES
+                 6. RISKS & OPPORTUNITIES (SWOT)
                  ========================================================== -->
             <section class="panel swot" aria-label="Risks and opportunities">
               <div class="panel__head">
-                <h2 class="panel__title">Risks &amp; Opportunities</h2>
+                <h2 class="panel__title">Key Risks &amp; Growth Opportunities</h2>
               </div>
               <div class="swot-grid">
                 <div class="swot-quadrant swot-quadrant--weakness">
-                  <h3 class="swot-quadrant__title">Key Risks</h3>
-                  <p id="reportKeyRisks"></p>
+                  <h3 class="swot-quadrant__title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Key Headwinds &amp; Risks
+                  </h3>
+                  <p id="reportKeyRisks">Market fluctuations and unverified fundamental balance sheet data.</p>
                 </div>
                 <div class="swot-quadrant swot-quadrant--opportunity">
-                  <h3 class="swot-quadrant__title">Key Opportunities</h3>
-                  <p id="reportKeyOpportunities"></p>
+                  <h3 class="swot-quadrant__title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    Market Opportunities
+                  </h3>
+                  <p id="reportKeyOpportunities">Sector expansion and continuous trading liquidity.</p>
                 </div>
               </div>
             </section>
 
             <!-- ==========================================================
-                 OUTLOOK & CONCLUSION — real overall_outlook + conclusion
-                 from report_service.py
+                 7. INVESTMENT DECISION SUMMARY (Section 17)
                  ========================================================== -->
-            <section class="panel ai-recommendation final-recommendation" aria-label="Outlook and conclusion">
-              <div class="panel__head">
-                <h2 class="panel__title">Overall Outlook &amp; Conclusion</h2>
-                <span class="eyebrow">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="currentColor"/></svg>
-                  AI Generated
-                </span>
+            <section class="panel decision-summary-card" id="reportDecisionSummaryCard" aria-label="Investment Decision Summary">
+              <div class="decision-summary-card__header">
+                <div>
+                  <span class="eyebrow" style="color:var(--color-primary);">AI Research Assessment</span>
+                  <h2 class="decision-summary-card__title">Investment Decision Summary</h2>
+                </div>
+                <div class="decision-summary-card__badges">
+                  <span class="decision-view-badge" id="reportResearchViewBadge">Neutral</span>
+                  <span class="confidence-badge" id="reportConfidenceBadge">Medium Confidence</span>
+                </div>
               </div>
-              <div class="ai-recommendation__body">
-                <p class="ai-recommendation__explanation" id="reportOutlook"></p>
-                <p class="ai-recommendation__explanation" id="reportConclusion"></p>
+
+              <!-- Action Recommendation Banner -->
+              <div class="decision-action-banner" id="reportActionBanner">
+                <div class="decision-action-banner__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div>
+                  <span class="decision-action-banner__label">Suggested Research Action</span>
+                  <div class="decision-action-banner__action" id="reportSuggestedAction">Consider for further research</div>
+                </div>
               </div>
-              <p class="field-hint">This is an AI-generated assessment based on the financial data and news retrieved for this company at the time of generation -- not a guarantee, certified rating, or prediction of future performance.</p>
+
+              <!-- Decision Columns: Why This View & Key Risks -->
+              <div class="decision-details-grid">
+                <div class="decision-col">
+                  <h3 class="decision-col__heading">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Why This View? (Verified Evidence)
+                  </h3>
+                  <ul class="decision-reasons-list" id="reportWhyThisViewList">
+                    <li>Based on verified closing prices and technical averages from NSE Bhavcopy records.</li>
+                  </ul>
+                </div>
+
+                <div class="decision-col">
+                  <h3 class="decision-col__heading decision-col__heading--risk">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Critical Risk Factors
+                  </h3>
+                  <ul class="decision-risks-list" id="reportKeyRisksList">
+                    <li>Equity market volatility and sector-wide sentiment shifts.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Change Drivers & Checklist -->
+              <div class="decision-followup-grid">
+                <div class="decision-change-card">
+                  <h4 class="decision-change-card__title">What Could Change This View?</h4>
+                  <p id="reportWhatCouldChange">A sustained technical breakout above moving averages on elevated volume, or publication of audited quarterly earnings reports, would adjust this perspective.</p>
+                </div>
+
+                <div class="decision-checklist-card">
+                  <h4 class="decision-checklist-card__title">What Should You Check Next?</h4>
+                  <ul class="checklist-items" id="reportCheckNextList">
+                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Review latest quarterly audited financial statements</li>
+                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Verify trading volume relative to the 30-session moving average</li>
+                    <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Compare performance against NSE sector peers</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Statutory Disclaimer Note -->
+              <div class="decision-card-footer">
+                <p class="field-hint" style="margin:0;">
+                  <strong>Disclaimer:</strong> This summary is an AI-assisted analysis grounded in verified NSE market records. It is not personalized investment advice, a price target guarantee, or a solicitation to trade.
+                </p>
+              </div>
             </section>
 
             <!-- ==========================================================
-                 REPORT ACTIONS
+                 8. HISTORICAL PRICE CHART (Accurate SVG Chart)
+                 ========================================================== -->
+            <section class="panel chart-card" aria-label="Historical price chart">
+              <div class="chart-controls">
+                <div>
+                  <h2 class="panel__title" style="margin:0; font-size:1.2rem;">Historical Price Chart</h2>
+                  <p class="field-hint" style="margin:2px 0 0 0;" id="reportChartSubtitle">Official NSE daily closing prices</p>
+                </div>
+
+                <div class="chart-controls__right">
+                  <!-- Price Mode Toggle -->
+                  <div class="price-mode-buttons" role="group" aria-label="Price adjustment mode">
+                    <button type="button" class="mode-btn is-active" data-mode="raw" aria-pressed="true" id="reportModeRawBtn">Raw</button>
+                    <button type="button" class="mode-btn" data-mode="split_adjusted" aria-pressed="false" id="reportModeAdjBtn">Split/Bonus Adjusted</button>
+                  </div>
+
+                  <!-- Range Controls -->
+                  <div class="range-buttons" role="group" aria-label="Chart time range selection">
+                    <button type="button" class="range-btn" data-range="1m" aria-pressed="false">1M</button>
+                    <button type="button" class="range-btn" data-range="3m" aria-pressed="false">3M</button>
+                    <button type="button" class="range-btn" data-range="6m" aria-pressed="false">6M</button>
+                    <button type="button" class="range-btn is-active" data-range="1y" aria-pressed="true">1Y</button>
+                    <button type="button" class="range-btn" data-range="max" aria-pressed="false">MAX</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Exclusive Status States -->
+              <div id="reportChartLoading" class="chart-status-message" hidden>
+                <div class="chart-skeleton">
+                  <div class="chart-skeleton__line"></div>
+                  <p>Loading verified historical price series from Neon database...</p>
+                </div>
+              </div>
+
+              <div id="reportChartEmpty" class="chart-status-message" hidden>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p id="reportChartEmptyMessage">No verified NSE price records found for the requested range.</p>
+              </div>
+
+              <div id="reportChartError" class="chart-status-message chart-status-message--error" hidden>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <p id="reportChartErrorMessage">Failed to load historical price data.</p>
+                <button type="button" class="btn btn-secondary btn-sm" id="reportChartRetryBtn">Retry</button>
+              </div>
+
+              <!-- Native SVG Chart Container (Hidden initially until state is 'data') -->
+              <div class="svg-chart-container" id="reportChartContainer" hidden>
+                <div class="chart-legend-bar">
+                  <span class="chart-legend-item">
+                    <span class="chart-legend-color chart-legend-color--primary"></span>
+                    <span id="reportChartLegendText">NSE EOD Close</span>
+                  </span>
+                  <span class="chart-legend-item" id="reportPeriodReturnBadge">
+                    Period Return: <strong id="reportChartPeriodReturn">—</strong>
+                  </span>
+                </div>
+
+                <div class="svg-wrapper" style="position: relative;">
+                  <svg id="reportPriceHistorySvg" class="svg-chart" viewBox="0 0 640 280" preserveAspectRatio="none" role="img" aria-label="Stock price history chart">
+                    <defs>
+                      <linearGradient id="reportChartGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#2563eb" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/>
+                      </linearGradient>
+                      <linearGradient id="reportChartGradientPos" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#16a34a" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#16a34a" stop-opacity="0.0"/>
+                      </linearGradient>
+                      <linearGradient id="reportChartGradientNeg" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#dc2626" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#dc2626" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <g id="reportSvgGridlines"></g>
+                    <g id="reportSvgAxes"></g>
+                    <path id="reportSvgAreaPath" class="chart-area" d="" fill="url(#reportChartGradient)" />
+                    <path id="reportSvgLinePath" class="chart-line" d="" />
+                    <g id="reportSvgCrosshair" style="display:none;"></g>
+                    <g id="reportSvgPoints"></g>
+                  </svg>
+                  
+                  <!-- Interactive Hover Tooltip -->
+                  <div id="reportChartTooltip" class="chart-tooltip" style="display: none;" role="tooltip"></div>
+                </div>
+
+                <p id="reportChartAccessibleSummary" class="sr-only" aria-live="polite"></p>
+
+                <!-- Chart High/Low Markers Bar -->
+                <div class="chart-bounds-bar">
+                  <span class="bound-tag">Period Low: <strong id="reportChartPeriodLow">—</strong></span>
+                  <span class="bound-tag">Period High: <strong id="reportChartPeriodHigh">—</strong></span>
+                  <span class="bound-tag">Sessions Plotted: <strong id="reportChartPlottedCount">—</strong></span>
+                </div>
+              </div>
+
+              <!-- Unadjusted / Corporate Action Disclaimer -->
+              <div id="reportChartAdjustmentDisclaimer" class="unadjusted-disclaimer" style="margin-top: 1rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="reportChartDisclaimerText">Official NSE closing prices. Corporate actions excluded in raw mode.</span>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 9. METHODOLOGY & STATUTORY DISCLAIMERS
+                 ========================================================== -->
+            <section class="panel report-disclaimers" aria-label="Methodology and disclaimers">
+              <h3 class="panel__title" style="font-size: 1.05rem;">Data Methodology &amp; Disclaimers</h3>
+              <div class="disclaimer-grid">
+                <div class="disclaimer-item">
+                  <strong>NSE End-of-Day Data:</strong>
+                  <p>All price series, volumes, VWAPs, and moving averages are computed directly from official National Stock Exchange of India (NSE) Bhavcopy files stored in a PostgreSQL repository. Zero external AI credits or synthetic values are used for market data.</p>
+                </div>
+                <div class="disclaimer-item">
+                  <strong>AI Research Integrity:</strong>
+                  <p>Artificial intelligence is utilized solely to analyze and explain verified historical records. InvestIQ strictly prohibits the fabrication of prices, targets, or unverified financial statements.</p>
+                </div>
+                <div class="disclaimer-item">
+                  <strong>Not Financial Advice:</strong>
+                  <p>This report is generated for educational and analytical research purposes only. It does not constitute certified investment advice, recommendation, or portfolio management service.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 10. REPORT ACTIONS
                  ========================================================== -->
             <section class="research-actions report-actions" aria-label="Report actions">
               <button type="button" class="btn btn-primary" id="printReportBtn">
