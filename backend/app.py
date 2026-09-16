@@ -79,15 +79,18 @@ def create_app(test_config=None):
 
     is_testing = app.config.get("TESTING", False)
 
-    # SECURITY FIX (Phase 11): fail loudly rather than silently
-    # deploying with the well-known dev fallback secret (which is
-    # now public in this project's own history) once DEBUG is off.
-    # When TESTING is True, test suites provide their own dedicated test secret.
-    if not is_testing and not app.config["DEBUG"] and app.config["SECRET_KEY"] == "dev-secret-key-change-later":
-        raise RuntimeError(
-            "SECRET_KEY must be set via the environment before running with "
-            "DEBUG=False. Refusing to start with the default development key."
-        )
+    # SECURITY FIX (Phase 11 & Phase D1): fail loudly rather than silently
+    # deploying with missing or unsafe variables in production.
+    if not is_testing and not app.config["DEBUG"]:
+        if app.config["SECRET_KEY"] == "dev-secret-key-change-later":
+            raise RuntimeError(
+                "SECRET_KEY must be set via the environment before running with "
+                "DEBUG=False. Refusing to start with the default development key."
+            )
+        if not os.environ.get("DATABASE_URL"):
+            raise RuntimeError("DATABASE_URL is required in production (DEBUG=False).")
+        if not os.environ.get("GEMINI_API_KEY"):
+            raise RuntimeError("GEMINI_API_KEY is required in production (DEBUG=False).")
 
     # CORS configuration
     if app.config["DEBUG"] or is_testing:
@@ -135,8 +138,8 @@ def create_app(test_config=None):
         db_status = "connected"
         try:
             db.session.execute(db.text("SELECT 1"))
-        except Exception as e:
-            db_status = f"error: {e}"
+        except Exception:
+            db_status = "unavailable"
 
         return jsonify({
             "success": True,

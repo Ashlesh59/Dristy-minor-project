@@ -26,11 +26,20 @@ class Config:
     DEBUG = os.environ.get("FLASK_DEBUG", "False") == "True"
 
     # ------------------------------------------------------------
-    # DATABASE CONFIGURATION (Phase 2)
+    # DATABASE CONFIGURATION (Phase 2 & Phase D1)
     # ------------------------------------------------------------
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(
-        BASE_DIR, "database", "investiq.db"
-    )
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql://", 1)
+        SQLALCHEMY_DATABASE_URI = database_url
+        SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
+    else:
+        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(
+            BASE_DIR, "database", "investiq.db"
+        )
+        SQLALCHEMY_ENGINE_OPTIONS = {}
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     RUN_MIGRATIONS = True
 

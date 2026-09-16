@@ -11,7 +11,10 @@
   var host = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '127.0.0.1';
   var proto = (typeof window !== 'undefined' && window.location && window.location.protocol && window.location.protocol.indexOf('http') === 0) ? window.location.protocol : 'http:';
 
-  window.INVESTIQ_API_BASE = window.INVESTIQ_API_BASE || (proto + '//' + host + ':5000');
+  var isLocal = (host === 'localhost' || host === '127.0.0.1');
+  var defaultBase = isLocal ? (proto + '//' + host + ':5000') : (proto + '//' + host);
+
+  window.INVESTIQ_API_BASE = window.INVESTIQ_API_BASE || defaultBase;
 })();
 
 var INVESTIQ_API_BASE = window.INVESTIQ_API_BASE;

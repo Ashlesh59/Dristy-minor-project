@@ -8,6 +8,7 @@ without dropping tables or rewriting historical rows.
 """
 
 from sqlalchemy import text
+import logging
 
 
 # (table, column, SQL type) -- columns added to existing tables
@@ -53,6 +54,13 @@ def run_migrations(db):
     Idempotent and safe to run on fresh or existing databases.
     """
     engine = db.engine
+    if engine.dialect.name == "postgresql":
+        logging.getLogger(__name__).info(
+            "Postgres dialect detected. Skipping lightweight SQLite migrations. "
+            "db.create_all() has generated the schema. Alembic should be adopted for future migrations."
+        )
+        return
+        
     with engine.begin() as connection:
         table_names = {
             row[0]

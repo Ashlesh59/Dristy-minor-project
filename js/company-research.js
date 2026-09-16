@@ -549,7 +549,7 @@
         }
         if (!result.ok || !result.data || !result.data.success) {
           var msg = (result.data && result.data.message) || 'Could not load latest market data.';
-          showError(msg);
+          renderLatestMarketData({ message: msg });
           return;
         }
         renderLatestMarketData(result.data);
