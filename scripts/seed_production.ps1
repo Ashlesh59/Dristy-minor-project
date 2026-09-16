@@ -13,19 +13,25 @@ seeder. It requires the raw CSV file to be downloaded locally.
 
 param (
     [switch]$DryRun,
-    [switch]$ConfirmProductionWrite
+    [switch]$ConfirmProductionWrite,
+    [switch]$FullSnapshot,
+    [switch]$ConfirmDeactivation
 )
 
 $ErrorActionPreference = "Stop"
 
-# Set the placeholder database URL (Owner must replace this in their local environment)
-# $env:DATABASE_URL = "postgresql://user:password@ep-cold-pond-123456.us-east-2.aws.neon.tech/neondb"
 if (-not $env:DATABASE_URL) {
-    Write-Host "WARNING: DATABASE_URL is not set in the environment. Seeding will run against local SQLite unless set." -ForegroundColor Yellow
+    Write-Host "ERROR: DATABASE_URL is not set in the environment. Production seeding requires a Postgres URL." -ForegroundColor Red
+    exit 1
+}
+
+if (-not ($env:DATABASE_URL.StartsWith("postgres://") -or $env:DATABASE_URL.StartsWith("postgresql://"))) {
+    Write-Host "ERROR: Only Postgres URLs are allowed for production seeding." -ForegroundColor Red
+    exit 1
 }
 
 $env:FLASK_DEBUG = "False"
-# We need a SECRET_KEY and GEMINI_API_KEY to satisfy app.py startup checks, even for CLI commands
+# Dummy variables to satisfy app factory config checks (safe since this is a CLI script)
 if (-not $env:SECRET_KEY) { $env:SECRET_KEY = "cli-override-secret-key" }
 if (-not $env:GEMINI_API_KEY) { $env:GEMINI_API_KEY = "cli-override-gemini-key" }
 if (-not $env:CORS_ALLOWED_ORIGINS) { $env:CORS_ALLOWED_ORIGINS = "http://localhost" }
@@ -51,6 +57,14 @@ if ($DryRun) {
 } else {
     Write-Host "ERROR: You must specify either -DryRun or -ConfirmProductionWrite" -ForegroundColor Red
     exit 1
+}
+
+if ($FullSnapshot) {
+    $commandArgs += "--full-snapshot"
+}
+
+if ($ConfirmDeactivation) {
+    $commandArgs += "--confirm-deactivation"
 }
 
 # Run the seeder

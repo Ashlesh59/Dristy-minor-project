@@ -37,9 +37,19 @@ def parse_args():
         help="Simulate import and report statistics without modifying the database",
     )
     parser.add_argument(
+        "--full-snapshot",
+        action="store_true",
+        help="Treat the file as a complete snapshot of all active securities. Missing ones will be deactivated.",
+    )
+    parser.add_argument(
         "--confirm-production-write",
         action="store_true",
         help="Explicit confirmation required to write to the production database",
+    )
+    parser.add_argument(
+        "--confirm-deactivation",
+        action="store_true",
+        help="Explicitly confirm deactivation of securities missing from a full snapshot",
     )
     return parser.parse_args()
 
@@ -56,6 +66,22 @@ def main():
         print("Use --confirm-production-write to execute a live import, or --dry-run to simulate.")
         sys.exit(1)
 
+    # 1. Immediately fail if DATABASE_URL is missing or not Postgres
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        print("\n[ERROR] DATABASE_URL environment variable is missing. Seeding requires a production Postgres URL.")
+        sys.exit(1)
+    
+    if not (db_url.startswith("postgres://") or db_url.startswith("postgresql://")):
+        print("\n[ERROR] Only Postgres URLs are allowed for production seeding. Refusing to seed.")
+        sys.exit(1)
+        
+    # Prevent the app factory from failing due to missing secrets during CLI run
+    # (these are safe dummy values because this script never serves HTTP traffic)
+    os.environ.setdefault("SECRET_KEY", "cli-dummy-secret-key")
+    os.environ.setdefault("GEMINI_API_KEY", "cli-dummy-gemini-key")
+    os.environ.setdefault("CORS_ALLOWED_ORIGINS", "http://localhost")
+
     print("==========================================================")
     print("  InvestIQ: Production Database Seeder")
     print("==========================================================")
@@ -66,18 +92,19 @@ def main():
     # DO NOT log the DATABASE_URL here
     app = create_app()
     with app.app_context():
-        # Confirm that a database url is actually configured for production
-        db_url = app.config.get("SQLALCHEMY_DATABASE_URI", "")
-        if "sqlite" in db_url.lower():
-            print("\n[WARNING] You are running the production seeder against a local SQLite database.")
+        # Ensure we are really on Postgres and not SQLite fallback
+        actual_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+        if "sqlite" in actual_uri.lower():
+            print("\n[ERROR] App context resolved to SQLite. Refusing to touch local database.")
+            sys.exit(1)
             
         importer = NSECompanyImporter(exchange="NSE")
         try:
             report = importer.run(
                 file_path=file_path,
                 dry_run=args.dry_run,
-                full_snapshot=True,
-                confirm_deactivation=args.confirm_production_write,
+                full_snapshot=args.full_snapshot,
+                confirm_deactivation=args.confirm_deactivation,
                 min_rows=100,
                 min_pct=80.0,
             )

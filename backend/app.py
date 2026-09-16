@@ -99,13 +99,23 @@ def create_app(test_config=None):
         allowed_origins = [
             origin.strip()
             for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
-            if origin.strip()
+            if origin.strip() and origin.strip() != "*"
         ]
+        
+        # Safely include Vercel deployment URLs if present
+        for v_env in ["VERCEL_URL", "VERCEL_BRANCH_URL"]:
+            v_url = os.environ.get(v_env)
+            if v_url:
+                v_origin = f"https://{v_url}"
+                if v_origin not in allowed_origins:
+                    allowed_origins.append(v_origin)
+                    
         if not allowed_origins:
             raise RuntimeError(
                 "CORS_ALLOWED_ORIGINS must be set to a comma-separated list of "
                 "allowed frontend origins before running with DEBUG=False."
             )
+        
         CORS(app, supports_credentials=True, origins=allowed_origins)
 
     # Exception propagation
