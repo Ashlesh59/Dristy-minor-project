@@ -298,6 +298,56 @@
         };
     }
 
+    /**
+     * Formats 52-week price range: "Low – High" or "—".
+     */
+    function format52WeekRange(low, high, currency) {
+        if (low === null || low === undefined || high === null || high === undefined || low === "" || high === "") {
+            return "—";
+        }
+        var formattedLow = formatCurrency(low, currency);
+        var formattedHigh = formatCurrency(high, currency);
+        if (formattedLow === "—" || formattedHigh === "—") return "—";
+        return formattedLow + " – " + formattedHigh;
+    }
+
+    /**
+     * Formats a percentage return value with sign and color indicator flags.
+     */
+    function formatReturn(returnVal) {
+        if (returnVal === null || returnVal === undefined || returnVal === "") {
+            return {
+                text: "—",
+                isPositive: false,
+                isNegative: false,
+                isZero: true,
+                raw: null,
+            };
+        }
+        var num = typeof returnVal === "number" ? returnVal : parseFloat(String(returnVal));
+        if (isNaN(num)) {
+            return {
+                text: "—",
+                isPositive: false,
+                isNegative: false,
+                isZero: true,
+                raw: null,
+            };
+        }
+        var isPos = num > 0;
+        var isNeg = num < 0;
+        var isZero = num === 0;
+        var sign = isPos ? "+" : (isNeg ? "-" : "");
+        var absFormatted = formatDecimal(Math.abs(num), 2);
+        return {
+            text: sign + absFormatted + "%",
+            isPositive: isPos,
+            isNegative: isNeg,
+            isZero: isZero,
+            raw: num,
+        };
+    }
+
     return {
         escapeHtml: escapeHtml,
         formatDecimal: formatDecimal,
@@ -305,6 +355,8 @@
         formatDailyChange: formatDailyChange,
         calculateSvgCoordinates: calculateSvgCoordinates,
         formatPriceModeLabel: formatPriceModeLabel,
+        format52WeekRange: format52WeekRange,
+        formatReturn: formatReturn,
     };
 });
 

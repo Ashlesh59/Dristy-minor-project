@@ -245,3 +245,32 @@ test('15. Price mode formatting fallback when split_adjusted data is unavailable
     assert.strictEqual(info.disclaimer, 'Split-adjusted price history has not been calculated for this security.');
 });
 
+test('16. 52-Week Range formatting handles normal, missing, and invalid prices', () => {
+    assert.strictEqual(MarketDataState.format52WeekRange('1400.00', '3200.00', 'INR'), '₹1,400.00 – ₹3,200.00');
+    assert.strictEqual(MarketDataState.format52WeekRange('100.50', '250.75', 'USD'), '$100.50 – $250.75');
+    assert.strictEqual(MarketDataState.format52WeekRange(null, '3200.00', 'INR'), '—');
+    assert.strictEqual(MarketDataState.format52WeekRange('1400.00', null, 'INR'), '—');
+    assert.strictEqual(MarketDataState.format52WeekRange('', '', 'INR'), '—');
+});
+
+test('17. Period return formatting handles positive, negative, zero, and missing values', () => {
+    const pos = MarketDataState.formatReturn('25.40');
+    assert.strictEqual(pos.text, '+25.40%');
+    assert.strictEqual(pos.isPositive, true);
+    assert.strictEqual(pos.isNegative, false);
+    assert.strictEqual(pos.isZero, false);
+
+    const neg = MarketDataState.formatReturn('-12.85');
+    assert.strictEqual(neg.text, '-12.85%');
+    assert.strictEqual(neg.isPositive, false);
+    assert.strictEqual(neg.isNegative, true);
+
+    const zero = MarketDataState.formatReturn('0.00');
+    assert.strictEqual(zero.text, '0.00%');
+    assert.strictEqual(zero.isZero, true);
+
+    const miss = MarketDataState.formatReturn(null);
+    assert.strictEqual(miss.text, '—');
+    assert.strictEqual(miss.raw, null);
+});
+

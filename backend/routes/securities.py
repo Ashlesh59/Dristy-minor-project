@@ -49,6 +49,28 @@ def get_latest_market_data(security_id: int):
         }), 500
 
 
+@securities_bp.route("/<int:security_id>/market-data/summary", methods=["GET"])
+@rate_limit(max_requests=60, window_seconds=60, key_prefix="market_data_summary")
+def get_market_summary(security_id: int):
+    user = get_current_user()
+    if user is None:
+        return _login_required_response()
+
+    try:
+        data = MarketDataService.get_market_summary(security_id)
+        return jsonify(data), 200
+    except SecurityNotFoundError as sne:
+        return jsonify({
+            "success": False,
+            "message": str(sne)
+        }), 404
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "An error occurred while retrieving market summary data."
+        }), 500
+
+
 @securities_bp.route("/<int:security_id>/market-data/history", methods=["GET"])
 @rate_limit(max_requests=60, window_seconds=60, key_prefix="market_data_history")
 def get_price_history(security_id: int):

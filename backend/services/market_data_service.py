@@ -144,6 +144,9 @@ class MarketDataService:
                     Decimal("0.0001")
                 )
 
+        # 4. Calculate 52-week range and period returns safely
+        metrics = cls._compute_market_metrics(security.id, latest_price)
+
         market_data_payload = {
             "trading_date": latest_price.trading_date.isoformat(),
             "open": _dec_str(latest_price.open_price, 2),
@@ -160,6 +163,9 @@ class MarketDataService:
             "trade_count": latest_price.trade_count,
             "deliverable_quantity": latest_price.deliverable_quantity,
             "deliverable_percentage": _dec_str(latest_price.deliverable_percentage, 2),
+            "week_52_high": metrics["week_52_high"],
+            "week_52_low": metrics["week_52_low"],
+            "returns": metrics["returns"],
             "source": latest_price.source,
             "is_adjusted": latest_price.is_adjusted,
         }
@@ -168,12 +174,96 @@ class MarketDataService:
             "success": True,
             "security": security_payload,
             "market_data": market_data_payload,
+            "summary": market_data_payload,
             "freshness": {
                 "data_type": "end_of_day",
                 "last_trading_date": latest_price.trading_date.isoformat(),
                 "is_real_time": False,
             },
         }
+
+    @classmethod
+    def _compute_market_metrics(cls, security_id: int, latest_price: DailyPrice) -> Dict[str, Any]:
+        """
+        Calculates 52-week high/low and 1M/3M/6M/1Y returns Decimal-safely
+        using stored chronological DailyPrice records.
+        """
+        if not latest_price or latest_price.close_price is None:
+            return {
+                "week_52_high": None,
+                "week_52_low": None,
+                "returns": {
+                    "return_1m": None,
+                    "return_3m": None,
+                    "return_6m": None,
+                    "return_1y": None,
+                }
+            }
+
+        t_date = latest_price.trading_date
+        year_ago = t_date - timedelta(days=365)
+
+        # 1. 52-Week High and Low
+        year_records = (
+            DailyPrice.query.filter(
+                DailyPrice.security_id == security_id,
+                DailyPrice.trading_date >= year_ago,
+                DailyPrice.trading_date <= t_date,
+            )
+            .all()
+        )
+
+        valid_highs = [
+            r.high_price if r.high_price is not None else r.close_price
+            for r in year_records
+            if (r.high_price is not None or r.close_price is not None)
+        ]
+        valid_lows = [
+            r.low_price if r.low_price is not None else r.close_price
+            for r in year_records
+            if (r.low_price is not None or r.close_price is not None)
+        ]
+
+        w52_high = max(valid_highs) if valid_highs else (latest_price.high_price or latest_price.close_price)
+        w52_low = min(valid_lows) if valid_lows else (latest_price.low_price or latest_price.close_price)
+
+        # 2. Returns (1M = 30d, 3M = 90d, 6M = 180d, 1Y = 365d)
+        def _calc_return(days: int) -> Optional[str]:
+            target_date = t_date - timedelta(days=days)
+            base_rec = (
+                DailyPrice.query.filter(
+                    DailyPrice.security_id == security_id,
+                    DailyPrice.trading_date <= target_date,
+                )
+                .order_by(desc(DailyPrice.trading_date))
+                .first()
+            )
+            if not base_rec or base_rec.close_price is None or base_rec.close_price <= Decimal("0"):
+                return None
+
+            latest_c = latest_price.close_price
+            base_c = base_rec.close_price
+            ret = ((latest_c - base_c) / base_c * Decimal("100")).quantize(Decimal("0.01"))
+            return str(ret)
+
+        return {
+            "week_52_high": _dec_str(w52_high, 2),
+            "week_52_low": _dec_str(w52_low, 2),
+            "returns": {
+                "return_1m": _calc_return(30),
+                "return_3m": _calc_return(90),
+                "return_6m": _calc_return(180),
+                "return_1y": _calc_return(365),
+            }
+        }
+
+    @classmethod
+    def get_market_summary(cls, security_id: int) -> Dict[str, Any]:
+        """
+        Retrieves a complete market performance summary for a security including
+        latest pricing, 52-week range, and period returns.
+        """
+        return cls.get_latest_market_data(security_id)
 
     @classmethod
     def get_price_history(

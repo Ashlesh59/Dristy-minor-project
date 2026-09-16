@@ -70,11 +70,21 @@ class Research(db.Model):
             return None
 
     def to_dict(self, include_details=True):
+        sec_id = self.security_id
+        if sec_id is None and self.ticker_symbol:
+            try:
+                from models.security import Security
+                matched = Security.query.filter_by(symbol=self.ticker_symbol, is_active=True).first()
+                if matched:
+                    sec_id = matched.id
+            except Exception:
+                pass
+
         data = {
             "id": self.id,
             "user_id": self.user_id,
             "company_id": self.company_id,
-            "security_id": self.security_id,
+            "security_id": sec_id,
             "company_name": self.company_name,
             "ticker_symbol": self.ticker_symbol,
             "research_type": self.research_type,

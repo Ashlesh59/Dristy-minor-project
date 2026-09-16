@@ -219,6 +219,147 @@
 
           <div id="reportContent" hidden>
             <!-- ==========================================================
+                 MARKET PERFORMANCE — verified DailyPrice EOD data from Neon Postgres
+                 ========================================================== -->
+            <section class="panel market-performance-panel" id="reportMarketPerformance" aria-label="Market Performance">
+              <div class="panel__head panel__head--between">
+                <div>
+                  <h2 class="panel__title">Market Performance</h2>
+                  <div class="market-badges" style="margin-top: 4px;">
+                    <span class="market-badge market-badge--eod" id="reportBadgeEod">NSE End-of-Day Data</span>
+                    <span class="market-badge" id="reportBadgeDate">Trading Date: —</span>
+                    <span class="market-badge" id="reportBadgeSource">NSE CM-UDiFF</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Price highlights and metric cards -->
+              <div class="market-performance__overview" id="reportMarketDataAvailable">
+                <div class="price-highlight" id="reportPriceHighlight">
+                  <span class="price-highlight__value" id="reportLatestClose">--</span>
+                  <span class="price-highlight__change" id="reportDayChange">--</span>
+                </div>
+
+                <div class="market-metrics-grid">
+                  <div class="stat-card">
+                    <div class="stat-card__label">Day High</div>
+                    <div class="stat-card__value" id="reportDayHigh">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">Day Low</div>
+                    <div class="stat-card__value" id="reportDayLow">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">Previous Close</div>
+                    <div class="stat-card__value" id="reportPrevClose">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">Volume</div>
+                    <div class="stat-card__value" id="reportVolume">--</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-card__label">VWAP</div>
+                    <div class="stat-card__value" id="reportVwap">--</div>
+                  </div>
+                  <div class="stat-card stat-card--wide">
+                    <div class="stat-card__label">52-Week Range</div>
+                    <div class="stat-card__value" id="report52WeekRange">--</div>
+                  </div>
+                </div>
+
+                <!-- Period Returns -->
+                <div class="returns-grid" aria-label="Historical period returns">
+                  <div class="return-item">
+                    <span class="return-item__label">1M Return</span>
+                    <span class="return-item__value" id="reportReturn1M">--</span>
+                  </div>
+                  <div class="return-item">
+                    <span class="return-item__label">3M Return</span>
+                    <span class="return-item__value" id="reportReturn3M">--</span>
+                  </div>
+                  <div class="return-item">
+                    <span class="return-item__label">6M Return</span>
+                    <span class="return-item__value" id="reportReturn6M">--</span>
+                  </div>
+                  <div class="return-item">
+                    <span class="return-item__label">1Y Return</span>
+                    <span class="return-item__value" id="reportReturn1Y">--</span>
+                  </div>
+                </div>
+
+                <!-- HISTORICAL PRICE CHART -->
+                <div class="chart-card" style="margin-top: 1.5rem;" aria-label="Historical price chart">
+                  <div class="chart-controls">
+                    <div>
+                      <h3 class="panel__title" style="margin:0; font-size:1.1rem;">Price History</h3>
+                      <p class="field-hint" style="margin:2px 0 0 0;" id="reportChartSubtitle">Official daily closing prices</p>
+                    </div>
+
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                      <!-- Price Mode Toggle -->
+                      <div class="price-mode-buttons" role="group" aria-label="Price adjustment mode">
+                        <button type="button" class="mode-btn is-active" data-mode="raw" aria-pressed="true" id="reportModeRawBtn">Raw</button>
+                        <button type="button" class="mode-btn" data-mode="split_adjusted" aria-pressed="false" id="reportModeAdjBtn">Split/Bonus Adjusted</button>
+                      </div>
+
+                      <!-- Range Controls -->
+                      <div class="range-buttons" role="group" aria-label="Chart time range selection">
+                        <button type="button" class="range-btn" data-range="1m" aria-pressed="false">1M</button>
+                        <button type="button" class="range-btn" data-range="3m" aria-pressed="false">3M</button>
+                        <button type="button" class="range-btn" data-range="6m" aria-pressed="false">6M</button>
+                        <button type="button" class="range-btn is-active" data-range="1y" aria-pressed="true">1Y</button>
+                        <button type="button" class="range-btn" data-range="max" aria-pressed="false">MAX</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Loading & Chart States -->
+                  <div id="reportChartLoading" class="chart-status-message" hidden>
+                    <p>Loading historical price data...</p>
+                  </div>
+
+                  <div id="reportChartEmpty" class="chart-status-message" hidden>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <p id="reportChartEmptyMessage">No historical price records found for the requested range.</p>
+                  </div>
+
+                  <!-- Native SVG Chart -->
+                  <div class="svg-chart-container" id="reportChartContainer">
+                    <svg id="reportPriceHistorySvg" class="svg-chart" viewBox="0 0 600 260" preserveAspectRatio="none" role="img" aria-label="Stock price history chart">
+                      <defs>
+                        <linearGradient id="reportChartGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3"/>
+                          <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/>
+                        </linearGradient>
+                      </defs>
+                      <g id="reportSvgGridlines"></g>
+                      <g id="reportSvgAxes"></g>
+                      <path id="reportSvgAreaPath" class="chart-area" d="" fill="url(#reportChartGradient)" />
+                      <path id="reportSvgLinePath" class="chart-line" d="" />
+                      <g id="reportSvgPoints"></g>
+                    </svg>
+                    <p id="reportChartAccessibleSummary" class="sr-only" aria-live="polite"></p>
+                  </div>
+
+                  <!-- Adjustment / Unadjusted Disclaimer -->
+                  <div id="reportChartAdjustmentDisclaimer" class="unadjusted-disclaimer" style="margin-top: 1rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span id="reportChartDisclaimerText">Official NSE closing prices. Corporate actions excluded in raw mode.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty state notice when no daily price data exists -->
+              <div id="reportMarketDataEmptyNotice" class="market-data-unavailable" hidden>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div>
+                  <strong>No verified NSE price data available</strong>
+                  <p class="field-hint" style="margin-top: 2px;">End-of-day daily market data has not been imported for this security yet.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ==========================================================
                  EXECUTIVE SUMMARY — company_overview + investment_summary
                  from report_service.py, both AI-generated text.
                  ========================================================== -->
@@ -327,6 +468,7 @@
   </div>
 
   <script src="js/config.js" defer></script>
+  <script src="js/market-data-state.js" defer></script>
   <script src="js/dashboard.js" defer></script>
   <script src="js/investment-report.js" defer></script>
 </body>
