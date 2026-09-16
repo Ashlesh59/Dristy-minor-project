@@ -31,6 +31,7 @@ from routes.auth import auth_bp
 from routes.research import research_bp
 from routes.companies import companies_bp
 from routes.securities import securities_bp
+from routes.admin import admin_bp
 
 
 
@@ -166,6 +167,7 @@ def create_app(test_config=None):
     app.register_blueprint(research_bp)
     app.register_blueprint(companies_bp)
     app.register_blueprint(securities_bp)
+    app.register_blueprint(admin_bp)
 
 
     # ------------------------------------------------------------
