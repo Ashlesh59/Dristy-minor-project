@@ -15,7 +15,9 @@ from flask import Blueprint, request, jsonify, current_app
 
 from database.db import db
 from models.research import Research
+from models.security import Security
 from routes.auth import get_current_user
+from services.market_data_service import MarketDataService
 from services.financial_service import (
     get_stock_quote,
     search_symbols,
@@ -80,7 +82,7 @@ def create_research():
     research_type = (data.get("research_type") or "general").strip() or "general"
 
     # Query the authoritative Security and Company from the local database
-    security = Security.query.get(raw_security_id)
+    security = db.session.get(Security, raw_security_id)
     if not security or not security.is_active or not security.company or not security.company.is_active:
         return jsonify({
             "success": False,
@@ -233,6 +235,43 @@ def get_research_financials(research_id):
             "message": "Research not found."
         }), 404
 
+    # Prioritize verified local database Bhavcopy market data
+    sec = None
+    if record.security_id:
+        sec = db.session.get(Security, record.security_id)
+    if not sec and record.ticker_symbol:
+        sec = Security.query.filter_by(symbol=record.ticker_symbol.upper()).first()
+
+    if sec:
+        try:
+            latest_summary = MarketDataService.get_market_summary(sec.id)
+            if latest_summary and latest_summary.get("summary") and latest_summary["summary"].get("close"):
+                s = latest_summary["summary"]
+                chg_pct = f"{s.get('day_change_percent')}%" if s.get("day_change_percent") is not None else ""
+                financial_data = {
+                    "symbol": sec.symbol,
+                    "price": str(s.get("close") or ""),
+                    "change": str(s.get("day_change") or ""),
+                    "change_percent": chg_pct,
+                    "open": str(s.get("open") or ""),
+                    "high": str(s.get("high") or ""),
+                    "low": str(s.get("low") or ""),
+                    "previous_close": str(s.get("previous_close") or ""),
+                    "volume": str(s.get("volume") or ""),
+                    "currency": sec.currency or "INR",
+                    "source": "NSE Bhavcopy"
+                }
+                record.financial_data = json.dumps(financial_data)
+                db.session.commit()
+                return jsonify({
+                    "success": True,
+                    "research_id": record.id,
+                    "ticker_symbol": record.ticker_symbol,
+                    "financial_data": financial_data
+                }), 200
+        except Exception as e:
+            current_app.logger.warning("Local market data lookup non-fatal error: %s", e)
+
     try:
         financial_data = get_stock_quote(record.ticker_symbol)
     except MissingApiKeyError as e:
@@ -257,11 +296,6 @@ def get_research_financials(research_id):
             "message": "Could not retrieve financial data for this ticker."
         }), 502
 
-    # Persist the real, just-fetched quote on the research record so a
-    # later page load (e.g. reopening a saved report) can show the
-    # last-known real data without necessarily re-calling Alpha
-    # Vantage. This never invents a value -- it only stores exactly
-    # what the provider returned.
     record.financial_data = json.dumps(financial_data)
     db.session.commit()
 
@@ -344,19 +378,51 @@ def _get_analysis_or_error(record, force_refresh=False):
             pass
 
     if not financial_data:
-        try:
-            financial_data = get_stock_quote(record.ticker_symbol)
-            record.financial_data = json.dumps(financial_data)
-            db.session.commit()
-        except (MissingApiKeyError, FinancialServiceUnavailableError, FinancialServiceBadResponseError) as e:
-            current_app.logger.warning("Financial service non-fatal fallback: %s", e)
-            if record.financial_data:
-                try:
-                    financial_data = json.loads(record.financial_data)
-                except Exception:
-                    financial_data = None
-            if not financial_data:
-                financial_data = {"symbol": record.ticker_symbol, "currency": "USD"}
+        # Prioritize verified local database Bhavcopy market data
+        sec = None
+        if record.security_id:
+            sec = db.session.get(Security, record.security_id)
+        if not sec and record.ticker_symbol:
+            sec = Security.query.filter_by(symbol=record.ticker_symbol.upper()).first()
+
+        if sec:
+            try:
+                latest_summary = MarketDataService.get_market_summary(sec.id)
+                if latest_summary and latest_summary.get("summary") and latest_summary["summary"].get("close"):
+                    s = latest_summary["summary"]
+                    chg_pct = f"{s.get('day_change_percent')}%" if s.get("day_change_percent") is not None else ""
+                    financial_data = {
+                        "symbol": sec.symbol,
+                        "price": str(s.get("close") or ""),
+                        "change": str(s.get("day_change") or ""),
+                        "change_percent": chg_pct,
+                        "open": str(s.get("open") or ""),
+                        "high": str(s.get("high") or ""),
+                        "low": str(s.get("low") or ""),
+                        "previous_close": str(s.get("previous_close") or ""),
+                        "volume": str(s.get("volume") or ""),
+                        "currency": sec.currency or "INR",
+                        "source": "NSE Bhavcopy"
+                    }
+                    record.financial_data = json.dumps(financial_data)
+                    db.session.commit()
+            except Exception as e:
+                current_app.logger.warning("Local market data lookup non-fatal error: %s", e)
+
+        if not financial_data:
+            try:
+                financial_data = get_stock_quote(record.ticker_symbol)
+                record.financial_data = json.dumps(financial_data)
+                db.session.commit()
+            except (MissingApiKeyError, FinancialServiceUnavailableError, FinancialServiceBadResponseError) as e:
+                current_app.logger.warning("Financial service non-fatal fallback: %s", e)
+                if record.financial_data:
+                    try:
+                        financial_data = json.loads(record.financial_data)
+                    except Exception:
+                        financial_data = None
+                if not financial_data:
+                    financial_data = {"symbol": record.ticker_symbol, "currency": "INR"}
 
     news_articles = []
     if not force_refresh and record.news_data:

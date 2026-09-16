@@ -96,8 +96,10 @@ graph TD
 | `/api/research` | `GET` | `research_bp` | Lists research records for authenticated user |
 | `/api/research/stats` | `GET` | `research_bp` | Real database metrics (total searches, distinct companies, total reports) |
 | `/api/securities/<id>/market-data/latest` | `GET` | `securities_bp` | Latest verified EOD market data with safe decimal changes & freshness metadata |
-| `/api/securities/<id>/market-data/history` | `GET` | `securities_bp` | Chronological EOD price history (1m/3m/6m/1y/3y/5y/max or ISO date ranges) |
-| `/api/research/<id>/report` | `POST` | `research_bp` | Synthesizes investment report from saved analysis |
+| `/api/securities/<id>/market-data/summary` | `GET` | `securities_bp` | EOD market summary including 52-week High/Low and 1M/3M/6M/1Y period returns |
+| `/api/securities/<id>/market-data/history` | `GET` | `securities_bp` | Chronological EOD price history (1m/3m/6m/1y/3y/5y/max or ISO date ranges, raw or adjusted) |
+| `/api/research/<id>/financials` | `GET` | `research_bp` | Retrieves financial quote prioritizing verified local Bhavcopy data before external fallback |
+| `/api/research/<id>/report` | `POST` | `research_bp` | Synthesizes investment report from saved analysis or retrieves existing report |
 
 ---
 

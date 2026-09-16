@@ -123,7 +123,7 @@ class TestAdjustmentService(unittest.TestCase):
         self.assertEqual(adj2.cumulative_price_factor, Decimal("1.0"))
 
         # Raw prices remain 100% unchanged
-        raw1 = DailyPrice.query.get(dp1.id)
+        raw1 = db.session.get(DailyPrice, dp1.id)
         self.assertEqual(raw1.close_price, Decimal("1010.0000"))
 
     def test_bonus_adjustment(self):

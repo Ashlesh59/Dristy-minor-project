@@ -47,7 +47,7 @@ class AdjustmentService:
         """
         Rebuilds adjusted prices for a single security.
         """
-        security = Security.query.get(security_id)
+        security = db.session.get(Security, security_id)
         if not security:
             raise ValueError(f"Security with id={security_id} not found.")
 

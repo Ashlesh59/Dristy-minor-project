@@ -87,7 +87,7 @@ class TestCorporateActionModels(unittest.TestCase):
         db.session.add(ca)
         db.session.commit()
 
-        loaded = CorporateAction.query.get(ca.id)
+        loaded = db.session.get(CorporateAction, ca.id)
         self.assertIsNotNone(loaded)
         self.assertEqual(loaded.action_type, "stock_split")
         self.assertEqual(loaded.ratio_from, Decimal("10.000000"))
