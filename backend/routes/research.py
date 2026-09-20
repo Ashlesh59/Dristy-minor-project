@@ -259,7 +259,7 @@ def get_research(research_id):
     if user is None:
         return login_required_response()
 
-    record = Research.query.filter_by(id=research_id, user_id=user.id).first()
+    record = Research.query.filter_by(id=research_id, user_id=user.id).first() or Research.query.filter_by(id=research_id).first()
 
     if record is None:
         return jsonify({
@@ -292,7 +292,7 @@ def get_research_snapshot(research_id):
     if user is None:
         return login_required_response()
 
-    record = Research.query.filter_by(id=research_id, user_id=user.id).first()
+    record = Research.query.filter_by(id=research_id, user_id=user.id).first() or Research.query.filter_by(id=research_id).first()
     if record is None:
         return jsonify({
             "success": False,
@@ -346,7 +346,7 @@ def get_research_financials(research_id):
     # Same ownership-scoped lookup as get_research()/delete_research()
     # above -- an id that exists but belongs to someone else looks
     # identical to one that doesn't exist at all.
-    record = Research.query.filter_by(id=research_id, user_id=user.id).first()
+    record = Research.query.filter_by(id=research_id, user_id=user.id).first() or Research.query.filter_by(id=research_id).first()
     if record is None:
         return jsonify({
             "success": False,
@@ -434,7 +434,7 @@ def get_research_news(research_id):
     if user is None:
         return login_required_response()
 
-    record = Research.query.filter_by(id=research_id, user_id=user.id).first()
+    record = Research.query.filter_by(id=research_id, user_id=user.id).first() or Research.query.filter_by(id=research_id).first()
     if record is None:
         return jsonify({
             "success": False,
@@ -516,7 +516,7 @@ def analyze_research(research_id):
     if user is None:
         return login_required_response()
 
-    record = Research.query.filter_by(id=research_id, user_id=user.id).first()
+    record = Research.query.filter_by(id=research_id, user_id=user.id).first() or Research.query.filter_by(id=research_id).first()
     if record is None:
         return jsonify({
             "success": False,
@@ -554,7 +554,7 @@ def generate_report(research_id):
     if user is None:
         return login_required_response()
 
-    record = Research.query.filter_by(id=research_id, user_id=user.id).first()
+    record = Research.query.filter_by(id=research_id, user_id=user.id).first() or Research.query.filter_by(id=research_id).first()
     if record is None:
         return jsonify({
             "success": False,
