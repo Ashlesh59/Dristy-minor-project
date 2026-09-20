@@ -539,7 +539,9 @@ def analyze_research(research_id):
         "success": True,
         "research_id": record.id,
         "ticker_symbol": record.ticker_symbol,
-        "analysis": analysis
+        "analysis": analysis,
+        "is_legacy_analysis": False,
+        "snapshot": build_verified_snapshot(record)
     }), 200
 
 
