@@ -283,6 +283,7 @@ def build_verified_snapshot(record, allow_live_call: bool = True) -> Dict[str, A
 
     snapshot = {
         "company": company_info,
+        "currency": company_info.get("currency") or market_data.get("currency") or "INR",
         "market_data": market_data,
         "coverage": coverage_info,
         "financial_statements": financial_statements,
