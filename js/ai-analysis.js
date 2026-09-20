@@ -116,23 +116,65 @@
     if (record.analysis_data) {
       renderAnalysis(record.analysis_data, record.financial_data);
     }
+
+    // Always ensure financial cards are rendered
+    if (record.financial_data) {
+      renderFinancialCards(record.financial_data);
+    } else if (record.id) {
+      fetchJson('/api/research/' + encodeURIComponent(record.id) + '/financials', { method: 'GET' })
+        .then(function (result) {
+          if (result.ok && result.data && result.data.financial_data) {
+            record.financial_data = result.data.financial_data;
+            renderFinancialCards(record.financial_data);
+          }
+        })
+        .catch(function () {});
+    }
   }
 
   function renderFinancialCards(financialData) {
     els.financialCards.innerHTML = '';
-    if (!financialData) {
-      els.financialCards.innerHTML = '<p class="field-hint">Financial data hasn\'t been fetched for this research yet -- visit Company Research first.</p>';
+    if (!financialData || !financialData.price) {
+      els.financialCards.innerHTML = '<p class="field-hint">Loading financial data...</p>';
       return;
     }
-    var curr = financialData.currency || 'USD';
+    var curr = financialData.currency || 'INR';
+
+    var chgVal = financialData.change;
+    var chgPct = financialData.change_percent;
+    var chgFormatted = null;
+    if (chgVal !== null && chgVal !== undefined && chgVal !== '') {
+      var numChg = parseFloat(chgVal);
+      var sign = numChg > 0 ? '+' : '';
+      chgFormatted = sign + formatPrice(chgVal, curr);
+    }
+
+    var chgPctFormatted = null;
+    if (chgPct !== null && chgPct !== undefined && chgPct !== '') {
+      var strPct = String(chgPct).replace('%', '').trim();
+      var numPct = parseFloat(strPct);
+      var pSign = numPct > 0 ? '+' : '';
+      chgPctFormatted = isNaN(numPct) ? chgPct : (pSign + numPct.toFixed(2) + '%');
+    }
+
+    var volFormatted = null;
+    if (financialData.volume !== null && financialData.volume !== undefined && financialData.volume !== '') {
+      var numVol = Number(financialData.volume);
+      volFormatted = !isNaN(numVol) ? numVol.toLocaleString('en-US') : String(financialData.volume);
+    }
+
     var cards = [
       { label: 'Last Close (EOD)', value: financialData.price ? formatPrice(financialData.price, curr) : null },
-      { label: 'Change', value: financialData.change },
-      { label: 'Change %', value: financialData.change_percent },
+      { label: 'Daily Change', value: chgFormatted },
+      { label: 'Change %', value: chgPctFormatted },
       { label: 'Day High', value: financialData.high ? formatPrice(financialData.high, curr) : null },
       { label: 'Day Low', value: financialData.low ? formatPrice(financialData.low, curr) : null },
-      { label: 'Volume', value: financialData.volume ? Number(financialData.volume).toLocaleString('en-US') : null }
+      { label: 'Day Open', value: financialData.open ? formatPrice(financialData.open, curr) : null },
+      { label: 'Volume', value: volFormatted },
+      { label: '52-Week High', value: financialData.week_52_high ? formatPrice(financialData.week_52_high, curr) : null },
+      { label: '52-Week Low', value: financialData.week_52_low ? formatPrice(financialData.week_52_low, curr) : null }
     ];
+
     cards.forEach(function (c) {
       if (!c.value) return;
       var card = document.createElement('div');
@@ -147,6 +189,7 @@
       card.appendChild(lblEl);
       els.financialCards.appendChild(card);
     });
+
     if (!els.financialCards.children.length) {
       els.financialCards.innerHTML = '<p class="field-hint">No financial data available for this research yet.</p>';
     }

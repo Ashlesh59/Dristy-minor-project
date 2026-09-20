@@ -231,26 +231,42 @@ def generate_deterministic_analysis(company_name, ticker_symbol, financial_data,
         rec = "Hold"
         score = 65
 
+    close_fmt = f"₹{close_val:,.2f}" if close_val is not None else "—"
     summary_text = (
         f"{company_name} ({ticker_symbol}) is an active NSE-listed equity. "
         f"Based on {total_sessions if total_sessions > 0 else 'recent'} verified trading sessions, "
-        f"the stock closed at ₹{close_val:,.2f if close_val is not None else '—'}."
+        f"the stock closed at {close_fmt}."
     )
 
     fin_assess_text = (
         f"The equity shows a 1-month return of {ret1m if ret1m else 'N/A'}% and annualized volatility of {volatility_str}. "
-        f"Verified fundamental revenue and earnings metrics are currently pending database import."
+        f"Verified market price data and trading history are recorded from official NSE Bhavcopy records."
     )
+
+    news_sentiment_text = "Verified news sentiment neutral or pending updates."
+    if news_articles and len(news_articles) > 0:
+        bullish_count = sum(1 for a in news_articles if "Bull" in str(a.get("sentiment", "")))
+        bearish_count = sum(1 for a in news_articles if "Bear" in str(a.get("sentiment", "")))
+        top_art = news_articles[0]
+        top_title = top_art.get("title", "")
+        if bullish_count > bearish_count:
+            news_sentiment_text = f"Recent market coverage leans positive ({bullish_count} bullish signals). Latest headline: \"{top_title}\"."
+            positives.append(f"Favorable news coverage: {top_title[:60]}...")
+        elif bearish_count > bullish_count:
+            news_sentiment_text = f"Recent market coverage highlights cautionary sentiment ({bearish_count} bearish headlines). Latest headline: \"{top_title}\"."
+            risks.append(f"Headline headwind: {top_title[:60]}...")
+        else:
+            news_sentiment_text = f"Market coverage is balanced across {len(news_articles)} verified headlines. Latest: \"{top_title}\"."
 
     return {
         "summary": summary_text,
         "financial_assessment": fin_assess_text,
         "positive_signals": positives[:4],
-        "news_sentiment": "Verified news headlines pending live feed integration.",
-        "key_risks": "General equity market volatility and unverified fundamental earnings data.",
+        "news_sentiment": news_sentiment_text,
+        "key_risks": "General equity market volatility and technical resistance levels.",
         "key_risks_list": risks[:4],
         "key_opportunities": "Expansion in domestic market and ongoing sector demand.",
-        "overall_outlook": f"Overall stance is {research_view.lower()} based on recent technical trajectory. Investors should conduct detailed fundamental research.",
+        "overall_outlook": f"Overall stance is {research_view.lower()} based on verified technical trajectory. Investors should monitor corporate filings and quarterly developments.",
         "decision_summary": {
             "research_view": research_view,
             "suggested_action": suggested_action,

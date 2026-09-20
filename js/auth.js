@@ -175,6 +175,102 @@
     var password = form.querySelector('#loginPassword');
     var submitBtn = form.querySelector('button[type="submit"]');
 
+    function performLogin(emailVal, passVal) {
+      clearFieldError(email);
+      clearFieldError(password);
+
+      setLoading(submitBtn, true);
+
+      fetch(API_BASE_URL + '/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: emailVal.trim(),
+          password: passVal
+        })
+      })
+        .then(function (response) {
+          return response.json().then(function (data) {
+            return {
+              ok: response.ok,
+              data: data
+            };
+          });
+        })
+        .then(function (result) {
+          setLoading(submitBtn, false);
+
+          if (!result.ok) {
+            showAlert(
+              form,
+              'error',
+              result.data.message || 'Login failed. Please try again.'
+            );
+            return;
+          }
+
+          showAlert(
+            form,
+            'success',
+            'Login successful. Redirecting to your dashboard...'
+          );
+
+          if (result.data.user) {
+            localStorage.setItem(
+              USER_KEY,
+              JSON.stringify(result.data.user)
+            );
+            localStorage.setItem(SESSION_KEY, 'true');
+          }
+
+          setTimeout(function () {
+            window.location.href = 'dashboard.html';
+          }, 600);
+
+        })
+        .catch(function (err) {
+          console.error('Login error:', err);
+          setLoading(submitBtn, false);
+
+          showAlert(
+            form,
+            'error',
+            'Unable to connect to the server. Please make sure the backend is running.'
+          );
+        });
+    }
+
+    // Quick 1-click demo login buttons
+    var quickBtn = document.getElementById('quickDemoBtn');
+    if (quickBtn) {
+      quickBtn.addEventListener('click', function () {
+        email.value = 'demo@investiq.com';
+        password.value = 'password123';
+        performLogin('demo@investiq.com', 'password123');
+      });
+    }
+
+    var googleBtn = document.getElementById('googleDemoBtn');
+    if (googleBtn) {
+      googleBtn.addEventListener('click', function () {
+        email.value = 'demo@investiq.com';
+        password.value = 'password123';
+        performLogin('demo@investiq.com', 'password123');
+      });
+    }
+
+    var msBtn = document.getElementById('msDemoBtn');
+    if (msBtn) {
+      msBtn.addEventListener('click', function () {
+        email.value = 'demo@investiq.com';
+        password.value = 'password123';
+        performLogin('demo@investiq.com', 'password123');
+      });
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var isValid = true;
@@ -203,70 +299,7 @@
         return;
       }
 
-      setLoading(submitBtn, true);
-
-fetch(API_BASE_URL + '/api/auth/login', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  credentials: 'include',
-  body: JSON.stringify({
-    email: email.value.trim(),
-    password: password.value
-  })
-})
-  .then(function (response) {
-    return response.json().then(function (data) {
-      return {
-        ok: response.ok,
-        data: data
-      };
-    });
-  })
-  .then(function (result) {
-
-    setLoading(submitBtn, false);
-
-    if (!result.ok) {
-      showAlert(
-        form,
-        'error',
-        result.data.message || 'Login failed. Please try again.'
-      );
-      return;
-    }
-
-    showAlert(
-      form,
-      'success',
-      'Login successful. Redirecting to your dashboard...'
-    );
-
-    if (result.data.user) {
-      localStorage.setItem(
-        USER_KEY,
-        JSON.stringify(result.data.user)
-      );
-      localStorage.setItem(SESSION_KEY, 'true');
-    }
-
-    setTimeout(function () {
-      window.location.href = 'dashboard.html';
-    }, 900);
-
-  })
-  .catch(function (err) {
-    console.error('Login error:', err);
-    setLoading(submitBtn, false);
-
-    showAlert(
-      form,
-      'error',
-      'Unable to connect to the server. Please make sure the backend is running.'
-    );
-
-  });
+      performLogin(email.value, password.value);
     });
   }
 

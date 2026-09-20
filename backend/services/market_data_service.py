@@ -104,6 +104,77 @@ class MarketDataService:
         }
 
         if not latest_price:
+            from flask import current_app
+            is_testing = False
+            try:
+                is_testing = bool(
+                    current_app
+                    and current_app.config.get("TESTING", False)
+                    and not current_app.config.get("ENABLE_LIVE_FALLBACK", False)
+                )
+            except Exception:
+                pass
+
+            if not is_testing:
+                try:
+                    from services.financial_service import get_stock_quote
+                    live_q = get_stock_quote(security.symbol)
+                    if live_q and live_q.get("price"):
+                        price_val = str(live_q.get("price"))
+                        chg_val = str(live_q.get("change") or "0.00")
+                        raw_pct = str(live_q.get("change_percent") or "0.00%").replace("%", "").replace("+", "").strip()
+                        curr = live_q.get("currency") or security.currency or "INR"
+                        security_payload["currency"] = curr
+                        
+                        trading_dt = live_q.get("latest_trading_day") or datetime.utcnow().strftime("%Y-%m-%d")
+                        market_data_payload = {
+                            "date": trading_dt,
+                            "trading_date": trading_dt,
+                            "currency": curr,
+                            "open": str(live_q.get("open") or price_val),
+                            "high": str(live_q.get("high") or price_val),
+                            "low": str(live_q.get("low") or price_val),
+                            "close": price_val,
+                            "last_price": price_val,
+                            "previous_close": str(live_q.get("previous_close") or price_val),
+                            "change": chg_val,
+                            "change_percent": raw_pct,
+                            "vwap": price_val,
+                            "volume": int(live_q.get("volume") or 0),
+                            "turnover": None,
+                            "trade_count": None,
+                            "deliverable_quantity": None,
+                            "deliverable_percentage": None,
+                            "week_52_high": str(live_q.get("high") or price_val),
+                            "week_52_low": str(live_q.get("low") or price_val),
+                            "sma_20": None,
+                            "sma_50": None,
+                            "average_volume_30": None,
+                            "volatility": None,
+                            "coverage": None,
+                            "returns": {
+                                "return_1m": None,
+                                "return_3m": None,
+                                "return_6m": None,
+                                "return_1y": None,
+                            },
+                            "source": live_q.get("source") or "Live Market Feed",
+                            "is_adjusted": False,
+                        }
+                        return {
+                            "success": True,
+                            "security": security_payload,
+                            "market_data": market_data_payload,
+                            "summary": market_data_payload,
+                            "freshness": {
+                                "data_type": "real_time",
+                                "last_trading_date": live_q.get("latest_trading_day"),
+                                "is_real_time": True,
+                            },
+                        }
+                except Exception as e:
+                    pass
+
             return {
                 "success": True,
                 "security": security_payload,
@@ -148,7 +219,9 @@ class MarketDataService:
         metrics = cls._compute_market_metrics(security.id, latest_price)
 
         market_data_payload = {
+            "date": latest_price.trading_date.isoformat(),
             "trading_date": latest_price.trading_date.isoformat(),
+            "currency": security_payload["currency"],
             "open": _dec_str(latest_price.open_price, 2),
             "high": _dec_str(latest_price.high_price, 2),
             "low": _dec_str(latest_price.low_price, 2),
@@ -503,6 +576,33 @@ class MarketDataService:
         }
         if clean_mode == "split_adjusted":
             metadata_dict["unavailable_reason"] = "Split-adjusted price history has not been calculated for this security."
+
+        # If no local prices exist and not in unit testing mode, fetch live historical candles from financial service
+        if not prices_list:
+            from flask import current_app
+            is_testing = False
+            try:
+                is_testing = bool(
+                    current_app
+                    and current_app.config.get("TESTING", False)
+                    and not current_app.config.get("ENABLE_LIVE_FALLBACK", False)
+                )
+            except Exception:
+                pass
+
+            if not is_testing:
+                try:
+                    from services.financial_service import get_stock_history
+                    fetched_history = get_stock_history(security.symbol, clean_range or "1y")
+                    if fetched_history:
+                        prices_list = fetched_history[:safe_limit]
+                        truncated = len(fetched_history) > safe_limit
+                        start_iso = prices_list[0]["date"] if prices_list else None
+                        end_iso = prices_list[-1]["date"] if prices_list else None
+                        metadata_dict["source"] = "Live Market Feed"
+                        metadata_dict["disclaimer"] = "Historical daily market prices."
+                except Exception as e:
+                    pass
 
         return {
             "success": True,

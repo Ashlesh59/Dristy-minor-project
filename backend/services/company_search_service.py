@@ -119,7 +119,70 @@ class CompanySearchService:
         )
 
         rows = base_query.limit(limit).all()
-        return [CompanySearchService._format_result(c, s) for c, s in rows]
+        results = [CompanySearchService._format_result(c, s) for c, s in rows]
+
+        # If no local matches found and query is at least 2 characters, discover via global symbols
+        if len(results) == 0 and len(clean_q) >= 2 and not any(ch in clean_q for ch in ["'", '"', ";", "\\", "%", "_", "=", "<", ">"]):
+            from flask import current_app
+            is_testing = False
+            try:
+                is_testing = bool(
+                    current_app
+                    and current_app.config.get("TESTING", False)
+                    and not current_app.config.get("ENABLE_LIVE_FALLBACK", False)
+                )
+            except Exception:
+                pass
+
+            if not is_testing:
+                try:
+                    from services.financial_service import search_symbols
+                    global_matches = search_symbols(clean_q)
+                    existing_symbols = {r["symbol"].upper() for r in results}
+
+                    for item in global_matches:
+                        sym = item.get("symbol", "").upper()
+                        if not sym or sym in existing_symbols:
+                            continue
+
+                        # Check if already in DB
+                        sec = Security.query.filter_by(symbol=sym).first()
+                        if not sec:
+                            comp_name = item.get("name") or sym
+                            norm = normalize_company_name(comp_name)
+                            comp = Company(
+                                display_name=comp_name,
+                                legal_name=comp_name,
+                                normalized_name=norm,
+                                country=item.get("country", "US"),
+                                is_active=True,
+                            )
+                            db.session.add(comp)
+                            db.session.flush()
+
+                            sec = Security(
+                                company_id=comp.id,
+                                symbol=sym,
+                                exchange=item.get("exchange", "NASDAQ"),
+                                series="EQ",
+                                currency=item.get("currency", "USD"),
+                                asset_type=item.get("type", "Equity"),
+                                is_active=True,
+                            )
+                            db.session.add(sec)
+                            db.session.commit()
+
+                        if sec and sec.company and (not active_only or (sec.is_active and sec.company.is_active)):
+                            res_dict = CompanySearchService._format_result(sec.company, sec)
+                            results.append(res_dict)
+                            existing_symbols.add(sym)
+
+                        if len(results) >= limit:
+                            break
+                except Exception:
+                    db.session.rollback()
+
+        return results[:limit]
 
     @staticmethod
     def _format_result(company: Company, security: Security) -> Dict[str, Any]:
@@ -136,3 +199,4 @@ class CompanySearchService:
             "asset_type": security.asset_type,
             "is_active": bool(security.is_active and company.is_active),
         }
+

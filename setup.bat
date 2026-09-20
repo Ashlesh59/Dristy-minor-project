@@ -83,6 +83,14 @@ if exist "data\raw\nse\EQUITY_L.csv" (
     echo (You can run `python -m backend.cli.sync_companies --source nse --file path/to/EQUITY_L.csv` anytime)
 )
 
+:: 7. Optional: Import NSE Bhavcopy Market Data if directory exists
+if exist "data\raw\nse\bhavcopy\" (
+    echo [OPTIONAL] Found data\raw\nse\bhavcopy\ directory.
+    echo Importing historical Bhavcopy price data into local database...
+    python -m backend.cli.sync_market_data --directory data\raw\nse\bhavcopy
+    echo [SUCCESS] NSE Bhavcopy price synchronization completed.
+)
+
 echo.
 echo ====================================================
 echo  Setup Complete!

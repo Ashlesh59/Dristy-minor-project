@@ -60,6 +60,78 @@ from models.company import Company
 from models.security import Security
 
 
+def _ensure_record_financial_data(record, allow_live_call=True):
+    """
+    Guarantees that a research record always has valid financial data.
+    1. Checks if record already has valid financial JSON with a price.
+    2. Resolves from local Bhavcopy DailyPrice if present.
+    3. Falls back to live quote (Alpha Vantage / Yahoo) if needed and allowed.
+    4. Persists the result to the record in SQLite.
+    """
+    if record.financial_data:
+        try:
+            parsed = json.loads(record.financial_data)
+            if parsed and parsed.get("price"):
+                return parsed
+        except Exception:
+            pass
+
+    sec = None
+    if record.security_id:
+        sec = db.session.get(Security, record.security_id)
+    if not sec and record.ticker_symbol:
+        sec = Security.query.filter_by(symbol=record.ticker_symbol.upper()).first()
+
+    fin_data = None
+    if sec:
+        try:
+            latest_summary = MarketDataService.get_market_summary(sec.id)
+            m = latest_summary.get("market_data") or latest_summary.get("summary")
+            if m and m.get("close") and m.get("source") != "Live Market Feed":
+                chg_pct = f"{m.get('change_percent')}%" if m.get("change_percent") is not None and not str(m.get("change_percent")).endswith("%") else str(m.get("change_percent") or "")
+                fin_data = {
+                    "symbol": sec.symbol,
+                    "price": str(m.get("close") or ""),
+                    "change": str(m.get("change") or ""),
+                    "change_percent": chg_pct,
+                    "open": str(m.get("open") or ""),
+                    "high": str(m.get("high") or ""),
+                    "low": str(m.get("low") or ""),
+                    "previous_close": str(m.get("previous_close") or ""),
+                    "volume": str(m.get("volume") or ""),
+                    "vwap": str(m.get("vwap") or ""),
+                    "week_52_high": str(m.get("week_52_high") or ""),
+                    "week_52_low": str(m.get("week_52_low") or ""),
+                    "currency": sec.currency or "INR",
+                    "source": "NSE Bhavcopy",
+                    "latest_trading_day": m.get("trading_date"),
+                }
+        except Exception as e:
+            current_app.logger.debug("Local market data lookup non-fatal: %s", e)
+
+    if not fin_data and record.ticker_symbol and allow_live_call:
+        from flask import current_app
+        is_testing = False
+        try:
+            is_testing = bool(current_app and current_app.config.get("TESTING", False) and not current_app.config.get("ENABLE_LIVE_FALLBACK", False))
+        except Exception:
+            pass
+        if not is_testing:
+            try:
+                fin_data = get_stock_quote(record.ticker_symbol)
+            except Exception as e:
+                current_app.logger.debug("Live quote lookup non-fatal: %s", e)
+
+    if fin_data:
+        record.financial_data = json.dumps(fin_data)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+    return fin_data
+
+
 @research_bp.route("", methods=["POST"])
 def create_research():
     user = get_current_user()
@@ -102,6 +174,10 @@ def create_research():
     )
 
     db.session.add(new_research)
+    db.session.flush()
+
+    # Pre-populate local Bhavcopy data if available
+    _ensure_record_financial_data(new_research, allow_live_call=False)
     db.session.commit()
 
     return jsonify({
@@ -185,6 +261,10 @@ def get_research(research_id):
             "message": "Research not found."
         }), 404
 
+    # Ensure financial_data is resolved and persisted
+    if not record.financial_data or record.financial_data in ("null", "{}"):
+        _ensure_record_financial_data(record)
+
     return jsonify({
         "success": True,
         "research": record.to_dict()
@@ -236,7 +316,6 @@ def get_research_financials(research_id):
             "message": "Research not found."
         }), 404
 
-    # Prioritize verified local database Bhavcopy market data
     sec = None
     if record.security_id:
         sec = db.session.get(Security, record.security_id)
@@ -246,21 +325,22 @@ def get_research_financials(research_id):
     if sec:
         try:
             latest_summary = MarketDataService.get_market_summary(sec.id)
-            if latest_summary and latest_summary.get("summary") and latest_summary["summary"].get("close"):
-                s = latest_summary["summary"]
-                chg_pct = f"{s.get('day_change_percent')}%" if s.get("day_change_percent") is not None else ""
+            m = latest_summary.get("market_data") or latest_summary.get("summary")
+            if m and m.get("close") and m.get("source") != "Live Market Feed":
+                chg_pct = f"{m.get('change_percent')}%" if m.get("change_percent") is not None and not str(m.get("change_percent")).endswith("%") else str(m.get("change_percent") or "")
                 financial_data = {
                     "symbol": sec.symbol,
-                    "price": str(s.get("close") or ""),
-                    "change": str(s.get("day_change") or ""),
+                    "price": str(m.get("close") or ""),
+                    "change": str(m.get("change") or ""),
                     "change_percent": chg_pct,
-                    "open": str(s.get("open") or ""),
-                    "high": str(s.get("high") or ""),
-                    "low": str(s.get("low") or ""),
-                    "previous_close": str(s.get("previous_close") or ""),
-                    "volume": str(s.get("volume") or ""),
+                    "open": str(m.get("open") or ""),
+                    "high": str(m.get("high") or ""),
+                    "low": str(m.get("low") or ""),
+                    "previous_close": str(m.get("previous_close") or ""),
+                    "volume": str(m.get("volume") or ""),
                     "currency": sec.currency or "INR",
-                    "source": "NSE Bhavcopy"
+                    "source": "NSE Bhavcopy",
+                    "latest_trading_day": m.get("trading_date"),
                 }
                 record.financial_data = json.dumps(financial_data)
                 db.session.commit()
@@ -276,9 +356,6 @@ def get_research_financials(research_id):
     try:
         financial_data = get_stock_quote(record.ticker_symbol)
     except MissingApiKeyError as e:
-        # Server misconfiguration, not the user's fault -- log the
-        # real reason for whoever's running the server, but never put
-        # it (or the missing key itself) in the response.
         current_app.logger.error("Financial service misconfigured: %s", e)
         return jsonify({
             "success": False,
@@ -328,7 +405,7 @@ def get_research_news(research_id):
         }), 404
 
     try:
-        news = get_ticker_news(record.ticker_symbol)
+        news = get_ticker_news(record.ticker_symbol, record.company_name)
     except NewsMissingApiKeyError as e:
         current_app.logger.error("News service misconfigured: %s", e)
         return jsonify({
@@ -362,78 +439,27 @@ def get_research_news(research_id):
 def _get_analysis_or_error(record, force_refresh=False):
     """
     Retrieves or generates analysis for a research record.
-    If force_refresh=False and analysis_data is present, returns cached analysis.
+    If force_refresh=False and analysis_data is present (and not stale), returns cached analysis.
     Otherwise fetches latest data and runs Gemini AI analysis.
     """
+    financial_data = _ensure_record_financial_data(record)
+
+    cached_analysis = None
     if not force_refresh and record.analysis_data:
         try:
-            return json.loads(record.analysis_data), None
+            cached_analysis = json.loads(record.analysis_data)
+            # Invalidate stale placeholder analysis if real financial data is now present
+            fin_assessment = str(cached_analysis.get("financial_assessment") or "").lower()
+            if financial_data and ("absence of specific live price" in fin_assessment or "no financial data" in fin_assessment or "financial data hasn't been fetched" in fin_assessment):
+                cached_analysis = None
         except Exception:
-            pass
+            cached_analysis = None
 
-    financial_data = None
-    if not force_refresh and record.financial_data:
-        try:
-            financial_data = json.loads(record.financial_data)
-        except Exception:
-            pass
+    if cached_analysis:
+        return cached_analysis, None
 
     if not financial_data:
-        # Prioritize verified local database Bhavcopy market data
-        sec = None
-        if record.security_id:
-            sec = db.session.get(Security, record.security_id)
-        if not sec and record.ticker_symbol:
-            sec = Security.query.filter_by(symbol=record.ticker_symbol.upper()).first()
-
-        if sec:
-            try:
-                latest_summary = MarketDataService.get_market_summary(sec.id)
-                if latest_summary and latest_summary.get("summary") and latest_summary["summary"].get("close"):
-                    s = latest_summary["summary"]
-                    chg_pct = f"{s.get('day_change_percent')}%" if s.get("day_change_percent") is not None else ""
-                    financial_data = {
-                        "symbol": sec.symbol,
-                        "price": str(s.get("close") or ""),
-                        "change": str(s.get("day_change") or ""),
-                        "change_percent": chg_pct,
-                        "open": str(s.get("open") or ""),
-                        "high": str(s.get("high") or ""),
-                        "low": str(s.get("low") or ""),
-                        "previous_close": str(s.get("previous_close") or ""),
-                        "volume": str(s.get("volume") or ""),
-                        "vwap": str(s.get("vwap") or ""),
-                        "week_52_high": str(s.get("week_52_high") or ""),
-                        "week_52_low": str(s.get("week_52_low") or ""),
-                        "sma_20": str(s.get("sma_20") or ""),
-                        "sma_50": str(s.get("sma_50") or ""),
-                        "average_volume_30": str(s.get("average_volume_30") or ""),
-                        "volatility": str(s.get("volatility") or ""),
-                        "returns": s.get("returns") or {},
-                        "coverage": s.get("coverage") or {},
-                        "currency": sec.currency or "INR",
-                        "source": "NSE Bhavcopy",
-                        "source_date": s.get("trading_date"),
-                    }
-                    record.financial_data = json.dumps(financial_data)
-                    db.session.commit()
-            except Exception as e:
-                current_app.logger.warning("Local market data lookup non-fatal error: %s", e)
-
-        if not financial_data:
-            try:
-                financial_data = get_stock_quote(record.ticker_symbol)
-                record.financial_data = json.dumps(financial_data)
-                db.session.commit()
-            except (MissingApiKeyError, FinancialServiceUnavailableError, FinancialServiceBadResponseError) as e:
-                current_app.logger.warning("Financial service non-fatal fallback: %s", e)
-                if record.financial_data:
-                    try:
-                        financial_data = json.loads(record.financial_data)
-                    except Exception:
-                        financial_data = None
-                if not financial_data:
-                    financial_data = {"symbol": record.ticker_symbol, "currency": "INR"}
+        financial_data = {"symbol": record.ticker_symbol, "currency": "INR"}
 
     news_articles = []
     if not force_refresh and record.news_data:
@@ -444,7 +470,7 @@ def _get_analysis_or_error(record, force_refresh=False):
 
     if not news_articles:
         try:
-            news_articles = get_ticker_news(record.ticker_symbol)
+            news_articles = get_ticker_news(record.ticker_symbol, record.company_name)
             if news_articles:
                 record.news_data = json.dumps(news_articles)
                 db.session.commit()
@@ -509,7 +535,7 @@ def analyze_research(research_id):
     }), 200
 
 
-@research_bp.route("/<int:research_id>/report", methods=["POST"])
+@research_bp.route("/<int:research_id>/report", methods=["POST", "GET"])
 @rate_limit(max_requests=15, window_seconds=60, key_prefix="research_report")
 def generate_report(research_id):
     """

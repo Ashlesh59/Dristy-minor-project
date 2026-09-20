@@ -134,6 +134,17 @@ def login():
 
     user = User.query.filter_by(email=email).first()
 
+    # Auto-provision demo user for seamless instant demo login if not present
+    if user is None and email == "demo@investiq.com" and password == "password123":
+        try:
+            user = User(name="Demo User", email="demo@investiq.com")
+            user.set_password("password123")
+            db.session.add(user)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            user = User.query.filter_by(email=email).first()
+
     # Deliberately the SAME error, same status code, whether the email
     # doesn't exist at all or the password is wrong for a real
     # account. Distinguishing the two ("no such email" vs "wrong

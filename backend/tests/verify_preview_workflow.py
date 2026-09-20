@@ -8,10 +8,11 @@ Comprehensive verification script for the live Vercel Preview deployment:
 """
 
 import sys
+import time
 import json
 import requests
 
-PREVIEW_URL = "https://aashinvest-9bdrm4l69-desksolutions.vercel.app"
+PREVIEW_URL = "https://aashinvest-jdwps76sc-desksolutions.vercel.app"
 
 def main():
     print(f"=== VERIFYING LIVE PREVIEW: {PREVIEW_URL} ===")
@@ -96,10 +97,14 @@ def main():
     print(f"   Created research record ID: {research_id}")
 
     # Generate Report
+    t0 = time.time()
     res_report = session.post(f"{PREVIEW_URL}/api/research/{research_id}/report")
+    dt = time.time() - t0
+    print(f"   Generated Report in {dt:.2f}s (Status: {res_report.status_code})")
     assert res_report.status_code == 200
     report_json = res_report.json().get("report", {})
     print(f"   AI Score: {report_json.get('ai_score')} | Stance: {report_json.get('recommendation')}")
+    print(f"   Deterministic Fallback Used: {report_json.get('is_deterministic')}")
     print(f"   Decision Summary: {json.dumps(report_json.get('decision_summary'), indent=2)}")
 
     # Reload Report from Cache (Zero Gemini calls)
