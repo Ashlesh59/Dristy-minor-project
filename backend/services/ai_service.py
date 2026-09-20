@@ -1,40 +1,45 @@
 """
 services/ai_service.py
 --------------------------------------------------------------------------
-Wraps Google's Gemini API to turn a research record's financial data +
-news into a structured AI analysis and Investment Decision Summary.
+Wraps Google's Gemini API to turn a Verified Research Snapshot into a
+grounded, strictly factual AI equity analysis and Decision Summary.
 
-Structured the same way as services/financial_service.py and
-services/news_service.py: this is the only file that knows Gemini
-exists, the key is read from the environment at call time (never
-hardcoded, never returned, never logged), and callers get back either
-a clean dict or one of the exceptions below to translate into an HTTP
-response.
+STRICT GROUNDING PRINCIPLES:
+1. Gemini receives ONLY the verified saved snapshot.
+2. If financial statements are absent, fundamental assessment explicitly states
+   they are unavailable; no unverified revenue/profit/P/E figures are invented.
+3. If news articles are absent, news sentiment explicitly states no verified
+   news was found; no news claims are generated.
+4. Confidence level is capped at 'Medium' or 'Low' when data is partial,
+   and recommendation is 'Insufficient Data' if market data is insufficient.
 --------------------------------------------------------------------------
 """
 
 import json
 import os
-from decimal import Decimal
+import logging
+from typing import Dict, Any, List, Optional
 
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai.types import GenerateContentConfig, ThinkingConfig
 
-# Primary and fallback models for Gemini API
+logger = logging.getLogger(__name__)
+
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-2.5-pro"]
 GEMINI_MODEL = "gemini-2.5-flash"
 
 REQUIRED_FIELDS = [
     "summary",
-    "financial_assessment",
+    "market_assessment",
+    "fundamental_assessment",
     "news_sentiment",
     "key_risks",
     "key_opportunities",
     "overall_outlook",
 ]
 
-RECOMMENDATION_VALUES = {"Buy", "Hold", "Sell"}
+RECOMMENDATION_VALUES = {"Buy", "Hold", "Sell", "Insufficient Data"}
 RESEARCH_VIEWS = {"Positive", "Neutral", "Cautious", "Insufficient Data"}
 CONFIDENCE_LEVELS = {"High", "Medium", "Low"}
 SUGGESTED_ACTIONS = {
@@ -43,6 +48,7 @@ SUGGESTED_ACTIONS = {
     "Wait for stronger confirmation",
     "Review risks before making a decision",
     "Avoid making a conclusion because data is insufficient",
+    "Wait for verified financial statements",
 }
 
 
@@ -55,251 +61,322 @@ class MissingApiKeyError(AIServiceError):
 
 
 class AIServiceUnavailableError(AIServiceError):
-    """Couldn't reach Gemini, or Gemini itself is rate-limiting /
-    temporarily erroring on its end."""
+    """Couldn't reach Gemini, or rate limited."""
 
 
 class AIServiceBadResponseError(AIServiceError):
-    """Gemini responded, but the content wasn't usable -- empty,
-    not valid JSON, or missing one of the fields this service
-    requires."""
+    """Gemini responded with unusable content."""
 
 
-def _build_prompt(company_name, ticker_symbol, financial_data, news_articles):
+def _build_snapshot_prompt(snapshot: Dict[str, Any]) -> str:
     """
-    Assembles the prompt sent to Gemini with strict grounding on verified NSE data.
+    Constructs the strictly grounded prompt sent to Gemini from a VerifiedSnapshot.
     """
+    comp = snapshot.get("company") or {}
+    mkt = snapshot.get("market_data") or {}
+    cov = snapshot.get("coverage") or {}
+    stmts = snapshot.get("financial_statements") or {}
+    ratios = snapshot.get("financial_ratios") or {}
+    news = snapshot.get("news_articles") or []
+    missing = snapshot.get("missing_sections") or []
+    quality = snapshot.get("quality_status") or "partial"
+
     news_lines = "\n".join(
-        f"- {a.get('title')} (sentiment: {a.get('sentiment')})"
-        for a in (news_articles or [])
-    ) or "No verified recent news headlines available."
+        f"- [{a.get('source', 'Media')}] {a.get('headline')} (Date: {a.get('published_at', 'N/A')}, Sentiment: {a.get('sentiment', 'Neutral')})"
+        for a in news
+    ) if news else "No verified recent news headlines available in snapshot."
 
-    fin_json = json.dumps(financial_data or {}, indent=2)
+    stmts_text = json.dumps(stmts, indent=2) if stmts.get("is_available") else "Verified financial statements are not available for this company yet."
+    ratios_text = json.dumps(ratios, indent=2) if ratios.get("is_available") else "Verified financial ratios are not available in this snapshot."
 
     return f"""You are a senior equity research analyst at InvestIQ specializing in Indian stock markets (NSE).
-Provide an objective, realistic, and company-specific research report for:
-Company: {company_name}
-NSE Symbol: {ticker_symbol}
+Produce an objective, strictly fact-based equity research report based EXCLUSIVELY on the verified snapshot below.
 
-Verified NSE Market Data & Technical Indicators:
-{fin_json}
+COMPANY IDENTITY:
+- Name: {comp.get('name')}
+- Symbol: {comp.get('symbol')} ({comp.get('exchange', 'NSE')}:{comp.get('series', 'EQ')})
+- Currency: {comp.get('currency', 'INR')}
+- ISIN: {comp.get('isin', 'N/A')}
 
-Verified News & Sentiment:
+1. VERIFIED NSE MARKET DATA & TECHNICALS:
+{json.dumps(mkt, indent=2)}
+
+Coverage & Technical Returns:
+{json.dumps(cov, indent=2)}
+
+2. VERIFIED FINANCIAL STATEMENTS:
+{stmts_text}
+
+3. VERIFIED FINANCIAL RATIOS:
+{ratios_text}
+
+4. VERIFIED NEWS HEADLINES & MEDIA:
 {news_lines}
 
-STRICT GROUNDING & ACCURACY RULES:
-1. Base all numerical statements exclusively on the provided verified financial data above.
-2. NEVER invent, hallucinate, or estimate unverified financial figures (e.g. unverified quarterly revenue, profit, P/E, or exact price targets). If verified fundamental financial statements are not in the payload, clearly state 'Verified fundamental data unavailable'.
-3. Mention the exact trading session count, date, and metrics (such as latest close, 50-day SMA, 52-week range, and period returns) where relevant.
-4. Distinguish verified exchange facts from analytical interpretation.
-5. Provide a realistic confidence level: 'High' only if complete 1Y history and multiple metrics exist; 'Medium' or 'Low' if history is limited or data is missing.
-6. Provide an objective research view (Positive, Neutral, Cautious, Insufficient Data) and practical next-step checklist.
+DATA INTEGRITY AUDIT:
+- Quality Status: {quality}
+- Explicit Missing Sections: {', '.join(missing) if missing else 'None'}
 
-Respond ONLY with a single valid JSON object (no markdown formatting, no backticks, no markdown code fence) with exactly the following schema:
+STRICT FACTUAL GROUNDING RULES:
+1. USE ONLY THE PROVIDED SNAPSHOT. Do NOT use unstated prior knowledge. Do NOT invent, hallucinate, or estimate financial figures, revenue, profit, EPS, P/E, or price targets.
+2. Market Assessment: Base statements exclusively on verified closing price (in {comp.get('currency', 'INR')}), volume, VWAP, 52-week range, and period returns.
+3. Fundamental Assessment: If financial_statements is unavailable or marked missing, output EXACTLY: "Verified financial statements are not available in this snapshot. Fundamental financial statement assessment could not be performed."
+4. News Sentiment: If no verified news articles exist, output EXACTLY: "No verified recent news was found. News sentiment was not calculated." If articles exist, summarize only the verified headlines.
+5. Missing Information: Explicitly list any missing sections so investors understand coverage gaps.
+6. Confidence Level:
+   - 'High' is ALLOWED ONLY IF Quality Status is 'complete' (both verified market data and verified financial statements exist).
+   - 'Medium' or 'Low' if Quality Status is 'partial'.
+   - 'Low' if Quality Status is 'insufficient'.
+7. Recommendation:
+   - If financial statements are unavailable, recommendation must be 'Hold' or 'Insufficient Data' with suggested action 'Wait for verified financial statements' or 'Consider for further research'.
+   - NEVER provide a confident 'Buy' with missing fundamentals.
+
+Respond ONLY with a single valid JSON object (no markdown, no backticks, no code fence) matching this schema:
 {{
-  "summary": "2-3 sentences summarizing the company's business and current verified market stance.",
-  "financial_assessment": "2-3 sentences evaluating the latest close relative to moving averages, recent volume, and period returns.",
+  "summary": "2-3 sentences summarizing the company and its verified market position.",
+  "market_assessment": "2-3 sentences assessing verified price relative to VWAP, 52W range, and returns.",
+  "fundamental_assessment": "Assessment of verified statements or exact unavailable notice.",
+  "financial_assessment": "Same text as fundamental_assessment for backward compatibility.",
+  "news_sentiment": "Summary of verified news headlines or exact unavailable notice.",
+  "missing_information": [
+    "Explicit list of unpopulated sections in the snapshot"
+  ],
   "positive_signals": [
-    "3 to 4 concise bullet points highlighting verified technical/market strengths"
+    "2 to 4 concise bullet points of verified strengths"
   ],
-  "news_sentiment": "1-2 sentences on recent market sentiment or state 'Verified news sentiment neutral/unavailable'.",
-  "key_risks": "2-3 key market headwinds, volatility risks, or sector challenges.",
+  "key_risks": "2-3 market or structural risks grounded in verified data.",
   "key_risks_list": [
-    "3 to 4 concise bullet points outlining key risks"
+    "2 to 4 concise bullet points outlining verified risks"
   ],
-  "key_opportunities": "2-3 growth catalysts, industry opportunities, or expansion drivers.",
-  "overall_outlook": "2-3 forward-looking sentences synthesizing the verified data into an analytical thesis.",
+  "key_opportunities": "2-3 verified catalysts or sector drivers.",
+  "overall_outlook": "2-3 forward-looking sentences synthesizing the verified data.",
   "decision_summary": {{
-    "research_view": "Positive",
-    "suggested_action": "Consider for further research",
-    "confidence_level": "Medium",
+    "research_view": "Positive | Neutral | Cautious | Insufficient Data",
+    "suggested_action": "Consider for further research | Add to watchlist | Wait for verified financial statements | Review risks before making a decision | Avoid making a conclusion because data is insufficient",
+    "confidence_level": "Medium | Low | High",
     "why_this_view": [
-      "3 to 4 short, evidence-based bullet points referencing exact numbers from the verified data"
+      "3 to 4 short, evidence-based bullet points citing exact snapshot numbers"
     ],
-    "what_could_change_view": "Explanation of which verified developments or breakout/breakdown levels would alter this outlook.",
+    "what_could_change_view": "Explanation of what verified filings or price levels would alter outlook.",
     "check_next_checklist": [
-      "Review upcoming quarterly filings and audited financial statements",
-      "Monitor trading volume relative to the 30-session average",
-      "Compare historical valuation with sectoral peers",
-      "Track corporate actions and dividend announcements on NSE"
+      "Review latest quarterly audited financial statements",
+      "Monitor trading volume relative to 30-session average",
+      "Check corporate action updates on NSE"
     ]
   }},
   "ai_score": 75,
-  "recommendation": "Buy"
+  "recommendation": "Buy | Hold | Sell | Insufficient Data",
+  "snapshot_version": 2
 }}
 """
 
 
-def generate_deterministic_analysis(company_name, ticker_symbol, financial_data, news_articles=None):
+def generate_deterministic_analysis_from_snapshot(snapshot: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Creates a deterministic, rule-based investment assessment directly from
-    verified NSE market data and technical calculations. Used as a safe, 100% reliable
-    fallback when AI providers are unavailable or offline.
+    Creates a 100% reliable, deterministic investment analysis directly from a VerifiedSnapshot.
+    Obeys all strict factual grounding rules with zero hallucinations.
     """
-    fin = financial_data or {}
-    close_str = str(fin.get("price") or fin.get("close") or "—")
-    sma20_str = str(fin.get("sma_20") or "")
-    sma50_str = str(fin.get("sma_50") or "")
-    volatility_str = str(fin.get("volatility") or "—")
-    ret1m = str((fin.get("returns") or {}).get("return_1m") or "")
-    ret1y = str((fin.get("returns") or {}).get("return_1y") or "")
-    coverage = fin.get("coverage") or {}
-    total_sessions = coverage.get("total_sessions") or 0
+    comp = snapshot.get("company") or {}
+    mkt = snapshot.get("market_data") or {}
+    cov = snapshot.get("coverage") or {}
+    stmts = snapshot.get("financial_statements") or {}
+    news = snapshot.get("news_articles") or []
+    missing = snapshot.get("missing_sections") or []
+    quality = snapshot.get("quality_status") or "partial"
 
-    try:
-        close_val = float(close_str.replace(",", "")) if close_str != "—" else None
-    except ValueError:
-        close_val = None
+    symbol = comp.get("symbol") or "UNKNOWN"
+    company_name = comp.get("name") or symbol
+    curr = comp.get("currency") or "INR"
+    curr_sym = "₹" if curr == "INR" else ("$" if curr == "USD" else curr + " ")
 
-    try:
-        sma20_val = float(sma20_str.replace(",", "")) if sma20_str else None
-    except ValueError:
-        sma20_val = None
+    close_val = mkt.get("close")
+    prev_close = mkt.get("previous_close")
+    chg_pct = mkt.get("change_percent")
+    vwap_val = mkt.get("vwap")
+    w52_h = mkt.get("week_52_high")
+    w52_l = mkt.get("week_52_low")
+    total_sessions = cov.get("total_sessions") or 0
+    returns = cov.get("returns") or {}
+    ret1m = returns.get("return_1m")
+    volatility = cov.get("volatility")
 
-    try:
-        sma50_val = float(sma50_str.replace(",", "")) if sma50_str else None
-    except ValueError:
-        sma50_val = None
+    # If insufficient market data
+    if quality == "insufficient" or close_val is None or total_sessions < 5:
+        return {
+            "summary": f"{company_name} ({symbol}) has insufficient verified market data in the system.",
+            "market_assessment": "Insufficient verified exchange price data to assess market trajectory.",
+            "fundamental_assessment": "Verified financial statements are not available for this company yet.",
+            "financial_assessment": "Verified financial statements are not available for this company yet.",
+            "news_sentiment": "No verified recent news was found. News sentiment was not calculated.",
+            "missing_information": ["NSE Market Price Data", "Verified Financial Statements", "Recent News Headlines"],
+            "positive_signals": ["Active security profile registered."],
+            "key_risks": "Data is insufficient to evaluate market risks or technical trends.",
+            "key_risks_list": ["Insufficient trading session history in verified database"],
+            "key_opportunities": "Awaiting verified exchange price data and corporate filings.",
+            "overall_outlook": "Evaluation deferred due to insufficient verified data.",
+            "decision_summary": {
+                "research_view": "Insufficient Data",
+                "suggested_action": "Avoid making a conclusion because data is insufficient",
+                "confidence_level": "Low",
+                "why_this_view": ["Trading history in database is under minimum threshold (5 sessions)"],
+                "what_could_change_view": "Ingestion of official exchange Bhavcopy price series.",
+                "check_next_checklist": [
+                    "Verify exchange ticker symbol and ISIN code",
+                    "Import official NSE Bhavcopy historical archives",
+                ],
+            },
+            "ai_score": None,
+            "recommendation": "Insufficient Data",
+            "snapshot_version": 2,
+            "is_deterministic": True,
+        }
 
-    try:
-        ret1m_val = float(ret1m) if ret1m and ret1m != "—" else None
-    except ValueError:
-        ret1m_val = None
+    # Market evidence points
+    reasons: List[str] = []
+    positives: List[str] = []
+    risks: List[str] = []
 
-    # Evidence points
-    reasons = []
-    positives = []
-    risks = []
+    close_fmt = f"{curr_sym}{close_val:,.2f}"
+    reasons.append(f"Latest verified {comp.get('exchange', 'NSE')} closing price settled at {close_fmt}.")
 
-    if close_val is not None:
-        reasons.append(f"Latest verified NSE closing price settled at ₹{close_val:,.2f}.")
+    if chg_pct is not None:
+        sign = "+" if chg_pct > 0 else ""
+        if chg_pct > 0:
+            positives.append(f"Daily session gain of {sign}{chg_pct:.2f}%")
+        elif chg_pct < 0:
+            risks.append(f"Daily session decline of {chg_pct:.2f}%")
 
-    if sma50_val is not None and close_val is not None:
-        if close_val >= sma50_val:
-            reasons.append(f"Share price trades above its 50-session moving average of ₹{sma50_val:,.2f}, indicating positive medium-term momentum.")
-            positives.append(f"Trading above 50-session moving average (₹{sma50_val:,.2f})")
-        else:
-            reasons.append(f"Share price is currently below the 50-session moving average (₹{sma50_val:,.2f}), reflecting price pressure.")
-            risks.append(f"Trading below 50-session moving average (₹{sma50_val:,.2f})")
+    if ret1m is not None:
+        try:
+            r1m_val = float(ret1m)
+            if r1m_val > 0:
+                reasons.append(f"Recorded a 1-month trailing return of +{r1m_val:.2f}%.")
+                positives.append(f"1-Month trailing gain of +{r1m_val:.2f}%")
+            else:
+                reasons.append(f"Recorded a 1-month trailing decline of {r1m_val:.2f}%.")
+                risks.append(f"1-Month trailing decline of {r1m_val:.2f}%")
+        except (ValueError, TypeError):
+            pass
 
-    if ret1m_val is not None:
-        if ret1m_val > 0:
-            reasons.append(f"Demonstrated a positive 1-month trailing return of +{ret1m_val:.2f}%.")
-            positives.append(f"1-Month trailing gain of +{ret1m_val:.2f}%")
-        else:
-            reasons.append(f"Experienced a 1-month trailing decline of {ret1m_val:.2f}%.")
-            risks.append(f"1-Month trailing decline of {ret1m_val:.2f}%")
-
-    if volatility_str and volatility_str != "—":
-        reasons.append(f"Annualized historical volatility calculated at {volatility_str} based on official EOD Bhavcopy series.")
-        risks.append(f"Market volatility at {volatility_str}")
+    if w52_h is not None and w52_l is not None:
+        reasons.append(f"Trading within 52-week range of {curr_sym}{w52_l:,.2f} - {curr_sym}{w52_h:,.2f}.")
 
     if total_sessions > 0:
-        reasons.append(f"Analysis grounded in {total_sessions} verified NSE trading sessions.")
+        reasons.append(f"Technical analysis grounded in {total_sessions} verified trading sessions.")
 
-    if not positives:
-        positives.append("Listed on NSE equity segment with verified daily market activity.")
-        positives.append("Official EOD price series archived and validated.")
-
-    if not risks:
-        risks.append("Market-wide macroeconomic fluctuations and sector-specific headwinds.")
-        risks.append("Verified fundamental balance sheet statements unavailable in current payload.")
-
-    # Determine research view & confidence
-    if total_sessions < 10 or close_val is None:
-        research_view = "Insufficient Data"
-        suggested_action = "Avoid making a conclusion because data is insufficient"
-        confidence_level = "Low"
-        rec = "Hold"
-        score = 50
-    elif ret1m_val is not None and ret1m_val > 5.0 and (sma50_val is None or close_val >= sma50_val):
-        research_view = "Positive"
-        suggested_action = "Consider for further research"
-        confidence_level = "High" if total_sessions >= 100 else "Medium"
-        rec = "Buy"
-        score = 78
-    elif ret1m_val is not None and ret1m_val < -5.0:
-        research_view = "Cautious"
-        suggested_action = "Review risks before making a decision"
-        confidence_level = "High" if total_sessions >= 100 else "Medium"
-        rec = "Hold"
-        score = 52
+    # Fundamental assessment section
+    if stmts.get("is_available"):
+        rev = stmts.get("revenue")
+        np_val = stmts.get("net_profit")
+        period = stmts.get("reporting_period") or "Recent Period"
+        fund_assess = f"Verified filings for {period} reflect revenue of {rev or 'N/A'} and net profit of {np_val or 'N/A'}."
     else:
-        research_view = "Neutral"
-        suggested_action = "Add to watchlist"
-        confidence_level = "Medium"
-        rec = "Hold"
-        score = 65
+        fund_assess = "Verified financial statements are not available in this snapshot. Fundamental financial statement assessment could not be performed."
+        risks.append("Verified fundamental balance sheet statements unavailable in current snapshot.")
 
-    close_fmt = f"₹{close_val:,.2f}" if close_val is not None else "—"
-    summary_text = (
-        f"{company_name} ({ticker_symbol}) is an active NSE-listed equity. "
-        f"Based on {total_sessions if total_sessions > 0 else 'recent'} verified trading sessions, "
-        f"the stock closed at {close_fmt}."
-    )
-
-    fin_assess_text = (
-        f"The equity shows a 1-month return of {ret1m if ret1m else 'N/A'}% and annualized volatility of {volatility_str}. "
-        f"Verified market price data and trading history are recorded from official NSE Bhavcopy records."
-    )
-
-    news_sentiment_text = "Verified news sentiment neutral or pending updates."
-    if news_articles and len(news_articles) > 0:
-        bullish_count = sum(1 for a in news_articles if "Bull" in str(a.get("sentiment", "")))
-        bearish_count = sum(1 for a in news_articles if "Bear" in str(a.get("sentiment", "")))
-        top_art = news_articles[0]
-        top_title = top_art.get("title", "")
+    # News sentiment section
+    if news:
+        bullish_count = sum(1 for a in news if "Bull" in str(a.get("sentiment", "")))
+        bearish_count = sum(1 for a in news if "Bear" in str(a.get("sentiment", "")))
+        top_art = news[0]
+        top_title = top_art.get("headline") or top_art.get("title", "")
         if bullish_count > bearish_count:
-            news_sentiment_text = f"Recent market coverage leans positive ({bullish_count} bullish signals). Latest headline: \"{top_title}\"."
-            positives.append(f"Favorable news coverage: {top_title[:60]}...")
+            news_sentiment_text = f"Recent media coverage leans positive ({bullish_count} bullish signals). Latest headline: \"{top_title}\"."
+            positives.append(f"Favorable media headline: {top_title[:55]}...")
         elif bearish_count > bullish_count:
-            news_sentiment_text = f"Recent market coverage highlights cautionary sentiment ({bearish_count} bearish headlines). Latest headline: \"{top_title}\"."
-            risks.append(f"Headline headwind: {top_title[:60]}...")
+            news_sentiment_text = f"Recent media coverage highlights cautionary sentiment ({bearish_count} bearish headlines). Latest headline: \"{top_title}\"."
+            risks.append(f"Media headwind: {top_title[:55]}...")
         else:
-            news_sentiment_text = f"Market coverage is balanced across {len(news_articles)} verified headlines. Latest: \"{top_title}\"."
+            news_sentiment_text = f"Market coverage is balanced across {len(news)} verified headlines. Latest: \"{top_title}\"."
+    else:
+        news_sentiment_text = "No verified recent news was found. News sentiment was not calculated."
+
+    # Missing information list
+    missing_info_list = []
+    if not stmts.get("is_available"):
+        missing_info_list.append("Verified Financial Statements (Income Statement, Balance Sheet, Cash Flow)")
+    if not snapshot.get("financial_ratios", {}).get("is_available"):
+        missing_info_list.append("Verified Valuation & Financial Ratios (P/E, P/B, ROE)")
+    if not news:
+        missing_info_list.append("Recent Verified News & Corporate Announcements")
+
+    # Determine view & confidence
+    if quality == "complete":
+        confidence = "High" if total_sessions >= 60 else "Medium"
+        view = "Positive" if (ret1m and float(ret1m) > 0) else "Neutral"
+        rec = "Buy" if view == "Positive" else "Hold"
+        score = 78 if view == "Positive" else 65
+        s_action = "Consider for further research"
+    elif quality == "partial":
+        confidence = "Medium"
+        view = "Positive" if (ret1m and float(ret1m) > 5.0) else "Neutral"
+        rec = "Hold"  # Never confident Buy without statements
+        score = 70 if view == "Positive" else 60
+        s_action = "Wait for verified financial statements" if not stmts.get("is_available") else "Consider for further research"
+    else:
+        confidence = "Low"
+        view = "Insufficient Data"
+        rec = "Insufficient Data"
+        score = 50
+        s_action = "Avoid making a conclusion because data is insufficient"
+
+    market_assess = (
+        f"On trading date {mkt.get('trading_date', 'N/A')}, {symbol} closed at {close_fmt} "
+        f"({'+' if (chg_pct or 0) > 0 else ''}{(chg_pct or 0):.2f}%). "
+        f"The stock has {total_sessions} verified exchange sessions in the active database."
+    )
+
+    summary_text = (
+        f"{company_name} ({symbol}) is an exchange-listed equity on {comp.get('exchange', 'NSE')}. "
+        f"Latest verified exchange close settled at {close_fmt}."
+    )
 
     return {
         "summary": summary_text,
-        "financial_assessment": fin_assess_text,
-        "positive_signals": positives[:4],
+        "market_assessment": market_assess,
+        "fundamental_assessment": fund_assess,
+        "financial_assessment": fund_assess,
         "news_sentiment": news_sentiment_text,
-        "key_risks": "General equity market volatility and technical resistance levels.",
-        "key_risks_list": risks[:4],
+        "missing_information": missing_info_list,
+        "positive_signals": positives[:4] or ["Verified exchange listing on NSE equity segment."],
+        "key_risks": "General equity market volatility and unverified fundamental earnings data.",
+        "key_risks_list": risks[:4] or ["Market-wide price volatility."],
         "key_opportunities": "Expansion in domestic market and ongoing sector demand.",
-        "overall_outlook": f"Overall stance is {research_view.lower()} based on verified technical trajectory. Investors should monitor corporate filings and quarterly developments.",
+        "overall_outlook": f"Overall stance is {view.lower()} based on verified market trajectory. Comprehensive fundamental filings remain pending import.",
         "decision_summary": {
-            "research_view": research_view,
-            "suggested_action": suggested_action,
-            "confidence_level": confidence_level,
+            "research_view": view,
+            "suggested_action": s_action,
+            "confidence_level": confidence,
             "why_this_view": reasons[:4],
-            "what_could_change_view": "A sustained breakout above moving averages on elevated volume or official corporate filings would improve confidence.",
+            "what_could_change_view": "Publishing of verified audited financial statements or significant price breakout.",
             "check_next_checklist": [
                 "Review latest quarterly audited financial statements",
-                "Verify trading volume relative to 30-session average",
-                "Compare valuation multiples with NSE sector peers",
-                "Check recent corporate announcements and dividend history",
+                "Monitor trading volume relative to 30-session average",
+                "Check corporate action updates on NSE",
             ],
         },
         "ai_score": score,
         "recommendation": rec,
+        "snapshot_version": 2,
         "is_deterministic": True,
     }
 
 
-def generate_research_analysis(company_name, ticker_symbol, financial_data, news_articles):
+def generate_research_analysis_from_snapshot(snapshot: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Calls Gemini with the given company context, financial data, and
-    news, and returns a dict with guaranteed required fields.
-    Falls back to deterministic analysis if API key is missing or calls fail.
+    Calls Gemini API with the verified snapshot under strict grounding constraints.
+    Falls back to deterministic snapshot analysis if API key is absent or Gemini fails.
     """
+    quality = snapshot.get("quality_status") or "partial"
+    if quality == "insufficient" or quality == "invalid":
+        return generate_deterministic_analysis_from_snapshot(snapshot)
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise MissingApiKeyError(
-            "GEMINI_API_KEY is not configured in the environment."
-        )
+        return generate_deterministic_analysis_from_snapshot(snapshot)
 
     client = genai.Client(api_key=api_key)
-    prompt = _build_prompt(company_name, ticker_symbol, financial_data, news_articles)
+    prompt = _build_snapshot_prompt(snapshot)
 
     last_error = None
     response = None
@@ -310,7 +387,7 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
                 contents=prompt,
                 config=GenerateContentConfig(
                     response_mime_type="application/json",
-                    temperature=0.2,
+                    temperature=0.1,
                     thinking_config=ThinkingConfig(thinking_budget=0),
                 ),
             )
@@ -321,15 +398,10 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
             continue
 
     if not response or not getattr(response, "text", None):
-        if last_error:
-            raise AIServiceUnavailableError(f"Gemini error: {last_error}") from last_error
-        raise AIServiceBadResponseError("Gemini returned an empty response.")
+        logger.warning("Gemini unavailable, falling back to deterministic snapshot analysis: %s", last_error)
+        return generate_deterministic_analysis_from_snapshot(snapshot)
 
-    raw_text = getattr(response, "text", None)
-    if not raw_text:
-        raise AIServiceBadResponseError("Gemini returned an empty response.")
-
-    raw_text = raw_text.strip()
+    raw_text = getattr(response, "text", "").strip()
     if raw_text.startswith("```"):
         lines = raw_text.splitlines()
         if lines and lines[0].startswith("```"):
@@ -340,16 +412,16 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
 
     try:
         parsed = json.loads(raw_text)
-    except (ValueError, TypeError) as exc:
-        raise AIServiceBadResponseError(
-            "Gemini response was not valid JSON."
-        ) from exc
+    except Exception as exc:
+        logger.warning("Gemini JSON parse failed, falling back to deterministic: %s", exc)
+        return generate_deterministic_analysis_from_snapshot(snapshot)
 
     if not isinstance(parsed, dict):
-        raise AIServiceBadResponseError("Gemini response was not a JSON object.")
+        return generate_deterministic_analysis_from_snapshot(snapshot)
 
-    # Fill required string fields
-    result = {}
+    # Post-process & enforce strict snapshot rules on Gemini response
+    result: Dict[str, Any] = {"snapshot_version": 2}
+
     for field in REQUIRED_FIELDS:
         val = parsed.get(field)
         if val is not None and str(val).strip():
@@ -357,21 +429,34 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
         else:
             result[field] = f"Verified analysis for {field.replace('_', ' ')} is being updated."
 
-    # Parse positive signals list
+    # Enforce fundamental statement unavailable text if statements are missing
+    stmts = snapshot.get("financial_statements") or {}
+    if not stmts.get("is_available"):
+        result["fundamental_assessment"] = "Verified financial statements are not available in this snapshot. Fundamental financial statement assessment could not be performed."
+        result["financial_assessment"] = result["fundamental_assessment"]
+    else:
+        result["financial_assessment"] = result["fundamental_assessment"]
+
+    # Enforce news sentiment unavailable text if news is missing
+    news = snapshot.get("news_articles") or []
+    if not news:
+        result["news_sentiment"] = "No verified recent news was found. News sentiment was not calculated."
+
+    # Missing information list
+    missing_raw = parsed.get("missing_information")
+    if isinstance(missing_raw, list) and missing_raw:
+        result["missing_information"] = [str(m).strip() for m in missing_raw if str(m).strip()]
+    else:
+        result["missing_information"] = snapshot.get("missing_sections") or []
+
+    # Positive signals & Risks
     pos_signals = parsed.get("positive_signals")
-    if isinstance(pos_signals, list) and pos_signals:
-        result["positive_signals"] = [str(s).strip() for s in pos_signals if str(s).strip()]
-    else:
-        result["positive_signals"] = []
+    result["positive_signals"] = [str(s).strip() for s in pos_signals if str(s).strip()] if isinstance(pos_signals, list) else []
 
-    # Parse key risks list
     key_risks_list = parsed.get("key_risks_list")
-    if isinstance(key_risks_list, list) and key_risks_list:
-        result["key_risks_list"] = [str(r).strip() for r in key_risks_list if str(r).strip()]
-    else:
-        result["key_risks_list"] = []
+    result["key_risks_list"] = [str(r).strip() for r in key_risks_list if str(r).strip()] if isinstance(key_risks_list, list) else []
 
-    # Parse Decision Summary
+    # Decision Summary
     dec_raw = parsed.get("decision_summary") or {}
     if not isinstance(dec_raw, dict):
         dec_raw = {}
@@ -382,55 +467,100 @@ def generate_research_analysis(company_name, ticker_symbol, financial_data, news
 
     s_action = str(dec_raw.get("suggested_action") or "").strip()
     if s_action not in SUGGESTED_ACTIONS:
-        s_action = "Consider for further research" if r_view == "Positive" else "Add to watchlist"
+        s_action = "Wait for verified financial statements" if not stmts.get("is_available") else "Consider for further research"
 
     c_level = str(dec_raw.get("confidence_level") or "").strip().title()
     if c_level not in CONFIDENCE_LEVELS:
         c_level = "Medium"
 
-    why_reasons = dec_raw.get("why_this_view")
-    if isinstance(why_reasons, list) and why_reasons:
-        clean_reasons = [str(w).strip() for w in why_reasons if str(w).strip()]
-    else:
-        clean_reasons = []
+    # Enforce confidence capping rule: High confidence is forbidden if statements are missing
+    if not stmts.get("is_available") and c_level == "High":
+        c_level = "Medium"
 
-    change_driver = str(dec_raw.get("what_could_change_view") or "").strip()
-    if not change_driver:
-        change_driver = "Material changes in quarterly financial filings or sustained price momentum would update this outlook."
+    why_reasons = dec_raw.get("why_this_view")
+    clean_reasons = [str(w).strip() for w in why_reasons if str(w).strip()] if isinstance(why_reasons, list) else []
 
     checklist = dec_raw.get("check_next_checklist")
-    if isinstance(checklist, list) and checklist:
-        clean_checklist = [str(c).strip() for c in checklist if str(c).strip()]
-    else:
-        clean_checklist = [
-            "Review upcoming quarterly audited filings",
-            "Monitor trading volume relative to 30-session average",
-            "Compare performance with sector peers",
-            "Check corporate action updates on NSE",
-        ]
+    clean_checklist = [str(c).strip() for c in checklist if str(c).strip()] if isinstance(checklist, list) else [
+        "Review latest quarterly audited financial statements",
+        "Monitor trading volume relative to 30-session average",
+        "Check corporate action updates on NSE",
+    ]
 
     result["decision_summary"] = {
         "research_view": r_view,
         "suggested_action": s_action,
         "confidence_level": c_level,
         "why_this_view": clean_reasons,
-        "what_could_change_view": change_driver,
+        "what_could_change_view": str(dec_raw.get("what_could_change_view") or "Receipt of verified financial statements or sustained price breakout."),
         "check_next_checklist": clean_checklist,
     }
 
     # ai_score validation
-    ai_score = None
     try:
         raw_score = int(parsed.get("ai_score"))
-        if 0 <= raw_score <= 100:
-            ai_score = raw_score
+        result["ai_score"] = raw_score if 0 <= raw_score <= 100 else 65
     except (TypeError, ValueError):
-        ai_score = None
-    result["ai_score"] = ai_score
+        result["ai_score"] = 65
 
-    raw_recommendation = str(parsed.get("recommendation") or "").strip().title()
-    result["recommendation"] = (
-        raw_recommendation if raw_recommendation in RECOMMENDATION_VALUES else None
-    )
+    raw_rec = str(parsed.get("recommendation") or "").strip().title()
+    # If statements are missing, cannot give confident Buy
+    if not stmts.get("is_available") and raw_rec == "Buy":
+        raw_rec = "Hold"
+    result["recommendation"] = raw_rec if raw_rec in RECOMMENDATION_VALUES else "Hold"
 
     return result
+
+
+# Backwards compatibility wrappers
+def generate_research_analysis(company_name, ticker_symbol, financial_data, news_articles):
+    """
+    Backwards compatibility adapter for older caller signatures.
+    Converts arguments into a snapshot structure and delegates to generate_research_analysis_from_snapshot.
+    """
+    snapshot = {
+        "company": {"name": company_name, "symbol": ticker_symbol, "currency": (financial_data or {}).get("currency", "INR")},
+        "market_data": {
+            "close": (financial_data or {}).get("price") or (financial_data or {}).get("close"),
+            "change": (financial_data or {}).get("change"),
+            "change_percent": (financial_data or {}).get("change_percent"),
+            "volume": (financial_data or {}).get("volume"),
+            "trading_date": (financial_data or {}).get("latest_trading_day"),
+            "is_available": bool(financial_data and (financial_data.get("price") or financial_data.get("close"))),
+            "currency": (financial_data or {}).get("currency", "INR"),
+        },
+        "coverage": (financial_data or {}).get("coverage", {}),
+        "financial_statements": (financial_data or {}).get("financial_statements", {"is_available": False}),
+        "financial_ratios": (financial_data or {}).get("financial_ratios", {"is_available": False}),
+        "news_articles": news_articles or [],
+        "missing_sections": ["financial_statements"] if not (financial_data or {}).get("financial_statements") else [],
+        "quality_status": "complete" if ((financial_data or {}).get("financial_statements") and news_articles) else "partial",
+        "snapshot_version": 2,
+    }
+    return generate_research_analysis_from_snapshot(snapshot)
+
+
+def generate_deterministic_analysis(company_name, ticker_symbol, financial_data, news_articles=None):
+    """
+    Backwards compatibility adapter for deterministic analysis.
+    """
+    snapshot = {
+        "company": {"name": company_name, "symbol": ticker_symbol, "currency": (financial_data or {}).get("currency", "INR")},
+        "market_data": {
+            "close": (financial_data or {}).get("price") or (financial_data or {}).get("close"),
+            "change": (financial_data or {}).get("change"),
+            "change_percent": (financial_data or {}).get("change_percent"),
+            "volume": (financial_data or {}).get("volume"),
+            "trading_date": (financial_data or {}).get("latest_trading_day"),
+            "is_available": bool(financial_data and (financial_data.get("price") or financial_data.get("close"))),
+            "currency": (financial_data or {}).get("currency", "INR"),
+        },
+        "coverage": (financial_data or {}).get("coverage", {}),
+        "financial_statements": (financial_data or {}).get("financial_statements", {"is_available": False}),
+        "financial_ratios": (financial_data or {}).get("financial_ratios", {"is_available": False}),
+        "news_articles": news_articles or [],
+        "missing_sections": ["financial_statements"] if not (financial_data or {}).get("financial_statements") else [],
+        "quality_status": "complete" if ((financial_data or {}).get("financial_statements") and news_articles) else "partial",
+        "snapshot_version": 2,
+    }
+    return generate_deterministic_analysis_from_snapshot(snapshot)

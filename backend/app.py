@@ -155,6 +155,7 @@ def create_app(test_config=None):
         return jsonify({
             "success": True,
             "status": "healthy" if db_status == "connected" else "degraded",
+            "build_id": "VERIFIED_SNAPSHOT_V2",
             "database": db_status,
             "services": {
                 "alpha_vantage": bool(os.environ.get("ALPHA_VANTAGE_API_KEY")),

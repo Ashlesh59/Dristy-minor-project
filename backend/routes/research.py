@@ -34,10 +34,13 @@ from services.news_service import (
 from services.ai_service import (
     generate_research_analysis,
     generate_deterministic_analysis,
+    generate_research_analysis_from_snapshot,
+    generate_deterministic_analysis_from_snapshot,
     MissingApiKeyError as AIMissingApiKeyError,
     AIServiceUnavailableError,
     AIServiceBadResponseError,
 )
+from services.snapshot_service import build_verified_snapshot
 from services.report_service import build_investment_report, ReportServiceError
 from utils.limiter import rate_limit
 
@@ -239,20 +242,23 @@ def get_research_stats():
     }), 200
 
 
+def _is_legacy_analysis(analysis_obj):
+    if not analysis_obj or not isinstance(analysis_obj, dict):
+        return False
+    if analysis_obj.get("snapshot_version") != 2:
+        return True
+    fund = str(analysis_obj.get("fundamental_assessment") or analysis_obj.get("financial_assessment") or "").lower()
+    if "typically trades at a premium" in fund or "absence of specific live price" in fund:
+        return True
+    return False
+
+
 @research_bp.route("/<int:research_id>", methods=["GET"])
 def get_research(research_id):
     user = get_current_user()
     if user is None:
         return login_required_response()
 
-    # Filtering by BOTH id and user_id in the same query -- rather
-    # than fetching by id alone and checking ownership afterwards --
-    # means a request for someone else's research id looks identical
-    # to a request for an id that doesn't exist at all: both come back
-    # empty, and both get the same 404 below. That's deliberate, for
-    # the same reason login gives one generic error either way: it
-    # avoids confirming to a client whether a given id belongs to
-    # *someone* (just not them) versus not existing at all.
     record = Research.query.filter_by(id=research_id, user_id=user.id).first()
 
     if record is None:
@@ -261,13 +267,44 @@ def get_research(research_id):
             "message": "Research not found."
         }), 404
 
-    # Ensure financial_data is resolved and persisted
-    if not record.financial_data or record.financial_data in ("null", "{}"):
-        _ensure_record_financial_data(record)
+    # Build or retrieve verified snapshot
+    snapshot = build_verified_snapshot(record)
+    res_dict = record.to_dict()
+    res_dict["snapshot"] = snapshot
+    is_legacy = _is_legacy_analysis(res_dict.get("analysis_data")) if res_dict.get("analysis_data") else False
+    res_dict["is_legacy_analysis"] = is_legacy
 
     return jsonify({
         "success": True,
-        "research": record.to_dict()
+        "research": res_dict,
+        "snapshot": snapshot,
+        "is_legacy_analysis": is_legacy,
+        "legacy_warning": "This analysis was generated without the current verified-data snapshot and may contain unsupported statements." if is_legacy else None,
+    }), 200
+
+
+@research_bp.route("/<int:research_id>/snapshot", methods=["GET"])
+def get_research_snapshot(research_id):
+    """
+    Returns the complete verified snapshot for a research record.
+    """
+    user = get_current_user()
+    if user is None:
+        return login_required_response()
+
+    record = Research.query.filter_by(id=research_id, user_id=user.id).first()
+    if record is None:
+        return jsonify({
+            "success": False,
+            "message": "Research not found."
+        }), 404
+
+    snapshot = build_verified_snapshot(record)
+    return jsonify({
+        "success": True,
+        "research_id": record.id,
+        "ticker_symbol": record.ticker_symbol,
+        "snapshot": snapshot
     }), 200
 
 
@@ -438,61 +475,32 @@ def get_research_news(research_id):
 
 def _get_analysis_or_error(record, force_refresh=False):
     """
-    Retrieves or generates analysis for a research record.
-    If force_refresh=False and analysis_data is present (and not stale), returns cached analysis.
-    Otherwise fetches latest data and runs Gemini AI analysis.
+    Retrieves or generates analysis strictly grounded in the verified snapshot.
+    If force_refresh=False and analysis_data is present, returns cached analysis.
+    Otherwise builds fresh snapshot and runs grounded analysis.
     """
-    financial_data = _ensure_record_financial_data(record)
-
     cached_analysis = None
     if not force_refresh and record.analysis_data:
         try:
             cached_analysis = json.loads(record.analysis_data)
-            # Invalidate stale placeholder analysis if real financial data is now present
-            fin_assessment = str(cached_analysis.get("financial_assessment") or "").lower()
-            if financial_data and ("absence of specific live price" in fin_assessment or "no financial data" in fin_assessment or "financial data hasn't been fetched" in fin_assessment):
-                cached_analysis = None
         except Exception:
             cached_analysis = None
 
     if cached_analysis:
         return cached_analysis, None
 
-    if not financial_data:
-        financial_data = {"symbol": record.ticker_symbol, "currency": "INR"}
-
-    news_articles = []
-    if not force_refresh and record.news_data:
-        try:
-            news_articles = json.loads(record.news_data)
-        except Exception:
-            pass
-
-    if not news_articles:
-        try:
-            news_articles = get_ticker_news(record.ticker_symbol, record.company_name)
-            if news_articles:
-                record.news_data = json.dumps(news_articles)
-                db.session.commit()
-        except (NewsMissingApiKeyError, NewsServiceUnavailableError, NewsServiceBadResponseError) as e:
-            current_app.logger.warning("News service non-fatal error: %s", e)
-            news_articles = []
-
+    snapshot = build_verified_snapshot(record)
     try:
-        analysis = generate_research_analysis(
-            company_name=record.company_name,
-            ticker_symbol=record.ticker_symbol,
-            financial_data=financial_data,
-            news_articles=news_articles,
-        )
+        analysis = generate_research_analysis_from_snapshot(snapshot)
     except (AIMissingApiKeyError, AIServiceUnavailableError, AIServiceBadResponseError, Exception) as e:
-        current_app.logger.warning("AI service fallback to deterministic data-driven report: %s", e)
-        analysis = generate_deterministic_analysis(
-            company_name=record.company_name,
-            ticker_symbol=record.ticker_symbol,
-            financial_data=financial_data,
-            news_articles=news_articles,
-        )
+        current_app.logger.warning("AI service fallback to deterministic snapshot analysis: %s", e)
+        analysis = generate_deterministic_analysis_from_snapshot(snapshot)
+
+    # Sync snapshot data to record
+    if snapshot.get("market_data", {}).get("is_available"):
+        record.financial_data = json.dumps(snapshot.get("market_data"))
+    if snapshot.get("news_articles"):
+        record.news_data = json.dumps(snapshot.get("news_articles"))
 
     return analysis, None
 
